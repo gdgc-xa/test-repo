@@ -16,7 +16,11 @@ export function initAbout(root) {
   if (!grid || grid.__wired) return;
   grid.__wired = true;
 
-  grid.innerHTML = TEAM.map((p, i) => personHtml(p, i)).join('');
+  // Leads (CEO, Project Head, Tech Lead) surface first and get the
+  // bigger treatment; everyone else follows in their normal order.
+  const ordered = [...TEAM].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+
+  grid.innerHTML = ordered.map((p, i) => personHtml(p, i)).join('');
   watchReveals(grid);
 }
 
@@ -25,9 +29,10 @@ function personHtml(p, i) {
   const avatar = p.photo
     ? `<img class="person__photo" src="${escapeAttr(p.photo)}" alt=""/>`
     : escapeHtml(initialsOf(p.name));
+  const featuredClass = p.featured ? ' person--featured' : '';
 
   return `
-    <article class="person reveal" style="--reveal-delay: ${i * 60}ms;">
+    <article class="person${featuredClass} reveal" style="--reveal-delay: ${i * 60}ms;">
       <div class="person__avatar"
            style="background: var(--${hue}-soft); color: var(--${hue}-ink);"
            aria-hidden="true">${avatar}</div>

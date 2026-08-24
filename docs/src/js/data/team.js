@@ -13,6 +13,7 @@ export const TEAM = [
     role: 'Chief Executive Officer',
     name: 'Serge Jossiah N. Calasara',
     photo: null,
+    featured: true,
   },
   {
     role: 'Chief Technology Officer',
@@ -39,12 +40,14 @@ export const TEAM = [
     name: 'Sean S. Salapantan',
     title: 'Chief Community Development Officer',
     photo: null,
+    featured: true,
   },
   {
     role: 'Tech Lead',
     name: 'John Mark D. Hingpit',
     title: 'Software Developer',
     photo: null,
+    featured: true,
   },
 ];
 
