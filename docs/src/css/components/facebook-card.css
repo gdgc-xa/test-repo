@@ -1,0 +1,122 @@
+/* ============================================================
+   facebook-card.css — the org's Facebook page as a link card
+   (booth aside). Identity and one working link, nothing imitated:
+   the follower row, the Like/Message buttons, the verified tick
+   and the PREVIEW chip were all decoration and are gone.
+   ============================================================ */
+
+.fb-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+/* Cover gradient — ocean → facebook-blue */
+.fb-card__cover {
+  height: 120px;
+  background: linear-gradient(135deg, var(--ocean) 0%, #1877F2 100%);
+  position: relative;
+  overflow: hidden;
+}
+.fb-card__cover::before,
+.fb-card__cover::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+}
+.fb-card__cover::before { left: 5%; top: -25%; width: 120px; height: 80px; }
+.fb-card__cover::after  { right: 5%; top: 25%; width: 80px; height: 60px; opacity: 0.7; }
+
+/* PREVIEW chip — signals this is a design mockup, not a live FB embed */
+.fb-card__body {
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  position: relative;
+}
+
+/* Profile emblem overlaps cover */
+.fb-card__emblem {
+  width: 84px; height: 84px;
+  border-radius: 50%;
+  background: var(--blue-soft);
+  border: 4px solid var(--surface);
+  display: grid; place-items: center;
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--blue-ink);
+  margin-top: -60px;
+  margin-bottom: var(--space-3);
+}
+
+.fb-card__name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.fb-card__handle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.fb-card__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: #1877F2;
+}
+.fb-card__link-mark {
+  width: 16px; height: 16px;
+  border-radius: 3px;
+  background: #1877F2;
+  color: #fff;
+  display: grid; place-items: center;
+  font-family: var(--font-serif);
+  font-weight: 800;
+  font-size: 12px;
+  flex: 0 0 auto;
+}
+.fb-card__link-arrow { margin-left: auto; color: var(--muted); }
+
+/* Pending — grayed out when FB API hasn't populated */
+.fb-card__emblem img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+/* --- Orgs the roster lists without a Facebook page --- */
+.fb-card--nopage .fb-card__body { padding-top: var(--space-5); }
+.fb-card--nopage .fb-card__emblem { margin-top: 0; }
+.fb-card__mails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+.fb-card__mail {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ocean);
+  word-break: break-all;
+}
+.fb-card__link { text-decoration: none; }
+.fb-card__link:hover { filter: brightness(1.1); }

@@ -1,0 +1,76 @@
+/* ============================================================
+   theme-block.css — "Ten categories, four colors" explainer.
+   Two-column: copy on left, 4-row legend on right.
+   Layout of the outer grid is in layout.css (.theme-block-grid).
+   ============================================================ */
+
+.theme-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.theme-block__kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.theme-block__title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  margin-bottom: var(--space-3);
+  line-height: 1.2;
+}
+
+.theme-block__copy {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+.theme-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.theme-legend__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 12px 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.theme-legend__dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--legend-color, var(--muted));
+}
+.theme-legend__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.theme-legend__clusters {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+}
+
+@media (max-width: 620px) {
+  .theme-block { padding: var(--space-5); }
+  .theme-block__title { font-size: 22px; }
+  .theme-legend__clusters { font-size: 10px; }
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Yellow puzzle piece">
+  <title>Puzzle piece — yellow</title>
+  <defs>
+    <linearGradient id="puzzle-yellow-fill" x1="15%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%"  stop-color="#F7CE4A"/>
+      <stop offset="100%" stop-color="#D19700"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#puzzle-yellow-fill)" stroke="#7E5B00" stroke-width="1.6" stroke-linejoin="round"
+        d="M 20 20 L 40 20 A 10 10 0 0 1 60 20 L 80 20 L 80 40 A 10 10 0 0 1 80 60 L 80 80 L 60 80 A 10 10 0 0 0 40 80 L 20 80 L 20 60 A 10 10 0 0 0 20 40 Z"/>
+  <path fill="#FFFFFF" opacity="0.32" stroke="none"
+        d="M 24 24 L 40 24 A 10 10 0 0 1 47 20 A 10 10 0 0 0 42 27 L 42 40 A 10 10 0 0 0 27 42 L 24 42 Z"/>
+</svg>

@@ -1,0 +1,206 @@
+/* ============================================================
+   venue-map.css — the org-fair map panel in the booth.
+
+   The map is inline SVG on a 960x720 viewBox. Every colour comes
+   from a --vz-* token so the blocks match the printed map in both
+   themes; nothing here hard-codes a hue.
+
+   One square (or one colour block) is lit at a time. Everything
+   else drops to a low opacity so the eye lands on the right spot
+   immediately — on a phone that is the whole point.
+   ============================================================ */
+
+.venue__where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.venue__badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #FFFFFF;                 /* sits on a saturated zone colour */
+  background: var(--venue-badge, var(--ink-2));
+  white-space: nowrap;
+}
+.venue__badge--none {
+  color: var(--muted);
+  background: transparent;
+  border: 1px dashed var(--border-strong);
+}
+
+/* Each block paints its own badge from the map's key. */
+.venue__badge--tech         { --venue-badge: var(--vz-tech); }
+.venue__badge--csg-aeco     { --venue-badge: var(--vz-csg-aeco); }
+.venue__badge--media        { --venue-badge: var(--vz-media); }
+.venue__badge--engineering  { --venue-badge: var(--vz-engineering); }
+.venue__badge--cas          { --venue-badge: var(--vz-cas); }
+.venue__badge--aggies       { --venue-badge: var(--vz-aggies); }
+.venue__badge--sbm          { --venue-badge: var(--vz-sbm); }
+.venue__badge--nursing      { --venue-badge: var(--vz-nursing); }
+.venue__badge--compstud     { --venue-badge: var(--vz-compstud); }
+.venue__badge--soe          { --venue-badge: var(--vz-soe); }
+.venue__badge--sports       { --venue-badge: var(--vz-sports); }
+.venue__badge--service      { --venue-badge: var(--vz-service); }
+.venue__badge--faith        { --venue-badge: var(--vz-faith); }
+.venue__badge--socio        { --venue-badge: var(--vz-socio); }
+.venue__badge--environment  { --venue-badge: var(--vz-environment); }
+.venue__badge--sci-eng-tech { --venue-badge: var(--vz-sci-eng-tech); }
+
+/* Light zone colours need dark text to stay legible. */
+.venue__badge--sbm,
+.venue__badge--nursing,
+.venue__badge--faith,
+.venue__badge--socio,
+.venue__badge--aggies { color: var(--ink); }
+
+.venue__hint {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+
+.venue__shared {
+  margin-top: var(--space-3);
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ---------- the map ---------- */
+.venue__map {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.venue__map svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.venue-map__field {
+  fill: var(--venue-field);
+  stroke: var(--venue-field-line);
+  stroke-width: 2;
+}
+
+.venue-map__building { fill: var(--venue-building); }
+.venue-map__building-label {
+  fill: var(--venue-building-ink);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.venue-map__marquee {
+  fill: var(--venue-tent);
+  stroke: var(--venue-field-line);
+  stroke-width: 1.5;
+}
+.venue-map__marquee-label {
+  fill: var(--muted);
+  font-size: 20px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.venue-map__stage { fill: var(--venue-stage); }
+.venue-map__stage-label {
+  fill: #FFFFFF;                  /* the stage is near-black in both themes */
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/* ---------- squares: one lit, the rest receded ---------- */
+.venue-map__slot .venue-map__square {
+  opacity: 0.32;
+  transition: opacity 200ms ease;
+}
+.venue-map__slot.is-lit .venue-map__square {
+  opacity: 1;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  paint-order: stroke;
+}
+
+.venue-map__square-label {
+  fill: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  opacity: 0.35;
+  transition: opacity 200ms ease;
+}
+/* Keep the number readable on the lit square, whatever colour the
+   block is: white fill over a dark outline drawn behind it. */
+.venue-map__slot.is-lit .venue-map__square-label {
+  opacity: 1;
+  fill: var(--venue-pin-ink);
+  stroke: var(--venue-pin-halo);
+  stroke-width: 3;
+  paint-order: stroke;
+}
+
+.venue-map__halo {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  opacity: 0.5;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: venuePulse 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .venue-map__halo { animation: none; opacity: 0.6; }
+  .venue-map__slot .venue-map__square,
+  .venue-map__square-label { transition: none; }
+}
+
+/* On a phone the map renders about 300px wide for a 960-unit
+   viewBox — roughly a third scale — so type sized for desktop comes
+   out at 4px and is simply unreadable. Everything here is sized in
+   viewBox units to land near 9-12px on an actual phone.
+
+   Tent numbers are dropped except the lit one: at a legible size the
+   text is wider than the 26-unit square and would collide with its
+   neighbours 34 units away. The badge above the map already names
+   the tent in full-size text, so nothing is lost — the map's job on
+   a phone is where, not which. */
+@media (max-width: 620px) {
+  /* Reclaim the panel's own side padding — the map is the one thing
+     in the booth that gets meaningfully better with every extra pixel
+     of width, and the scale factor is what makes the labels legible. */
+  .venue__map {
+    margin-inline: calc(var(--space-6) * -1);
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .venue-map__building-label { font-size: 24px; letter-spacing: 0; }
+  .venue-map__marquee-label  { font-size: 30px; }
+  .venue-map__stage-label    { font-size: 28px; letter-spacing: 0; }
+
+  .venue-map__square-label { display: none; }
+  .venue-map__slot.is-lit .venue-map__square-label {
+    display: block;
+    font-size: 40px;
+    stroke-width: 7;
+  }
+}

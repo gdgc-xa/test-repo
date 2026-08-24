@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Compass rose">
+  <title>Compass rose</title>
+  <!-- Outer + inner ring -->
+  <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2.4"/>
+  <circle cx="50" cy="50" r="34" fill="none" stroke="currentColor" stroke-width="1"/>
+
+  <!-- Cardinal spokes (long) — currentColor -->
+  <polygon points="50,4 54,44 50,48 46,44" fill="currentColor"/>
+  <polygon points="96,50 56,54 52,50 56,46" fill="currentColor"/>
+  <polygon points="50,96 54,56 50,52 46,56" fill="currentColor"/>
+  <polygon points="4,50 44,54 48,50 44,46" fill="currentColor"/>
+
+  <!-- Ordinal spokes (short) — slight opacity for depth -->
+  <g fill="currentColor" opacity="0.7">
+    <polygon points="82,18 55,45 50,50 45,45"/>
+    <polygon points="82,82 55,55 50,50 45,55"/>
+    <polygon points="18,82 45,55 50,50 55,55"/>
+    <polygon points="18,18 45,45 50,50 55,45"/>
+  </g>
+
+  <!-- Inner tick dots -->
+  <g fill="currentColor">
+    <circle cx="50" cy="34" r="1.2"/>
+    <circle cx="66" cy="50" r="1.2"/>
+    <circle cx="50" cy="66" r="1.2"/>
+    <circle cx="34" cy="50" r="1.2"/>
+  </g>
+  <circle cx="50" cy="50" r="2" fill="currentColor"/>
+</svg>

@@ -1,0 +1,137 @@
+/* ============================================================
+   layout.css — page-level layout only.
+   Max-widths, section rhythm, responsive breakpoints.
+   Does NOT define component visuals — those live in components/.
+   ============================================================ */
+
+/* Content shell — every top-level section sits in a .wrap */
+.wrap {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* Screen root — the visible page below the nav.
+   The nav is sticky so screens don't need padding-top for it,
+   but we ensure the first section breathes. */
+.screen { padding-top: var(--space-4); }
+
+/* Warm background wash under the ground.
+   Positioned relative to body so both light and dark render it. */
+.ground-wash {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 620px;
+  overflow: hidden;
+}
+.ground-wash::before,
+.ground-wash::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+}
+.ground-wash::before {
+  background: radial-gradient(closest-side, var(--sun) 0%, transparent 70%);
+  opacity: 0.08;
+  left: -300px; top: -200px;
+  width: 1200px; height: 500px;
+}
+.ground-wash::after {
+  background: radial-gradient(closest-side, var(--ocean) 0%, transparent 70%);
+  opacity: 0.06;
+  right: -300px; top: -180px;
+  width: 1000px; height: 500px;
+}
+
+/* Explore-head grid (browse: title left, count right) */
+.explore-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: var(--space-4);
+}
+
+/* Booth split — the org's own card beside the Facebook preview + contact.
+   The hero itself is a plain card now and owns its own box in booth.css. */
+.booth-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  align-items: start;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+
+/* Org card grid (browse) — 4-col auto-fit */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-5);
+}
+
+/* Category tag cloud (landing) — flexbox two rows, centered */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Filter chip row (browse) — flex wrap, left-aligned */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Filter toolbar row (browse: help copy left, clear button right) */
+.filter-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  margin-block: var(--space-4);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Theme block (landing) — 2 columns: copy | legend */
+.theme-block-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  align-items: center;
+}
+
+/* ============================================================
+   Breakpoints
+   ============================================================ */
+
+/* Tablet — 900px and below drops booth to 1 column, hides screen-index */
+@media (max-width: 900px) {
+  .booth-grid { grid-template-columns: 1fr; }
+  .theme-block-grid { grid-template-columns: 1fr; gap: var(--space-5); }
+  .explore-head { grid-template-columns: 1fr; }
+}
+
+/* Card grid narrows sooner */
+@media (max-width: 720px) {
+  .card-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+}
+
+/* Mobile — ≤ 480px per DESIGN.md #5.4 */
+@media (max-width: 480px) {
+  .wrap { padding: 0 var(--space-4); }
+  .card-grid { grid-template-columns: 1fr; }
+  .tag-cloud {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    max-width: 380px;
+  }
+}

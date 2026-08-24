@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Campus Compass — a directory of every student organization at Xavier University – Ateneo de Cagayan."/>
+  <title>Campus Compass · Xavier Ateneo</title>
+  <link rel="icon" type="image/svg+xml" href="assets/illustrations/compass-rose.svg"/>
+
+  <!-- CSS load order:
+       tokens → base → layout → components/* → screens/* → animations
+       (per DESIGN.md, one <link> per file so DevTools stays inspectable) -->
+  <link rel="stylesheet" href="src/css/tokens.css"/>
+  <link rel="stylesheet" href="src/css/base.css"/>
+  <link rel="stylesheet" href="src/css/layout.css"/>
+
+  <link rel="stylesheet" href="src/css/components/nav.css"/>
+  <link rel="stylesheet" href="src/css/components/nav-sheet.css"/>
+  <link rel="stylesheet" href="src/css/components/button.css"/>
+  <link rel="stylesheet" href="src/css/components/search-shell.css"/>
+  <link rel="stylesheet" href="src/css/components/tag.css"/>
+  <link rel="stylesheet" href="src/css/components/chip.css"/>
+  <link rel="stylesheet" href="src/css/components/card.css"/>
+  <link rel="stylesheet" href="src/css/components/panel.css"/>
+  <link rel="stylesheet" href="src/css/components/venue-map.css"/>
+  <link rel="stylesheet" href="src/css/components/facebook-card.css"/>
+  <link rel="stylesheet" href="src/css/components/theme-block.css"/>
+  <link rel="stylesheet" href="src/css/components/sea-scene.css"/>
+  <link rel="stylesheet" href="src/css/components/footer.css"/>
+  <link rel="stylesheet" href="src/css/components/filter-note.css"/>
+  <link rel="stylesheet" href="src/css/components/modal.css"/>
+  <link rel="stylesheet" href="src/css/components/hero-scene.css"/>
+  <link rel="stylesheet" href="src/css/components/hero-lockup.css"/>
+  <link rel="stylesheet" href="src/css/components/ocean-waves.css"/>
+
+  <link rel="stylesheet" href="src/css/screens/landing.css"/>
+  <link rel="stylesheet" href="src/css/components/featured.css"/>
+  <link rel="stylesheet" href="src/css/screens/browse.css"/>
+  <link rel="stylesheet" href="src/css/screens/booth.css"/>
+  <link rel="stylesheet" href="src/css/screens/about.css"/>
+
+  <link rel="stylesheet" href="src/css/animations.css"/>
+</head>
+
+<body>
+
+  <!-- ============================================================
+       NAV — sticky, present on every screen
+       ============================================================ -->
+  <header class="site-nav">
+    <div class="site-nav__wrap">
+      <a class="brand" href="./" data-nav="landing">
+        <span class="brand__mark" style="color: var(--compass-face);">
+          <!-- Inline compass rose so it picks up currentColor -->
+          <svg viewBox="0 0 100 100" role="img" aria-label="Compass Compass">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2.4"/>
+            <circle cx="50" cy="50" r="34" fill="none" stroke="currentColor" stroke-width="1"/>
+            <polygon points="50,4 54,44 50,48 46,44" fill="currentColor"/>
+            <polygon points="96,50 56,54 52,50 56,46" fill="currentColor"/>
+            <polygon points="50,96 54,56 50,52 46,56" fill="currentColor"/>
+            <polygon points="4,50 44,54 48,50 44,46" fill="currentColor"/>
+            <g fill="currentColor" opacity="0.7">
+              <polygon points="82,18 55,45 50,50 45,45"/>
+              <polygon points="82,82 55,55 50,50 45,55"/>
+              <polygon points="18,82 45,55 50,50 55,55"/>
+              <polygon points="18,18 45,45 50,50 55,45"/>
+            </g>
+            <g fill="currentColor">
+              <circle cx="50" cy="34" r="1.2"/>
+              <circle cx="66" cy="50" r="1.2"/>
+              <circle cx="50" cy="66" r="1.2"/>
+              <circle cx="34" cy="50" r="1.2"/>
+            </g>
+            <circle cx="50" cy="50" r="2" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="brand__text">
+          <span class="brand__name">Campus Compass</span>
+          <span class="brand__sub">Xavier Ateneo · Sands of Time</span>
+        </span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main">
+        <button class="nav-links__item" data-nav="landing" data-nav-item="landing">Discover</button>
+        <button class="nav-links__item" data-nav="browse"  data-nav-item="browse">Browse Organizations</button>
+        <button class="nav-links__item" data-nav="about"   data-nav-item="about">About</button>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
+      </div>
+
+      <button class="nav-toggle" aria-label="Menu">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6"  x2="19" y2="6"/>
+          <line x1="3" y1="11" x2="19" y2="11"/>
+          <line x1="3" y1="16" x2="19" y2="16"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MOBILE NAV SHEET — shown under the hamburger below 820px,
+       where .nav-links and .nav-actions are both display:none.
+       The theme toggle is repeated here because it is otherwise
+       unreachable on a phone; theme-toggle.js wires every
+       [data-theme-toggle] it finds, so it needs no extra code.
+       data-nav is picked up by router.js; data-nav-item is what
+       it stamps aria-current onto.
+       ============================================================ -->
+  <div class="nav-sheet__scrim" data-nav-sheet-scrim></div>
+  <div id="nav-sheet" class="nav-sheet" data-nav-sheet>
+    <nav class="nav-sheet__links" aria-label="Mobile">
+      <button class="nav-sheet__item" data-nav="landing" data-nav-item="landing">Discover</button>
+      <button class="nav-sheet__item" data-nav="browse"  data-nav-item="browse">Browse Organizations</button>
+      <button class="nav-sheet__item" data-nav="about"   data-nav-item="about">About</button>
+    </nav>
+    <div class="nav-sheet__foot">
+      <span class="nav-sheet__label">Appearance</span>
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       LANDING — bright cel-shaded beach hero, "Sands of Time"
+       ============================================================ -->
+  <main id="screen-landing" class="screen screen--landing" data-screen="landing">
+
+    <!-- ==== HERO SCENE — layered beach backdrop ====
+         Bands top→bottom: sky · sea · surf · sand.
+         Offsets (--horizon, --shore) are defined on
+         .screen--landing in landing.css so the content stack
+         can land the hourglass exactly on the shore line. -->
+    <div class="hero-scene" aria-hidden="true">
+
+      <!-- SKY -->
+      <div class="hero-scene__sky"></div>
+
+      <!-- NIGHT SKY — moon + stars, revealed in dark mode.
+           These are CSS circles, not SVG: the scene SVGs use
+           preserveAspectRatio="none", which stretched a <circle>
+           into an oblong at every viewport width but one. -->
+      <div class="hero-scene__night">
+        <span class="night-moon"></span>
+        <span class="night-star" style="--x:6%; --y:17%; --s:3px;"></span>
+        <span class="night-star" style="--x:13%; --y:38%; --s:2px;"></span>
+        <span class="night-star" style="--x:19%; --y:12%; --s:3.5px;"></span>
+        <span class="night-star" style="--x:25%; --y:30%; --s:2px;"></span>
+        <span class="night-star" style="--x:31%; --y:15%; --s:3px;"></span>
+        <span class="night-star" style="--x:37%; --y:43%; --s:2px;"></span>
+        <span class="night-star" style="--x:43%; --y:21%; --s:3.5px;"></span>
+        <span class="night-star" style="--x:49%; --y:35%; --s:2px;"></span>
+        <span class="night-star" style="--x:55%; --y:11%; --s:3px;"></span>
+        <span class="night-star" style="--x:61%; --y:28%; --s:3px;"></span>
+        <span class="night-star" style="--x:67%; --y:45%; --s:2px;"></span>
+        <span class="night-star" style="--x:73%; --y:16%; --s:2.5px;"></span>
+        <span class="night-star" style="--x:85%; --y:47%; --s:3px;"></span>
+        <span class="night-star" style="--x:92%; --y:23%; --s:2px;"></span>
+        <span class="night-star" style="--x:97%; --y:38%; --s:3.5px;"></span>
+      </div>
+
+      <!-- DISTANT ISLANDS at the horizon.
+           preserveAspectRatio is xMidYMax (not "none") so the
+           island silhouettes keep their shape instead of being
+           smeared flat across the width. -->
+      <div class="hero-scene__headland">
+        <svg class="headland headland--left" viewBox="0 0 300 78" preserveAspectRatio="xMinYMax meet">
+          <g fill="var(--scene-hill)">
+            <!-- Main landmass — rounded, with a gentle peak -->
+            <path d="M 6 78
+                     Q 24 58 52 52
+                     Q 74 30 104 34
+                     Q 128 20 156 34
+                     Q 186 30 206 52
+                     Q 232 58 250 78 Z"/>
+            <!-- Two palm silhouettes on the ridge -->
+            <g transform="translate(104,34)">
+              <path d="M 0 0 L -1.5 -14" stroke="var(--scene-hill)" stroke-width="2.2" fill="none"/>
+              <path d="M -1.5 -14 q -11 -4 -15 2 q 8 -2 14 1 Z"/>
+              <path d="M -1.5 -14 q 11 -5 16 1 q -9 -2 -15 1 Z"/>
+              <path d="M -1.5 -14 q -3 -9 2 -12 q 1 7 0 12 Z"/>
+            </g>
+            <g transform="translate(156,34) scale(0.82)">
+              <path d="M 0 0 L 1.5 -13" stroke="var(--scene-hill)" stroke-width="2.2" fill="none"/>
+              <path d="M 1.5 -13 q -11 -4 -15 2 q 8 -2 14 1 Z"/>
+              <path d="M 1.5 -13 q 11 -5 16 1 q -9 -2 -15 1 Z"/>
+              <path d="M 1.5 -13 q 2 -9 7 -10 q -3 6 -6 11 Z"/>
+            </g>
+            <!-- Small offshore rock -->
+            <ellipse cx="268" cy="72" rx="13" ry="7"/>
+          </g>
+        </svg>
+
+        <svg class="headland headland--right" viewBox="0 0 300 78" preserveAspectRatio="xMaxYMax meet">
+          <g fill="var(--scene-hill)">
+            <ellipse cx="26" cy="73" rx="16" ry="6"/>
+            <path d="M 52 78
+                     Q 72 60 98 54
+                     Q 118 34 146 38
+                     Q 170 22 198 36
+                     Q 226 34 248 56
+                     Q 274 62 294 78 Z"/>
+            <g transform="translate(146,38) scale(0.9)">
+              <path d="M 0 0 L -1.5 -14" stroke="var(--scene-hill)" stroke-width="2.2" fill="none"/>
+              <path d="M -1.5 -14 q -12 -4 -16 2 q 9 -2 15 1 Z"/>
+              <path d="M -1.5 -14 q 12 -5 17 1 q -10 -2 -16 1 Z"/>
+              <path d="M -1.5 -14 q -3 -9 2 -12 q 1 7 0 12 Z"/>
+            </g>
+            <g transform="translate(198,36)">
+              <path d="M 0 0 L 1.5 -15" stroke="var(--scene-hill)" stroke-width="2.2" fill="none"/>
+              <path d="M 1.5 -15 q -12 -4 -16 2 q 9 -2 15 1 Z"/>
+              <path d="M 1.5 -15 q 12 -5 17 1 q -10 -2 -16 1 Z"/>
+              <path d="M 1.5 -15 q 2 -10 8 -11 q -4 7 -7 12 Z"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <!-- SEA — depth gradient (deep at horizon → pale at shore) -->
+      <div class="hero-scene__sea">
+        <div class="sea-shimmer">
+          <svg viewBox="0 0 1400 270" preserveAspectRatio="none">
+            <g stroke="#FFFFFF" fill="none" stroke-linecap="round">
+              <path stroke-width="3" opacity="0.32" d="M 90 62 Q 170 56 250 62"/>
+              <path stroke-width="3" opacity="0.28" d="M 430 48 Q 510 42 590 48"/>
+              <path stroke-width="3" opacity="0.32" d="M 820 66 Q 900 60 980 66"/>
+              <path stroke-width="3" opacity="0.26" d="M 1150 52 Q 1220 46 1290 52"/>
+              <path stroke-width="4" opacity="0.38" d="M 200 118 Q 300 110 400 118"/>
+              <path stroke-width="4" opacity="0.34" d="M 640 130 Q 740 122 840 130"/>
+              <path stroke-width="4" opacity="0.38" d="M 1020 116 Q 1110 108 1200 116"/>
+              <path stroke-width="5" opacity="0.42" d="M 120 186 Q 240 176 360 186"/>
+              <path stroke-width="5" opacity="0.4"  d="M 560 198 Q 680 188 800 198"/>
+              <path stroke-width="5" opacity="0.42" d="M 980 184 Q 1100 174 1220 184"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- SURF — 3 parallax wave layers + reverse-drifting foam edge.
+           Each layer is 200% wide; translateX(0 → -50%) loops.
+           Path periods 400 / 300 / 200 / 240 all divide 1200
+           evenly, so the tiling seam is invisible. -->
+      <div class="hero-scene__surf">
+        <div class="wave wave--back">
+          <svg viewBox="0 0 2400 100" preserveAspectRatio="none">
+            <path fill="var(--scene-water-1)" d="M 0 25 Q 100 10 200 25 T 400 25 T 600 25 T 800 25 T 1000 25 T 1200 25 T 1400 25 T 1600 25 T 1800 25 T 2000 25 T 2200 25 T 2400 25 L 2400 100 L 0 100 Z"/>
+          </svg>
+        </div>
+
+        <div class="wave wave--mid">
+          <svg viewBox="0 0 2400 100" preserveAspectRatio="none">
+            <path fill="var(--scene-water-2)" d="M 0 42 Q 75 26 150 42 T 300 42 T 450 42 T 600 42 T 750 42 T 900 42 T 1050 42 T 1200 42 T 1350 42 T 1500 42 T 1650 42 T 1800 42 T 1950 42 T 2100 42 T 2250 42 T 2400 42 L 2400 100 L 0 100 Z"/>
+          </svg>
+        </div>
+
+        <div class="wave wave--front">
+          <svg viewBox="0 0 2400 100" preserveAspectRatio="none">
+            <path fill="var(--scene-water-3)" d="M 0 60 Q 50 42 100 60 T 200 60 T 300 60 T 400 60 T 500 60 T 600 60 T 700 60 T 800 60 T 900 60 T 1000 60 T 1100 60 T 1200 60 T 1300 60 T 1400 60 T 1500 60 T 1600 60 T 1700 60 T 1800 60 T 1900 60 T 2000 60 T 2100 60 T 2200 60 T 2300 60 T 2400 60 L 2400 100 L 0 100 Z"/>
+
+            <!-- Foam glints on the front crests (x = 50 + 200k, this
+                 layer's crest period). Each fades and lifts in place on
+                 its own cycle; none of them moves sideways.
+                 The delay and the radii REPEAT every 1200 units, because
+                 the layer is 200% wide and slides -50% — x and x+1200 are
+                 the same glint either side of the loop seam. Negative
+                 delays start them mid-cycle so the crest is alive on load. -->
+            <g class="foam-glints" fill="var(--scene-foam-hi)">
+              <ellipse class="foam-glint" cx="50"   cy="46" rx="13" ry="4" style="--glint-delay: -0.2s;"/>
+              <ellipse class="foam-glint" cx="250"  cy="46" rx="12" ry="4" style="--glint-delay: -1.7s;"/>
+              <ellipse class="foam-glint" cx="450"  cy="46" rx="11" ry="3.5" style="--glint-delay: -0.9s;"/>
+              <ellipse class="foam-glint" cx="650"  cy="46" rx="11" ry="3.5" style="--glint-delay: -2.6s;"/>
+              <ellipse class="foam-glint" cx="850"  cy="46" rx="13" ry="4" style="--glint-delay: -1.3s;"/>
+              <ellipse class="foam-glint" cx="1050" cy="46" rx="13" ry="4" style="--glint-delay: -3.0s;"/>
+              <ellipse class="foam-glint" cx="1250" cy="46" rx="13" ry="4" style="--glint-delay: -0.2s;"/>
+              <ellipse class="foam-glint" cx="1450" cy="46" rx="12" ry="4" style="--glint-delay: -1.7s;"/>
+              <ellipse class="foam-glint" cx="1650" cy="46" rx="11" ry="3.5" style="--glint-delay: -0.9s;"/>
+              <ellipse class="foam-glint" cx="1850" cy="46" rx="11" ry="3.5" style="--glint-delay: -2.6s;"/>
+              <ellipse class="foam-glint" cx="2050" cy="46" rx="13" ry="4" style="--glint-delay: -1.3s;"/>
+              <ellipse class="foam-glint" cx="2250" cy="46" rx="13" ry="4" style="--glint-delay: -3.0s;"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="wave wave--foam-edge">
+          <svg viewBox="0 0 2400 100" preserveAspectRatio="none">
+            <path fill="var(--scene-foam)" d="M 0 76 Q 60 66 120 76 T 240 76 T 360 76 T 480 76 T 600 76 T 720 76 T 840 76 T 960 76 T 1080 76 T 1200 76 T 1320 76 T 1440 76 T 1560 76 T 1680 76 T 1800 76 T 1920 76 T 2040 76 T 2160 76 T 2280 76 T 2400 76 L 2400 100 L 0 100 Z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- SAND -->
+      <div class="hero-scene__sand"></div>
+
+      <!-- Beach accents on the dry sand -->
+      <div class="hero-accents">
+        <img class="hero-accent hero-accent--starfish" src="assets/illustrations/hero-starfish.svg" alt=""/>
+        <img class="hero-accent hero-accent--shell"    src="assets/illustrations/hero-shell.svg"    alt=""/>
+        <img class="hero-accent hero-accent--crab"     src="assets/illustrations/hero-crab.svg"     alt=""/>
+      </div>
+
+      <!-- Palm fronds peeking in from the top corners -->
+      <img class="palm-frond palm-frond--left"    src="assets/illustrations/palm-frond.svg" alt=""/>
+      <img class="palm-frond palm-frond--left-2"  src="assets/illustrations/palm-frond.svg" alt=""/>
+      <img class="palm-frond palm-frond--right"   src="assets/illustrations/palm-frond.svg" alt=""/>
+      <img class="palm-frond palm-frond--right-2" src="assets/illustrations/palm-frond.svg" alt=""/>
+    </div>
+
+    <!-- ==== HERO CONTENT (overlaid on the scene) ==== -->
+    <div class="hero-content">
+      <div class="wrap">
+        <h2 class="hero-tagline reveal" style="--reveal-delay: 0ms;">Sands of Time</h2>
+
+        <!-- Unified "Campus [hourglass] Compass" lockup.
+             The hourglass stands on the shore line; the four
+             puzzle pieces lie on the sand around its base.
+             They are children of the lockup, whose padding-bottom
+             reserves their space so nothing below overlaps. -->
+        <div class="hero-lockup reveal" style="--reveal-delay: 120ms;">
+          <span class="lockup__campus">Campus</span>
+          <!-- The hourglass, its rose, its shadow and its sand mound
+               share one wrapper so they stay centred on each other.
+               (The two word columns are different widths, so anything
+               centred on the LOCKUP lands off-centre from the glass.) -->
+          <span class="lockup__glass">
+            <!-- Brand compass rose, sized as the anchor of the whole
+                 lockup. Sits BEHIND the hourglass and rotates toward
+                 the current screen (compass-orientation.js). -->
+            <span class="lockup__rose" aria-hidden="true">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <circle cx="50" cy="50" r="34" fill="none" stroke="currentColor" stroke-width="0.8"/>
+                <circle cx="50" cy="50" r="24" fill="none" stroke="currentColor" stroke-width="0.6"/>
+                <!-- Cardinal points -->
+                <polygon points="50,2 53.5,45 50,49 46.5,45" fill="currentColor"/>
+                <polygon points="98,50 55,53.5 51,50 55,46.5" fill="currentColor"/>
+                <polygon points="50,98 53.5,55 50,51 46.5,55" fill="currentColor"/>
+                <polygon points="2,50 45,53.5 49,50 45,46.5" fill="currentColor"/>
+                <!-- Ordinal points -->
+                <g fill="currentColor" opacity="0.72">
+                  <polygon points="80,20 56,44 50,50 44,44"/>
+                  <polygon points="80,80 56,56 50,50 44,56"/>
+                  <polygon points="20,80 44,56 50,50 56,56"/>
+                  <polygon points="20,20 44,44 50,50 56,44"/>
+                </g>
+                <!-- Tick dots between the rings -->
+                <g fill="currentColor" opacity="0.85">
+                  <circle cx="50" cy="29" r="0.9"/><circle cx="71" cy="50" r="0.9"/>
+                  <circle cx="50" cy="71" r="0.9"/><circle cx="29" cy="50" r="0.9"/>
+                  <circle cx="65" cy="35" r="0.7"/><circle cx="65" cy="65" r="0.7"/>
+                  <circle cx="35" cy="65" r="0.7"/><circle cx="35" cy="35" r="0.7"/>
+                </g>
+                <!-- Fine minute marks on the outer ring -->
+                <g stroke="currentColor" stroke-width="0.7" opacity="0.6">
+                  <line x1="50" y1="8"  x2="50" y2="12"/><line x1="92" y1="50" x2="88" y2="50"/>
+                  <line x1="50" y1="92" x2="50" y2="88"/><line x1="8"  y1="50" x2="12" y2="50"/>
+                  <line x1="79.7" y1="20.3" x2="76.9" y2="23.1"/>
+                  <line x1="79.7" y1="79.7" x2="76.9" y2="76.9"/>
+                  <line x1="20.3" y1="79.7" x2="23.1" y2="76.9"/>
+                  <line x1="20.3" y1="20.3" x2="23.1" y2="23.1"/>
+                </g>
+                <circle cx="50" cy="50" r="2.4" fill="currentColor"/>
+              </svg>
+            </span>
+            <img class="lockup__hourglass" src="assets/illustrations/hero-hourglass.svg" alt="Hourglass"/>
+            <span class="lockup__hourglass-shadow" aria-hidden="true"></span>
+            <span class="lockup__sand-mound" aria-hidden="true"></span>
+          </span>
+
+          <span class="lockup__compass">Compass</span>
+
+
+          <img class="hero-puzzle hero-puzzle--red"    src="assets/illustrations/primitives/puzzle-red.svg"    alt="" aria-hidden="true"/>
+          <img class="hero-puzzle hero-puzzle--green"  src="assets/illustrations/primitives/puzzle-green.svg"  alt="" aria-hidden="true"/>
+          <img class="hero-puzzle hero-puzzle--yellow" src="assets/illustrations/primitives/puzzle-yellow.svg" alt="" aria-hidden="true"/>
+          <img class="hero-puzzle hero-puzzle--blue"   src="assets/illustrations/primitives/puzzle-blue.svg"   alt="" aria-hidden="true"/>
+        </div>
+
+        <p class="hero-anchor reveal" style="--reveal-delay: 170ms;">
+          Every org is a grain in the sand. Every cluster a piece of the puzzle.
+        </p>
+
+        <p class="hero-sub reveal" style="--reveal-delay: 210ms;">
+          A campus-wide directory of every student organization at Xavier University – Ateneo de Cagayan.
+          Search, filter, and visit any booth without leaving your seat.
+        </p>
+
+        <form class="search-shell hero-search reveal" data-hero-search style="--reveal-delay: 240ms;" onsubmit="return false;">
+          <svg class="search-shell__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="9" cy="9" r="6"/><line x1="17" y1="17" x2="13.5" y2="13.5"/>
+          </svg>
+          <input class="search-shell__input" type="search"
+                 placeholder="Search all orgs — try 'debate', 'coders', 'farm'…"
+                 aria-label="Search orgs"/>
+          <button class="btn hero-search__submit search-shell__submit" type="submit">Search</button>
+        </form>
+
+        <p class="hero-cluster-label reveal" style="--reveal-delay: 300ms;">Browse by cluster</p>
+        <div class="tag-cloud reveal" data-tag-cloud style="--reveal-delay: 360ms;"></div>
+      </div>
+    </div>
+
+
+    <!-- ==== FEATURED ORGANIZATIONS ====
+         What renders here is driven entirely by
+         src/js/data/featured.js — add/remove/reorder orgs there,
+         nothing here needs to change. Section auto-hides itself
+         if that list is empty or disabled. -->
+    <section class="landing-featured" data-featured-section>
+      <div class="wrap">
+        <div class="landing-featured__head">
+          <div>
+            <p class="landing-featured__kicker reveal">Featured</p>
+            <h3 class="landing-featured__title reveal">Organizations to know this term</h3>
+          </div>
+          <a class="landing-featured__link reveal" href="?screen=browse" data-nav="browse">Browse all orgs →</a>
+        </div>
+        <div class="card-grid" data-featured-grid></div>
+      </div>
+    </section>
+
+    <!-- Theme block: ten categories, four colors -->
+    <section class="landing-theme">
+      <div class="wrap">
+        <div class="theme-block reveal">
+          <div class="theme-block-grid">
+            <div>
+              <p class="theme-block__kicker">Eleven clusters · Four colors</p>
+              <h3 class="theme-block__title">Every org lives under one cluster.</h3>
+              <p class="theme-block__copy">
+                The eleven Xavier Ateneo clusters are grouped into four Google puzzle-piece hues so you can scan the whole roster at a glance.
+                Pick one on Browse to see just that cluster.
+              </p>
+            </div>
+            <div class="theme-legend">
+              <div class="theme-legend__row"><span class="theme-legend__dot" style="--legend-color: var(--blue);"></span><span class="theme-legend__name">Mind</span><span class="theme-legend__clusters">Governance · Sci · Eng · Tech · Program-Based</span></div>
+              <div class="theme-legend__row"><span class="theme-legend__dot" style="--legend-color: var(--green);"></span><span class="theme-legend__name">Ground</span><span class="theme-legend__clusters">Business · Sports · Environment</span></div>
+              <div class="theme-legend__row"><span class="theme-legend__dot" style="--legend-color: var(--yellow);"></span><span class="theme-legend__name">Culture</span><span class="theme-legend__clusters">Food &amp; Agri · Socio-Cultural</span></div>
+              <div class="theme-legend__row"><span class="theme-legend__dot" style="--legend-color: var(--red);"></span><span class="theme-legend__name">Voice</span><span class="theme-legend__clusters">Media &amp; Arts · Service-Learning</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       BROWSE
+       ============================================================ -->
+  <main id="screen-browse" class="screen screen--browse" hidden data-screen="browse">
+    <div class="ground-wash" aria-hidden="true"></div>
+
+    <div class="wrap">
+      <section class="browse-head">
+        <nav class="browse-crumb" aria-label="Breadcrumb">
+          <a href="./" data-nav="landing">Discover</a>
+          <span class="browse-crumb__sep">/</span>
+          <span>Browse Organizations</span>
+        </nav>
+        <div class="explore-head">
+          <h1 class="browse-title" data-browse-title>All Xavier Ateneo orgs</h1>
+          <span class="browse-count" data-browse-count>—</span>
+        </div>
+
+        <div class="browse-search">
+          <form class="search-shell search-shell--compact" data-browse-search onsubmit="return false;">
+            <svg class="search-shell__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9" cy="9" r="6"/><line x1="17" y1="17" x2="13.5" y2="13.5"/>
+            </svg>
+            <input class="search-shell__input" type="search"
+                   placeholder="Search by name, category, or interest…"
+                   aria-label="Filter orgs"/>
+            <button class="btn btn--primary search-shell__submit" type="submit">Search</button>
+          </form>
+        </div>
+
+        <div class="filter-toolbar">
+          <span class="filter-toolbar__help">
+            <svg class="filter-toolbar__help-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+              <line x1="0" y1="8" x2="16" y2="8"/><line x1="8" y1="0" x2="8" y2="16"/>
+            </svg>
+            Pick <strong>one</strong> cluster — every org belongs to exactly one.
+          </span>
+          <button class="btn btn--ghost btn--sm clear-filters" data-clear-filters type="button">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/>
+            </svg>
+            Clear filters
+          </button>
+        </div>
+
+        <div class="chip-row browse-chips" data-chip-row></div>
+
+      </section>
+
+      <section class="browse-grid card-grid" data-card-grid></section>
+
+      <p class="grid-footnote" data-grid-footnote hidden></p>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       ABOUT — what this is, who made it. Team tiles are rendered
+       by screens/about.js from data/team.js.
+       ============================================================ -->
+  <main id="screen-about" class="screen screen--about" hidden data-screen="about">
+    <div class="ground-wash" aria-hidden="true"></div>
+
+    <div class="wrap">
+      <header class="about-head">
+        <p class="about-head__kicker">About</p>
+        <h1 class="about-head__title">A directory for the whole org fair.</h1>
+        <p class="about-head__lede">
+          Campus Compass gathers every accredited student organization at Xavier
+          University &ndash; Ateneo de Cagayan into one page you can search, filter
+          and carry in your pocket on the day.
+        </p>
+      </header>
+
+      <section class="about-grid">
+        <article class="about-card">
+          <h2 class="about-card__title">What you can do here</h2>
+          <ul class="about-list">
+            <li><strong>Browse all 69 organizations</strong> across the eleven Xavier Ateneo clusters, one cluster at a time.</li>
+            <li><strong>Search by interest</strong> &mdash; type <em>coders</em>, <em>farm</em>, <em>music</em> or <em>volunteer</em> and get the orgs that actually match.</li>
+            <li><strong>Open any org</strong> for what they do, how to reach them, and their Facebook page.</li>
+            <li><strong>Find their tent</strong> on the fair map, with the spot lit and a landmark to walk toward.</li>
+          </ul>
+        </article>
+
+        <article class="about-card about-card--gdg">
+          <div class="about-gdg">
+            <img class="about-gdg__mark" src="assets/illustrations/gdg-credit.svg" alt="" aria-hidden="true"/>
+            <div>
+              <h2 class="about-card__title">Built by GDG on Campus</h2>
+              <p class="about-gdg__org">Google Developer Groups on Campus &mdash; Xavier Ateneo</p>
+            </div>
+          </div>
+          <p class="about-card__body">
+            Campus Compass was made for <strong>Sands of Time</strong>, the General
+            Assembly Organizational Trip, by the GDG on Campus student developer
+            community at Xavier Ateneo.
+          </p>
+          <a class="btn btn--primary" href="https://www.facebook.com/gdgcxavier" target="_blank" rel="noopener noreferrer">
+            Visit our Facebook page
+            <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 3 H3 v10 h10 V10"/><polyline points="10,2 14,2 14,6"/><line x1="14" y1="2" x2="7" y2="9"/>
+            </svg>
+          </a>
+        </article>
+      </section>
+
+      <section class="about-team">
+        <h2 class="about-team__title">People behind the project</h2>
+        <div class="team-grid" data-team-grid></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       BOOTH MODAL — content rendered by screens/booth.js
+       ============================================================ -->
+  <div id="booth-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="booth-title">
+    <div class="modal__backdrop" aria-hidden="true"></div>
+    <div class="modal__panel">
+      <button class="modal__close" data-close-modal aria-label="Close booth">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="3" x2="15" y2="15"/>
+          <line x1="15" y1="3" x2="3" y2="15"/>
+        </svg>
+      </button>
+      <div class="modal__panel-content"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER (present on every screen)
+       ============================================================ -->
+  <footer class="site-footer">
+    <div class="site-footer__wrap">
+      <div class="site-footer__brand">
+        <span class="site-footer__name">Campus Compass</span>
+        <span class="site-footer__sub">Xavier University – Ateneo de Cagayan</span>
+      </div>
+
+      <div class="gdg-credit">
+        <span class="gdg-credit__label">Created by</span>
+        <img class="gdg-credit__mark" src="assets/illustrations/gdg-credit.svg" alt="GDG"/>
+        <div class="gdg-credit__text">
+          <span class="gdg-credit__org">Google Developer Group</span>
+          <span>
+            <span class="gdg-credit__loc">Xavier Ateneo</span>
+            <span class="gdg-credit__season">Sands of Time</span>
+          </span>
+        </div>
+      </div>
+
+      <p class="site-footer__tagline">Built for Sands of Time · General Assembly Organizational Trip</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       SEA SCENE — inline SVG so animations bind to internal groups
+       ============================================================ -->
+  <div class="sea-scene" aria-hidden="true">
+    <!-- TIDE LINE — the page closes looking straight DOWN at the
+         water's edge. Deliberately a different camera from the hero:
+         one world, two shots, so the beach never repeats itself.
+         Keep in sync with assets/illustrations/sea-scene.svg. -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 420" preserveAspectRatio="none" role="img" aria-label="Water's edge">
+      <defs>
+        <linearGradient id="tide-sand" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"    stop-color="var(--surface-2)"/>
+          <stop offset="0.45" stop-color="var(--scene-sand-top)"/>
+          <stop offset="1"    stop-color="var(--scene-sand-wet)"/>
+        </linearGradient>
+        <linearGradient id="tide-water" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"    stop-color="var(--scene-sea-shallow)"/>
+          <stop offset="0.42" stop-color="var(--scene-water-1)"/>
+          <stop offset="1"    stop-color="var(--scene-water-3)"/>
+        </linearGradient>
+                <linearGradient id="tide-damp" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"   stop-color="var(--scene-sand-dark)" stop-opacity="0"/>
+          <stop offset="1"   stop-color="var(--scene-sand-dark)" stop-opacity="0.22"/>
+        </linearGradient>
+      </defs>
+
+      <!-- ===== DRY SAND ===== -->
+      <rect y="0" width="1440" height="272" fill="url(#tide-sand)"/>
+
+      <!-- Sand grain texture -->
+      <g fill="var(--scene-sand-dark)" opacity="0.18">
+        <circle cx="70"   cy="52"  r="2"/><circle cx="238" cy="96"  r="1.6"/>
+        <circle cx="402"  cy="40"  r="2.2"/><circle cx="560" cy="112" r="1.5"/>
+        <circle cx="742"  cy="62"  r="2"/><circle cx="905"  cy="128" r="1.7"/>
+        <circle cx="1064" cy="48"  r="2.1"/><circle cx="1228" cy="104" r="1.6"/>
+        <circle cx="1362" cy="70"  r="2"/><circle cx="150"  cy="150" r="1.5"/>
+        <circle cx="640"  cy="168" r="1.8"/><circle cx="1150" cy="158" r="1.6"/>
+        <circle cx="330"  cy="186" r="1.7"/><circle cx="880"  cy="196" r="1.5"/>
+      </g>
+
+      <!-- ===== THINGS ON THE SAND (seen from above) ===== -->
+      <g class="tide-items">
+        <!-- Starfish -->
+        <g transform="translate(236,116) rotate(-18)">
+          <path fill="#E68A2E" stroke="#3D2817" stroke-width="2.4" stroke-linejoin="round"
+                d="M 0 -30 L 8 -10 L 31 -6 L 14 6 L 20 30 L 0 17 L -20 30 L -14 6 L -31 -6 L -8 -10 Z"/>
+          <path fill="#F5B876" opacity="0.85" d="M 0 -25 L 5 -11 L 17 -6 L -5 -5 L -17 -6 L -5 -11 Z"/>
+          <g fill="#B96A1A"><circle cx="0" cy="0" r="2"/><circle cx="6" cy="8" r="1.3"/><circle cx="-6" cy="8" r="1.3"/></g>
+        </g>
+        <!-- Little crab -->
+        <g transform="translate(1088,128) scale(0.62)">
+          <g stroke="#3D2817" stroke-width="3" fill="none" stroke-linecap="round">
+            <path d="M -20 5 L -32 20"/><path d="M -10 8 L -14 26"/>
+            <path d="M 10 8 L 14 26"/><path d="M 20 5 L 32 20"/>
+          </g>
+          <ellipse cx="0" cy="0" rx="24" ry="16" fill="#EA4335" stroke="#3D2817" stroke-width="3"/>
+          <ellipse cx="-6" cy="-6" rx="14" ry="8" fill="#F58179" opacity="0.85"/>
+          <circle cx="-8" cy="-19" r="4" fill="#FDF6E4" stroke="#3D2817" stroke-width="2"/>
+          <circle cx="8"  cy="-19" r="4" fill="#FDF6E4" stroke="#3D2817" stroke-width="2"/>
+          <circle cx="-8" cy="-19" r="1.7" fill="#3D2817"/><circle cx="8" cy="-19" r="1.7" fill="#3D2817"/>
+          <path fill="#EA4335" stroke="#3D2817" stroke-width="2.5" stroke-linejoin="round"
+                d="M -26 0 L -38 -8 L -34 0 L -38 8 L -26 5 Z"/>
+          <path fill="#EA4335" stroke="#3D2817" stroke-width="2.5" stroke-linejoin="round"
+                d="M 26 0 L 38 -8 L 34 0 L 38 8 L 26 5 Z"/>
+        </g>
+        <!-- Pebbles -->
+        <g fill="var(--scene-sand-dark)" opacity="0.38">
+          <ellipse cx="470"  cy="150" rx="7"   ry="4.5"/>
+          <ellipse cx="700"  cy="196" rx="5.5" ry="3.6"/>
+          <ellipse cx="1290" cy="176" rx="6.5" ry="4"/>
+          <ellipse cx="880"  cy="86"  rx="5"   ry="3.2"/>
+        </g>
+      </g>
+
+      <!-- ===== DAMP SAND — how far the last wave reached.
+           The strongest overhead cue on a real beach. ===== -->
+      <rect y="176" width="1440" height="96" fill="url(#tide-damp)"/>
+      <g class="tide-ripples" fill="none" stroke="var(--scene-sand-dark)"
+         stroke-width="2" stroke-linecap="round" opacity="0.20">
+        <path d="M 40 216 Q 130 208 220 216 T 400 216"/>
+        <path d="M 470 228 Q 560 220 650 228 T 830 228"/>
+        <path d="M 900 212 Q 990 204 1080 212 T 1260 212"/>
+        <path d="M 1290 232 Q 1360 226 1430 232"/>
+        <path d="M 150 244 Q 250 237 350 244"/>
+        <path d="M 640 250 Q 740 243 840 250"/>
+        <path d="M 1010 246 Q 1110 239 1210 246"/>
+      </g>
+
+      <!-- ===== WATER — scalloped top edge is the shoreline ===== -->
+      <g class="tide-foam tide-foam--water">
+        <path fill="url(#tide-water)" d="M -300 252 Q -240 232 -180 252 T -60 252 T 60 252 T 180 252 T 300 252 T 420 252 T 540 252 T 660 252 T 780 252 T 900 252 T 1020 252 T 1140 252 T 1260 252 T 1380 252 T 1500 252 T 1620 252 T 1740 252 L 1740 420 L -300 420 Z"/>
+      </g>
+
+      <!-- Caustics on the sandy bottom -->
+      <g class="tide-caustics" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity="0.34">
+        <path d="M 90 356 Q 160 344 232 356 T 372 356"/>
+        <path d="M 470 382 Q 540 370 612 382 T 752 382"/>
+        <path d="M 860 352 Q 930 340 1002 352 T 1142 352"/>
+        <path d="M 1210 386 Q 1275 374 1342 386"/>
+      </g>
+      <g class="tide-caustics tide-caustics--b" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.26">
+        <path d="M 200 406 Q 268 396 338 406"/>
+        <path d="M 640 340 Q 706 330 774 340"/>
+        <path d="M 1040 408 Q 1108 398 1178 408"/>
+      </g>
+
+      <!-- ===== FOAM — three lacy bands, receding into the water ===== -->
+      <g class="tide-foam tide-foam--c" fill="#FFFFFF" opacity="0.22">
+        <path d="M -300 350 Q -270 341 -240 350 T -180 350 T -120 350 T -60 350 T 0 350 T 60 350 T 120 350 T 180 350 T 240 350 T 300 350 T 360 350 T 420 350 T 480 350 T 540 350 T 600 350 T 660 350 T 720 350 T 780 350 T 840 350 T 900 350 T 960 350 T 1020 350 T 1080 350 T 1140 350 T 1200 350 T 1260 350 T 1320 350 T 1380 350 T 1440 350 T 1500 350 T 1560 350 T 1620 350 T 1680 350 T 1740 350 L 1740 364 L -300 364 Z"/>
+      </g>
+      <g class="tide-foam tide-foam--b" fill="#FFFFFF" opacity="0.40">
+        <path d="M -300 302 Q -240 288 -180 302 T -60 302 T 60 302 T 180 302 T 300 302 T 420 302 T 540 302 T 660 302 T 780 302 T 900 302 T 1020 302 T 1140 302 T 1260 302 T 1380 302 T 1500 302 T 1620 302 T 1740 302 L 1740 322 L -300 322 Z"/>
+      </g>
+      <g class="tide-foam tide-foam--a">
+        <path fill="var(--scene-foam-hi)" d="M -300 248 Q -270 236 -240 248 T -180 248 T -120 248 T -60 248 T 0 248 T 60 248 T 120 248 T 180 248 T 240 248 T 300 248 T 360 248 T 420 248 T 480 248 T 540 248 T 600 248 T 660 248 T 720 248 T 780 248 T 840 248 T 900 248 T 960 248 T 1020 248 T 1080 248 T 1140 248 T 1200 248 T 1260 248 T 1320 248 T 1380 248 T 1440 248 T 1500 248 T 1560 248 T 1620 248 T 1680 248 T 1740 248 L 1740 288 L -300 288 Z"/>
+        <!-- Bubbles breaking along the leading edge -->
+        <g fill="var(--scene-foam-hi)" opacity="0.9"><circle cx="60" cy="237" r="3"/><circle cx="210" cy="242" r="5"/><circle cx="360" cy="237" r="3"/><circle cx="520" cy="242" r="5"/><circle cx="680" cy="237" r="3"/><circle cx="830" cy="242" r="5"/><circle cx="980" cy="237" r="3"/><circle cx="1130" cy="242" r="5"/><circle cx="1280" cy="237" r="3"/><circle cx="1400" cy="242" r="5"/></g>
+      </g>
+
+</svg>
+  </div>
+
+  <script type="module" src="src/js/main.js"></script>
+</body>
+</html>

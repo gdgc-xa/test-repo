@@ -1,0 +1,582 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1660" width="1440" height="1660" font-family="Segoe UI, -apple-system, Roboto, sans-serif">
+  <title>Campus Compass — 01 Landing (Sands of Time)</title>
+  <desc>Xavier University – Ateneo de Cagayan · Landing screen with hero, featured strip, category legend, and beach scene</desc>
+
+  <defs>
+    <symbol id="puzzle" viewBox="0 0 100 100">
+      <path d="M15 15 h30 v20 a10 10 0 1 0 0 20 v10 h-40 v-30 a10 10 0 1 1 0 -20 z"/>
+    </symbol>
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F9C58A"/>
+      <stop offset="60%" stop-color="#E68A2E"/>
+      <stop offset="100%" stop-color="#B96A1A"/>
+    </radialGradient>
+    <linearGradient id="oceanCard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D5EBEE"/>
+      <stop offset="100%" stop-color="#F5EBD3"/>
+    </linearGradient>
+    <linearGradient id="dune1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FBE4C8" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#FBE4C8" stop-opacity="0.55"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ground -->
+  <rect width="1440" height="1660" fill="#F5EBD3"/>
+
+  <!-- Subtle warm wash overlays -->
+  <ellipse cx="290" cy="0" rx="600" ry="260" fill="#E68A2E" fill-opacity="0.08"/>
+  <ellipse cx="1440" cy="80" rx="500" ry="260" fill="#2C7C8E" fill-opacity="0.06"/>
+
+  <!-- ============================================================ -->
+  <!-- BANNER                                                        -->
+  <!-- ============================================================ -->
+  <g id="Banner">
+    <rect width="1440" height="32" fill="#2B1E12"/>
+    <circle cx="580" cy="16" r="3" fill="#E68A2E"/>
+    <text x="596" y="20" fill="#F5EBD3" font-size="11" letter-spacing="1.2">WEBSITE PROTOTYPE · CAMPUS COMPASS · XAVIER UNIVERSITY – ATENEO DE CAGAYAN</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- NAV                                                           -->
+  <!-- ============================================================ -->
+  <g id="Nav">
+    <rect y="32" width="1440" height="68" fill="#F5EBD3" fill-opacity="0.85"/>
+    <line x1="0" y1="100" x2="1440" y2="100" stroke="#E1CFA6"/>
+
+    <g id="Nav-Brand" transform="translate(120, 50)">
+      <g id="Compass-Icon" transform="translate(0, 0)">
+        <!-- Detailed tan compass rose (matches the provided compass image) -->
+        <circle cx="18" cy="18" r="15" fill="none" stroke="#B8A576" stroke-width="1.4"/>
+        <circle cx="18" cy="18" r="11.5" fill="none" stroke="#B8A576" stroke-width="0.7"/>
+        <polygon points="18,2 20,15 18,16 16,15" fill="#B8A576"/>
+        <polygon points="34,18 21,20 20,18 21,16" fill="#B8A576"/>
+        <polygon points="18,34 20,21 18,20 16,21" fill="#B8A576"/>
+        <polygon points="2,18 15,20 16,18 15,16" fill="#B8A576"/>
+        <polygon points="28,8 20,16 18,18 16,16" fill="#C8B27F" opacity="0.9"/>
+        <polygon points="28,28 20,20 18,18 16,20" fill="#C8B27F" opacity="0.9"/>
+        <polygon points="8,28 16,20 18,18 20,20" fill="#C8B27F" opacity="0.9"/>
+        <polygon points="8,8 16,16 18,18 20,16" fill="#C8B27F" opacity="0.9"/>
+        <circle cx="18" cy="18" r="1.4" fill="#B8A576"/>
+      </g>
+      <text x="52" y="15" font-size="16" font-weight="700" fill="#2B1E12" letter-spacing="-0.3">Campus Compass</text>
+      <text x="52" y="32" font-size="10" font-weight="600" fill="#8B735B" letter-spacing="0.5">XAVIER ATENEO · SANDS OF TIME</text>
+    </g>
+
+    <g id="Nav-Links" transform="translate(680, 71)">
+      <rect x="-4" y="-16" width="82" height="30" rx="10" fill="#FBE4C8"/>
+      <text x="37" y="4" text-anchor="middle" font-size="14" fill="#2B1E12" font-weight="500">Discover</text>
+      <text x="120" y="4" font-size="14" fill="#5B4530" font-weight="500">Browse orgs</text>
+      <text x="228" y="4" font-size="14" fill="#5B4530" font-weight="500">For orgs</text>
+      <text x="304" y="4" font-size="14" fill="#5B4530" font-weight="500">Events</text>
+    </g>
+
+    <g id="Nav-Actions" transform="translate(1080, 71)">
+      <g id="Theme-Toggle">
+        <circle cx="18" cy="0" r="18" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="18" cy="0" r="4" fill="none" stroke="#5B4530" stroke-width="1.5"/>
+        <g stroke="#5B4530" stroke-width="1.5" stroke-linecap="round">
+          <line x1="18" y1="-9" x2="18" y2="-7"/>
+          <line x1="18" y1="7" x2="18" y2="9"/>
+          <line x1="9" y1="0" x2="11" y2="0"/>
+          <line x1="25" y1="0" x2="27" y2="0"/>
+        </g>
+      </g>
+      <g id="Btn-Signin">
+        <rect x="50" y="-16" width="86" height="32" rx="16" fill="none" stroke="#C8B27F"/>
+        <text x="93" y="5" text-anchor="middle" font-size="14" fill="#2B1E12" font-weight="600">Sign in</text>
+      </g>
+      <g id="Btn-Add-Org">
+        <rect x="150" y="-16" width="120" height="32" rx="16" fill="#E68A2E"/>
+        <text x="210" y="5" text-anchor="middle" font-size="14" fill="#FFFFFF" font-weight="600">Add my org</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- HERO                                                          -->
+  <!-- ============================================================ -->
+  <g id="Hero">
+    <!-- Ambient primitives -->
+    <g id="Hero-Primitives" opacity="0.9">
+      <use href="#puzzle" x="72" y="160" width="72" height="72" fill="#EA4335" transform="rotate(-8 108 196)"/>
+      <use href="#puzzle" x="172" y="360" width="42" height="42" fill="#4285F4" transform="rotate(22 193 381)"/>
+      <use href="#puzzle" x="1240" y="180" width="60" height="60" fill="#EFB100" transform="rotate(15 1270 210)"/>
+      <use href="#puzzle" x="1320" y="460" width="34" height="34" fill="#34A853" transform="rotate(-12 1337 477)"/>
+      <g transform="translate(100, 550) rotate(-14)">
+        <path fill="#E68A2E" stroke="#B96A1A" stroke-width="2.5" stroke-linejoin="round" d="M0,-28 L10,-8 L30,-6 L14,8 L18,30 L0,18 L-18,30 L-14,8 L-30,-6 L-10,-8 Z"/>
+        <circle cx="0" cy="0" r="2.5" fill="#FDF6E4" opacity="0.9"/>
+        <circle cx="-6" cy="6" r="1.5" fill="#FDF6E4" opacity="0.9"/>
+        <circle cx="6" cy="6" r="1.5" fill="#FDF6E4" opacity="0.9"/>
+      </g>
+    </g>
+
+    <!-- Half-buried hourglass — thematic centerpiece for the "Sands of Time" trip -->
+    <g id="Hourglass" transform="translate(1170, 470)">
+      <!-- Wood top cap -->
+      <rect x="15" y="0" width="150" height="14" rx="3" fill="#8B5A2B" stroke="#5B3F1F" stroke-width="2"/>
+      <ellipse cx="90" cy="0" rx="75" ry="5" fill="#A0703E" stroke="#5B3F1F" stroke-width="1.5"/>
+      <!-- Upper glass bulb -->
+      <path d="M30 14 Q30 78 90 105 Q150 78 150 14 Z"
+            fill="#FDF6E4" fill-opacity="0.45" stroke="#5B3F1F" stroke-width="2.5" stroke-linejoin="round"/>
+      <!-- Highlight -->
+      <path d="M42 22 Q40 50 50 78" fill="none" stroke="#FFFFFF" stroke-width="1.8" opacity="0.6" stroke-linecap="round"/>
+      <!-- Sand in upper -->
+      <path d="M36 20 L144 20 L92 100 L88 100 Z" fill="#E68A2E"/>
+      <path d="M36 20 Q90 30 144 20 L144 22 Q90 32 36 22 Z" fill="#B96A1A" opacity="0.5"/>
+      <!-- Falling trickle with grains -->
+      <line x1="90" y1="105" x2="90" y2="160" stroke="#E68A2E" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="92" cy="122" r="1.4" fill="#F4B400"/>
+      <circle cx="88" cy="140" r="1.2" fill="#F4B400"/>
+      <!-- Lower glass -->
+      <path d="M30 190 Q30 118 90 105 Q150 118 150 190 Z"
+            fill="#FDF6E4" fill-opacity="0.45" stroke="#5B3F1F" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M42 182 Q40 150 50 125" fill="none" stroke="#FFFFFF" stroke-width="1.8" opacity="0.5" stroke-linecap="round"/>
+      <!-- Sand pile in lower -->
+      <path d="M40 190 Q65 160 90 160 Q115 160 140 190 Z" fill="#E68A2E"/>
+      <!-- Wood bottom cap -->
+      <rect x="15" y="184" width="150" height="14" rx="3" fill="#8B5A2B" stroke="#5B3F1F" stroke-width="2"/>
+      <ellipse cx="90" cy="198" rx="75" ry="5" fill="#8B5A2B" stroke="#5B3F1F" stroke-width="1.5"/>
+      <!-- Wood side posts -->
+      <line x1="25" y1="10" x2="25" y2="192" stroke="#8B5A2B" stroke-width="5" stroke-linecap="round"/>
+      <line x1="155" y1="10" x2="155" y2="192" stroke="#8B5A2B" stroke-width="5" stroke-linecap="round"/>
+      <!-- Sand mound half-burying the base -->
+      <path d="M-40 205 Q40 188 90 215 Q140 226 200 215 Q220 208 240 220 L240 260 L-40 260 Z"
+            fill="#EAD9B1" stroke="#C8B27F" stroke-width="1.5"/>
+      <!-- Wet sand strip -->
+      <path d="M-10 232 Q70 222 130 234 Q180 226 220 234 L220 252 L-10 252 Z"
+            fill="#D9B87E" opacity="0.65"/>
+      <!-- Sand ripples -->
+      <g stroke="#C8B27F" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.7">
+        <path d="M10 246 Q50 243 90 246"/>
+        <path d="M140 250 Q180 247 220 250"/>
+      </g>
+      <!-- Sand grains -->
+      <g fill="#B96A1A" opacity="0.55">
+        <circle cx="0" cy="240" r="1.2"/>
+        <circle cx="55" cy="248" r="1"/>
+        <circle cx="130" cy="252" r="1.2"/>
+        <circle cx="180" cy="243" r="1"/>
+        <circle cx="215" cy="248" r="1"/>
+      </g>
+    </g>
+
+    <!-- Kicker pill -->
+    <g id="Kicker" transform="translate(720, 180)">
+      <rect x="-190" y="-16" width="380" height="30" rx="15" fill="#FDF6E4" stroke="#E1CFA6"/>
+      <use href="#puzzle" x="-176" y="-9" width="14" height="14" fill="#E68A2E"/>
+      <text x="0" y="4" text-anchor="middle" font-size="11.5" font-weight="600" fill="#5B4530" letter-spacing="1">XAVIER ATENEO · CLUB FAIR SEASON · NOW OPEN</text>
+    </g>
+
+    <!-- Script tagline -->
+    <text id="Script-Tagline" x="720" y="238" text-anchor="middle"
+          font-family="Segoe Script, Snell Roundhand, Brush Script MT, cursive"
+          font-size="30" font-style="italic" font-weight="700" fill="#B96A1A">Sands of Time</text>
+
+    <!-- Campus Compass logo (replaces the H1 headline) -->
+    <g id="Campus-Compass-Logo" transform="translate(720, 320)">
+      <!-- "Campus" brush script -->
+      <text x="0" y="0" text-anchor="middle"
+            font-family="'Brush Script MT','Segoe Script','Snell Roundhand',cursive"
+            font-size="100" font-style="italic" font-weight="800"
+            fill="#F4B400" stroke="#2B1E12" stroke-width="2.8"
+            paint-order="stroke fill">Campus</text>
+      <!-- Compass rose (middle) -->
+      <g transform="translate(0, 42)">
+        <circle r="28" fill="none" stroke="#B8A576" stroke-width="2.4"/>
+        <circle r="22" fill="none" stroke="#B8A576" stroke-width="1"/>
+        <polygon points="0,-38 4,-7 0,-3 -4,-7" fill="#B8A576"/>
+        <polygon points="38,0 7,4 3,0 7,-4" fill="#B8A576"/>
+        <polygon points="0,38 4,7 0,3 -4,7" fill="#B8A576"/>
+        <polygon points="-38,0 -7,4 -3,0 -7,-4" fill="#B8A576"/>
+        <polygon points="22,-22 5,-5 2.5,-2.5 5,-2.5" fill="#C8B27F"/>
+        <polygon points="22,22 5,5 2.5,2.5 2.5,5" fill="#C8B27F"/>
+        <polygon points="-22,22 -5,5 -2.5,2.5 -5,2.5" fill="#C8B27F"/>
+        <polygon points="-22,-22 -5,-5 -2.5,-2.5 -2.5,-5" fill="#C8B27F"/>
+        <g fill="#B8A576">
+          <circle cx="0" cy="-15" r="0.9"/>
+          <circle cx="15" cy="0" r="0.9"/>
+          <circle cx="0" cy="15" r="0.9"/>
+          <circle cx="-15" cy="0" r="0.9"/>
+        </g>
+        <circle r="1.7" fill="#B8A576"/>
+      </g>
+      <!-- "Compass" outlined serif -->
+      <text x="0" y="128" text-anchor="middle"
+            font-family="'Georgia','Iowan Old Style',serif"
+            font-size="66" font-weight="900"
+            fill="none" stroke="#2B1E12" stroke-width="1.9"
+            letter-spacing="-1.5">Compass</text>
+    </g>
+
+    <!-- Sub -->
+    <text id="Hero-Sub" x="720" y="450" text-anchor="middle" font-size="16" fill="#5B4530">A campus-wide directory of every student organization at Xavier University – Ateneo de Cagayan.</text>
+    <text x="720" y="472" text-anchor="middle" font-size="16" fill="#5B4530">Search, filter, and visit any booth without leaving your seat.</text>
+
+    <!-- Search shell -->
+    <g id="Search-Shell" transform="translate(390, 510)">
+      <rect width="660" height="60" rx="30" fill="#FDF6E4" stroke="#E1CFA6" filter="drop-shadow(0 6px 18px rgba(80,50,20,0.09))"/>
+      <g transform="translate(24, 20)" stroke="#8B735B" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="10" cy="10" r="7"/>
+        <line x1="15" y1="15" x2="20" y2="20"/>
+      </g>
+      <text x="60" y="36" font-size="15" fill="#8B735B">Search 132 orgs — try 'debate', 'coders', 'dance'…</text>
+      <g id="Search-Btn">
+        <rect x="540" y="8" width="112" height="44" rx="22" fill="#2C7C8E"/>
+        <text x="586" y="35" text-anchor="middle" font-size="14" font-weight="600" fill="#FFFFFF">Search</text>
+        <path d="M 610 30 L 618 30 M 615 26 L 619 30 L 615 34" stroke="#FFFFFF" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </g>
+
+    <!-- Category cloud label -->
+    <text x="720" y="620" text-anchor="middle" font-size="12" font-weight="600" fill="#8B735B" letter-spacing="1.5">BROWSE BY CLUSTER</text>
+
+    <!-- Category tags (10, short labels) — Ten Xavier Ateneo clusters -->
+    <g id="Category-Tags" transform="translate(0, 645)" font-size="13">
+      <!-- Row 1: 5 tags -->
+      <g id="Tag-Governance" transform="translate(410, 0)">
+        <rect width="112" height="34" rx="17" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="16" cy="17" r="4" fill="#4285F4"/>
+        <text x="28" y="22" font-weight="500" fill="#5B4530">Governance</text>
+      </g>
+      <g id="Tag-MediaArts" transform="translate(530, 0)">
+        <rect width="128" height="34" rx="17" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="16" cy="17" r="4" fill="#EA4335"/>
+        <text x="28" y="22" font-weight="500" fill="#5B4530">Media &amp; Arts</text>
+      </g>
+      <g id="Tag-SciEngTech" transform="translate(666, 0)">
+        <rect width="132" height="34" rx="17" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="16" cy="17" r="4" fill="#4285F4"/>
+        <text x="28" y="22" font-weight="500" fill="#5B4530">Sci · Eng · Tech</text>
+      </g>
+      <g id="Tag-Business" transform="translate(806, 0)">
+        <rect width="94" height="34" rx="17" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="16" cy="17" r="4" fill="#34A853"/>
+        <text x="28" y="22" font-weight="500" fill="#5B4530">Business</text>
+      </g>
+      <g id="Tag-Sports" transform="translate(908, 0)">
+        <rect width="86" height="34" rx="17" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="16" cy="17" r="4" fill="#34A853"/>
+        <text x="28" y="22" font-weight="500" fill="#5B4530">Sports</text>
+      </g>
+      <!-- Row 2: 5 tags -->
+      <g id="Tag-Environment" transform="translate(380, 46)">
+        <rect width="118" height="34" rx="17" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="16" cy="17" r="4" fill="#34A853"/>
+        <text x="28" y="22" font-weight="500" fill="#5B4530">Environment</text>
+      </g>
+      <g id="Tag-FoodAgri" transform="translate(506, 46)">
+        <rect width="112" height="34" rx="17" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="16" cy="17" r="4" fill="#EFB100"/>
+        <text x="28" y="22" font-weight="500" fill="#5B4530">Food &amp; Agri</text>
+      </g>
+      <g id="Tag-Socio" transform="translate(626, 46)">
+        <rect width="126" height="34" rx="17" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="16" cy="17" r="4" fill="#EFB100"/>
+        <text x="28" y="22" font-weight="500" fill="#5B4530">Socio-Cultural</text>
+      </g>
+      <g id="Tag-Service" transform="translate(760, 46)">
+        <rect width="138" height="34" rx="17" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="16" cy="17" r="4" fill="#EA4335"/>
+        <text x="28" y="22" font-weight="500" fill="#5B4530">Service-Learning</text>
+      </g>
+      <g id="Tag-Program" transform="translate(906, 46)">
+        <rect width="126" height="34" rx="17" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <circle cx="16" cy="17" r="4" fill="#4285F4"/>
+        <text x="28" y="22" font-weight="500" fill="#5B4530">Program-Based</text>
+      </g>
+    </g>
+
+    <!-- Dune divider -->
+    <g id="Dunes" transform="translate(0, 760)">
+      <path d="M0,60 C240,10 480,120 720,60 C960,10 1200,90 1440,40 L1440,120 L0,120 Z" fill="url(#dune1)"/>
+      <path d="M0,80 C220,40 460,110 720,80 C960,55 1180,110 1440,70 L1440,120 L0,120 Z" fill="#EFE0BF"/>
+    </g>
+  </g>
+
+  <!-- Featured section removed per updated design -->
+  <g id="Removed-Featured-Section" style="display:none">
+    <g id="Featured-Head" transform="translate(120, 900)">
+      <text x="0" y="0" font-family="Iowan Old Style, Georgia, serif" font-size="30" font-weight="700" fill="#2B1E12" letter-spacing="-0.7">Featured this week</text>
+      <text x="0" y="26" font-size="15" fill="#8B735B">Booths trending during Club Fair Week at Xavier Ateneo.</text>
+      <g id="See-All" transform="translate(1050, -8)">
+        <rect width="150" height="36" rx="18" fill="#D5EBEE"/>
+        <text x="20" y="23" font-size="14" font-weight="600" fill="#2C7C8E">See all orgs</text>
+        <path d="M 118 15 L 132 15 M 128 11 L 132 15 L 128 19" stroke="#2C7C8E" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </g>
+
+    <!-- 4 featured cards -->
+    <g id="Featured-Cards" transform="translate(120, 960)">
+
+      <!-- Card 1: GDG (Blue) -->
+      <g id="Card-GDG" transform="translate(0, 0)">
+        <rect width="285" height="280" rx="22" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <rect width="4" height="280" rx="0" fill="#4285F4"/>
+        <rect x="20" y="20" width="46" height="46" rx="12" fill="#E3ECFD" stroke="#4285F4" stroke-opacity="0.25"/>
+        <text x="43" y="49" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="14" font-weight="700" fill="#1A56CB">GDG</text>
+        <text x="80" y="34" font-family="Iowan Old Style, Georgia, serif" font-size="15" font-weight="700" fill="#2B1E12">Google Developer</text>
+        <text x="80" y="52" font-family="Iowan Old Style, Georgia, serif" font-size="15" font-weight="700" fill="#2B1E12">Group on Campus</text>
+        <g transform="translate(80, 62)">
+          <rect width="82" height="18" rx="4" fill="#E3ECFD"/>
+          <text x="41" y="13" text-anchor="middle" font-size="10" font-weight="700" fill="#1A56CB" letter-spacing="0.5">TECHNOLOGY</text>
+          <rect x="88" width="62" height="18" rx="4" fill="#E3ECFD"/>
+          <text x="119" y="13" text-anchor="middle" font-size="10" font-weight="700" fill="#1A56CB" letter-spacing="0.5">LEARNING</text>
+        </g>
+        <text x="20" y="130" font-size="13" fill="#5B4530">For students who love to build.</text>
+        <text x="20" y="148" font-size="13" fill="#5B4530">Workshops, hackathons, and open-</text>
+        <text x="20" y="166" font-size="13" fill="#5B4530">source Fridays.</text>
+        <text x="20" y="252" font-size="12" fill="#8B735B">◷ Est. 2019</text>
+        <g transform="translate(180, 236)">
+          <rect width="90" height="26" rx="13" fill="#EAD9B1" stroke="#E1CFA6"/>
+          <text x="14" y="17" font-size="12" font-weight="600" fill="#2B1E12">Visit booth →</text>
+        </g>
+      </g>
+
+      <!-- Card 2: Kultura (Red) -->
+      <g id="Card-Kultura" transform="translate(305, 0)">
+        <rect width="285" height="280" rx="22" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <rect width="4" height="280" rx="0" fill="#EA4335"/>
+        <rect x="20" y="20" width="46" height="46" rx="12" fill="#FCE0DE" stroke="#EA4335" stroke-opacity="0.25"/>
+        <text x="43" y="49" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="14" font-weight="700" fill="#B21E10">KDT</text>
+        <text x="80" y="34" font-family="Iowan Old Style, Georgia, serif" font-size="15" font-weight="700" fill="#2B1E12">Kultura Dance Troupe</text>
+        <g transform="translate(80, 44)">
+          <rect width="52" height="18" rx="4" fill="#FCE0DE"/>
+          <text x="26" y="13" text-anchor="middle" font-size="10" font-weight="700" fill="#B21E10" letter-spacing="0.5">DANCE</text>
+          <rect x="58" width="58" height="18" rx="4" fill="#FCEEC1"/>
+          <text x="87" y="13" text-anchor="middle" font-size="10" font-weight="700" fill="#7E5B00" letter-spacing="0.5">CULTURE</text>
+        </g>
+        <text x="20" y="112" font-size="13" fill="#5B4530">Filipino folk and contemporary.</text>
+        <text x="20" y="130" font-size="13" fill="#5B4530">Weekly rehearsals, showcase every</text>
+        <text x="20" y="148" font-size="13" fill="#5B4530">semester.</text>
+        <text x="20" y="252" font-size="12" fill="#8B735B">◷ Est. 2005</text>
+        <g transform="translate(180, 236)">
+          <rect width="90" height="26" rx="13" fill="#EAD9B1" stroke="#E1CFA6"/>
+          <text x="14" y="17" font-size="12" font-weight="600" fill="#2B1E12">Visit booth →</text>
+        </g>
+      </g>
+
+      <!-- Card 3: Debate (Red) -->
+      <g id="Card-UDS" transform="translate(610, 0)">
+        <rect width="285" height="280" rx="22" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <rect width="4" height="280" rx="0" fill="#EA4335"/>
+        <rect x="20" y="20" width="46" height="46" rx="12" fill="#FCE0DE" stroke="#EA4335" stroke-opacity="0.25"/>
+        <text x="43" y="49" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="14" font-weight="700" fill="#B21E10">UDS</text>
+        <text x="80" y="34" font-family="Iowan Old Style, Georgia, serif" font-size="15" font-weight="700" fill="#2B1E12">Union Debate Society</text>
+        <g transform="translate(80, 44)">
+          <rect width="72" height="18" rx="4" fill="#FCE0DE"/>
+          <text x="36" y="13" text-anchor="middle" font-size="10" font-weight="700" fill="#B21E10" letter-spacing="0.5">DEBATING</text>
+          <rect x="78" width="70" height="18" rx="4" fill="#E3ECFD"/>
+          <text x="113" y="13" text-anchor="middle" font-size="10" font-weight="700" fill="#1A56CB" letter-spacing="0.5">ACADEMIC</text>
+        </g>
+        <text x="20" y="112" font-size="13" fill="#5B4530">Parliamentary and BP formats.</text>
+        <text x="20" y="130" font-size="13" fill="#5B4530">Compete regionally, argue</text>
+        <text x="20" y="148" font-size="13" fill="#5B4530">anywhere.</text>
+        <text x="20" y="252" font-size="12" fill="#8B735B">◷ Est. 1998</text>
+        <g transform="translate(180, 236)">
+          <rect width="90" height="26" rx="13" fill="#EAD9B1" stroke="#E1CFA6"/>
+          <text x="14" y="17" font-size="12" font-weight="600" fill="#2B1E12">Visit booth →</text>
+        </g>
+      </g>
+
+      <!-- Card 4: Photo Guild (Yellow) -->
+      <g id="Card-Photo" transform="translate(915, 0)">
+        <rect width="285" height="280" rx="22" fill="#FDF6E4" stroke="#E1CFA6"/>
+        <rect width="4" height="280" rx="0" fill="#EFB100"/>
+        <rect x="20" y="20" width="46" height="46" rx="12" fill="#FCEEC1" stroke="#EFB100" stroke-opacity="0.25"/>
+        <text x="43" y="49" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="14" font-weight="700" fill="#7E5B00">PG</text>
+        <text x="80" y="34" font-family="Iowan Old Style, Georgia, serif" font-size="15" font-weight="700" fill="#2B1E12">Photography Guild</text>
+        <g transform="translate(80, 44)">
+          <rect width="58" height="18" rx="4" fill="#FCEEC1"/>
+          <text x="29" y="13" text-anchor="middle" font-size="10" font-weight="700" fill="#7E5B00" letter-spacing="0.5">CULTURE</text>
+          <rect x="64" width="62" height="18" rx="4" fill="#E3ECFD"/>
+          <text x="95" y="13" text-anchor="middle" font-size="10" font-weight="700" fill="#1A56CB" letter-spacing="0.5">LEARNING</text>
+        </g>
+        <text x="20" y="112" font-size="13" fill="#5B4530">Film and digital, portraits and</text>
+        <text x="20" y="130" font-size="13" fill="#5B4530">street. Monthly critique nights,</text>
+        <text x="20" y="148" font-size="13" fill="#5B4530">always open.</text>
+        <text x="20" y="252" font-size="12" fill="#8B735B">◷ Est. 2008</text>
+        <g transform="translate(180, 236)">
+          <rect width="90" height="26" rx="13" fill="#EAD9B1" stroke="#E1CFA6"/>
+          <text x="14" y="17" font-size="12" font-weight="600" fill="#2B1E12">Visit booth →</text>
+        </g>
+      </g>
+
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- FOUR-COLOR SYSTEM BLOCK                                       -->
+  <!-- ============================================================ -->
+  <g id="Theme-Block" transform="translate(120, 900)">
+    <rect width="1200" height="300" rx="22" fill="#FDF6E4" stroke="#E1CFA6"/>
+
+    <g id="Theme-Copy" transform="translate(40, 60)">
+      <text x="0" y="0" font-size="11" font-weight="700" fill="#8B735B" letter-spacing="1.5">TEN CATEGORIES · FOUR COLORS</text>
+      <text x="0" y="40" font-family="Iowan Old Style, Georgia, serif" font-size="28" font-weight="700" fill="#2B1E12" letter-spacing="-0.5">Every org lives under one cluster.</text>
+      <text x="0" y="78" font-size="14" fill="#5B4530">The ten Xavier Ateneo clusters are grouped into four</text>
+      <text x="0" y="98" font-size="14" fill="#5B4530">Google puzzle-piece hues so you can scan the whole</text>
+      <text x="0" y="118" font-size="14" fill="#5B4530">roster at a glance. Combine two chips on Browse to</text>
+      <text x="0" y="138" font-size="14" fill="#5B4530">intersect them — find only the orgs at the meeting point.</text>
+    </g>
+
+    <g id="Theme-Legend" transform="translate(620, 60)">
+      <!-- Blue: Mind (3 clusters) -->
+      <g transform="translate(0, 0)">
+        <rect width="540" height="46" rx="12" fill="#EAD9B1" stroke="#E1CFA6"/>
+        <circle cx="20" cy="23" r="6" fill="#4285F4"/>
+        <text x="36" y="28" font-size="14" font-weight="700" fill="#2B1E12">Mind</text>
+        <text x="530" y="28" text-anchor="end" font-size="11" fill="#8B735B">Governance · Sci · Eng · Tech · Program-Based</text>
+      </g>
+      <!-- Green: Ground (3 clusters) -->
+      <g transform="translate(0, 60)">
+        <rect width="540" height="46" rx="12" fill="#EAD9B1" stroke="#E1CFA6"/>
+        <circle cx="20" cy="23" r="6" fill="#34A853"/>
+        <text x="36" y="28" font-size="14" font-weight="700" fill="#2B1E12">Ground</text>
+        <text x="530" y="28" text-anchor="end" font-size="11" fill="#8B735B">Business · Sports · Environment</text>
+      </g>
+      <!-- Yellow: Culture (2 clusters) -->
+      <g transform="translate(0, 120)">
+        <rect width="540" height="46" rx="12" fill="#EAD9B1" stroke="#E1CFA6"/>
+        <circle cx="20" cy="23" r="6" fill="#EFB100"/>
+        <text x="36" y="28" font-size="14" font-weight="700" fill="#2B1E12">Culture</text>
+        <text x="530" y="28" text-anchor="end" font-size="11" fill="#8B735B">Food &amp; Agri · Socio-Cultural</text>
+      </g>
+      <!-- Red: Voice (2 clusters) -->
+      <g transform="translate(0, 180)">
+        <rect width="540" height="46" rx="12" fill="#EAD9B1" stroke="#E1CFA6"/>
+        <circle cx="20" cy="23" r="6" fill="#EA4335"/>
+        <text x="36" y="28" font-size="14" font-weight="700" fill="#2B1E12">Voice</text>
+        <text x="530" y="28" text-anchor="end" font-size="11" fill="#8B735B">Media &amp; Arts · Service-Learning</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER (on sand, sits between content and the ocean)          -->
+  <!-- ============================================================ -->
+  <g id="Footer" transform="translate(0, 1240)">
+    <rect width="1440" height="100" fill="#EAD9B1"/>
+    <g id="Footer-Brand" transform="translate(120, 45)">
+      <text x="0" y="0" font-size="14" font-weight="700" fill="#2B1E12">Campus Compass</text>
+      <text x="0" y="18" font-size="12" fill="#8B735B">Xavier University – Ateneo de Cagayan</text>
+    </g>
+    <!-- GDG "Created by" credit -->
+    <g id="GDG-Credit" transform="translate(560, 22)">
+      <rect x="0" y="0" width="330" height="56" rx="12" fill="#FDF6E4" fill-opacity="0.55" stroke="#B8A576" stroke-opacity="0.4"/>
+      <text x="14" y="20" font-size="10" font-weight="700" fill="#8B735B" letter-spacing="1.5">CREATED BY</text>
+      <!-- Sun icon -->
+      <g transform="translate(110, 28)">
+        <g fill="#F4B400">
+          <polygon points="0,-14 2,-10 -2,-10"/>
+          <polygon points="0,14 2,10 -2,10"/>
+          <polygon points="14,0 10,2 10,-2"/>
+          <polygon points="-14,0 -10,2 -10,-2"/>
+          <polygon points="10,-10 7.5,-6.5 6,-8"/>
+          <polygon points="10,10 7.5,6.5 6,8"/>
+          <polygon points="-10,10 -7.5,6.5 -6,8"/>
+          <polygon points="-10,-10 -7.5,-6.5 -6,-8"/>
+        </g>
+        <circle r="8" fill="#E68A2E"/>
+        <text y="3" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="7" font-weight="800" fill="#FDF6E4">&lt;/&gt;</text>
+      </g>
+      <text x="132" y="26" font-size="13" font-weight="700" fill="#2B1E12">Google Developer Group</text>
+      <text x="132" y="42" font-size="11" font-style="italic" fill="#4285F4">Xavier Ateneo</text>
+      <text x="220" y="42"
+            font-family="'Brush Script MT','Segoe Script','Snell Roundhand',cursive"
+            font-size="14" font-style="italic" font-weight="700"
+            fill="#8B735B" stroke="#5B3F1F" stroke-width="0.4"
+            paint-order="stroke fill">Sands of Time</text>
+    </g>
+    <text x="1320" y="55" text-anchor="end" font-size="12" fill="#5B4530">Prototype · Ready for the Figma "Website Prototype" rebuild</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- SEA SCENE (below footer, page ends in ocean)                  -->
+  <!-- ============================================================ -->
+  <g id="Sea-Scene" transform="translate(0, 1340)">
+    <!-- Sand strip that blends with the footer above -->
+    <rect width="1440" height="30" fill="#EAD9B1"/>
+    <!-- Wet sand transition -->
+    <path fill="#D9B87E" opacity="0.9" d="M0,20 Q160,10 320,30 Q460,50 600,20 Q740,-5 880,25 Q1020,50 1160,20 Q1300,-5 1440,25 L1440,50 L0,50 Z"/>
+
+    <!-- Big cartoony foam wave -->
+    <path fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"
+          d="M0,30 Q130,50 260,30 Q380,15 500,45 Q620,70 720,70 Q820,70 940,45 Q1060,15 1180,30 Q1310,50 1440,30"/>
+    <path fill="#FFFFFF" d="M0,35 Q130,55 260,35 Q380,20 500,50 Q620,75 720,75 Q820,75 940,50 Q1060,20 1180,35 Q1310,55 1440,35 L1440,110 L0,110 Z"/>
+    <path fill="#E8F5F8" d="M0,80 Q130,95 260,80 Q380,68 500,92 Q620,112 720,112 Q820,112 940,92 Q1060,68 1180,80 Q1310,95 1440,80 L1440,130 L0,130 Z"/>
+    <path fill="#FFFFFF" opacity="0.65" d="M0,100 Q140,88 280,100 T560,100 T840,100 T1120,100 T1440,100 L1440,120 L0,120 Z"/>
+
+    <!-- Bold ocean layers -->
+    <path fill="#7CC4D6" d="M0,115 Q140,100 280,115 T560,115 T840,115 T1120,115 T1440,115 L1440,320 L0,320 Z"/>
+    <path fill="#3E9FB8" d="M0,150 Q140,135 280,150 T560,150 T840,150 T1120,150 T1440,150 L1440,320 L0,320 Z"/>
+    <path fill="#1F6E88" d="M0,195 Q140,180 280,195 T560,195 T840,195 T1120,195 T1440,195 L1440,320 L0,320 Z"/>
+    <path fill="#0F4E68" d="M0,240 Q140,225 280,240 T560,240 T840,240 T1120,240 T1440,240 L1440,320 L0,320 Z"/>
+    <path fill="#082F41" opacity="0.85" d="M0,285 Q140,270 280,285 T560,285 T840,285 T1120,285 T1440,285 L1440,320 L0,320 Z"/>
+
+    <!-- Wave motion lines -->
+    <g stroke="#FFFFFF" fill="none" stroke-linecap="round">
+      <path stroke-width="5" opacity="0.9" d="M60,165 Q170,148 280,168"/>
+      <path stroke-width="4.5" opacity="0.75" d="M320,190 Q450,172 580,192"/>
+      <path stroke-width="5" opacity="0.9" d="M620,170 Q740,152 860,172"/>
+      <path stroke-width="4.5" opacity="0.75" d="M900,195 Q1030,178 1160,198"/>
+      <path stroke-width="5" opacity="0.9" d="M1200,170 Q1310,152 1420,172"/>
+      <path stroke-width="3.5" opacity="0.75" d="M90,225 Q200,215 310,225"/>
+      <path stroke-width="3.5" opacity="0.7" d="M400,240 Q510,230 620,240"/>
+      <path stroke-width="3.5" opacity="0.75" d="M700,225 Q810,215 920,225"/>
+      <path stroke-width="3.5" opacity="0.7" d="M1020,245 Q1120,235 1220,245"/>
+      <path stroke-width="3.5" opacity="0.75" d="M1260,225 Q1340,217 1420,225"/>
+      <path stroke-width="3" opacity="0.5" d="M150,275 Q240,268 340,275"/>
+      <path stroke-width="3" opacity="0.5" d="M540,280 Q640,272 740,280"/>
+      <path stroke-width="3" opacity="0.5" d="M920,275 Q1020,268 1130,275"/>
+      <path stroke-width="3" opacity="0.5" d="M1220,285 Q1310,278 1400,285"/>
+      <path stroke-width="2.5" opacity="0.35" d="M300,305 Q400,300 500,305"/>
+      <path stroke-width="2.5" opacity="0.35" d="M800,310 Q900,305 1000,310"/>
+    </g>
+
+    <!-- Foam splashes and sparkles -->
+    <g fill="#FFFFFF" opacity="0.95">
+      <ellipse cx="180" cy="128" rx="5" ry="2"/>
+      <ellipse cx="400" cy="122" rx="4" ry="1.5"/>
+      <ellipse cx="680" cy="125" rx="6" ry="2"/>
+      <ellipse cx="960" cy="128" rx="5" ry="2"/>
+      <ellipse cx="1220" cy="122" rx="4" ry="1.5"/>
+      <circle cx="90" cy="210" r="2.5"/>
+      <circle cx="340" cy="205" r="2"/>
+      <circle cx="560" cy="215" r="2.5"/>
+      <circle cx="800" cy="205" r="2"/>
+      <circle cx="1080" cy="215" r="2.5"/>
+      <circle cx="1340" cy="205" r="2"/>
+      <path d="M240,175 L242,172 L244,175 L242,178 Z"/>
+      <path d="M500,158 L502,155 L504,158 L502,161 Z"/>
+      <path d="M900,182 L902,179 L904,182 L902,185 Z"/>
+      <path d="M1180,158 L1182,155 L1184,158 L1182,161 Z"/>
+      <path d="M660,255 L662,252 L664,255 L662,258 Z"/>
+      <path d="M1050,265 L1052,262 L1054,265 L1052,268 Z"/>
+    </g>
+
+    <!-- Sailboat on horizon -->
+    <g id="Sea-Sailboat" transform="translate(1080, 92) scale(1.15)">
+      <path d="M0,-20 L0,4" stroke="#2B1E12" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M0,-20 L14,4 L0,4 Z" fill="#FDF6E4" stroke="#2B1E12" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M0,-12 L-10,4 L0,4 Z" fill="#EA4335" stroke="#2B1E12" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M-14,4 L14,4 L11,11 L-11,11 Z" fill="#B96A1A" stroke="#2B1E12" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M0,-20 L5,-17 L0,-14" fill="#EFB100" stroke="#2B1E12" stroke-width="0.8" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Tiny distant sailboat -->
+    <g id="Sea-Sailboat-Distant" transform="translate(1360, 108) scale(0.6)">
+      <path d="M0,-16 L0,3" stroke="#2B1E12" stroke-width="1.2" fill="none"/>
+      <path d="M0,-16 L11,3 L0,3 Z" fill="#FDF6E4" stroke="#2B1E12" stroke-width="1"/>
+      <path d="M-9,3 L9,3 L7,8 L-7,8 Z" fill="#5B4530" stroke="#2B1E12" stroke-width="1"/>
+    </g>
+
+    <!-- Birds on horizon -->
+    <g fill="none" stroke="#2B1E12" stroke-width="1.5" stroke-linecap="round" opacity="0.7">
+      <path d="M180,55 Q186,49 192,55 Q198,49 204,55"/>
+      <path d="M310,70 Q316,64 322,70 Q328,64 334,70"/>
+      <path d="M720,50 Q726,44 732,50 Q738,44 744,50"/>
+    </g>
+  </g>
+
+</svg>

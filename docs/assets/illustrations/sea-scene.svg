@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 420" preserveAspectRatio="none" role="img" aria-label="Water's edge">
+  <defs>
+<linearGradient id="tide-sand" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0"    stop-color="var(--surface-2)"/>
+  <stop offset="0.45" stop-color="var(--scene-sand-top)"/>
+  <stop offset="1"    stop-color="var(--scene-sand-wet)"/>
+</linearGradient>
+<linearGradient id="tide-water" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0"    stop-color="var(--scene-sea-shallow)"/>
+  <stop offset="0.42" stop-color="var(--scene-water-1)"/>
+  <stop offset="1"    stop-color="var(--scene-water-3)"/>
+</linearGradient>
+<linearGradient id="tide-damp" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0"   stop-color="var(--scene-sand-dark)" stop-opacity="0"/>
+  <stop offset="1"   stop-color="var(--scene-sand-dark)" stop-opacity="0.22"/>
+</linearGradient>
+  </defs>
+
+  <!-- ===== DRY SAND ===== -->
+  <rect y="0" width="1440" height="272" fill="url(#tide-sand)"/>
+
+  <!-- Sand grain texture -->
+  <g fill="var(--scene-sand-dark)" opacity="0.18">
+    <circle cx="70"   cy="52"  r="2"/><circle cx="238" cy="96"  r="1.6"/>
+    <circle cx="402"  cy="40"  r="2.2"/><circle cx="560" cy="112" r="1.5"/>
+    <circle cx="742"  cy="62"  r="2"/><circle cx="905"  cy="128" r="1.7"/>
+    <circle cx="1064" cy="48"  r="2.1"/><circle cx="1228" cy="104" r="1.6"/>
+    <circle cx="1362" cy="70"  r="2"/><circle cx="150"  cy="150" r="1.5"/>
+    <circle cx="640"  cy="168" r="1.8"/><circle cx="1150" cy="158" r="1.6"/>
+    <circle cx="330"  cy="186" r="1.7"/><circle cx="880"  cy="196" r="1.5"/>
+  </g>
+
+  <!-- ===== THINGS ON THE SAND (seen from above) ===== -->
+  <g class="tide-items">
+    <!-- Starfish -->
+    <g transform="translate(236,116) rotate(-18)">
+      <path fill="#E68A2E" stroke="#3D2817" stroke-width="2.4" stroke-linejoin="round"
+            d="M 0 -30 L 8 -10 L 31 -6 L 14 6 L 20 30 L 0 17 L -20 30 L -14 6 L -31 -6 L -8 -10 Z"/>
+      <path fill="#F5B876" opacity="0.85" d="M 0 -25 L 5 -11 L 17 -6 L -5 -5 L -17 -6 L -5 -11 Z"/>
+      <g fill="#B96A1A"><circle cx="0" cy="0" r="2"/><circle cx="6" cy="8" r="1.3"/><circle cx="-6" cy="8" r="1.3"/></g>
+    </g>
+    <!-- Little crab -->
+    <g transform="translate(1088,128) scale(0.62)">
+      <g stroke="#3D2817" stroke-width="3" fill="none" stroke-linecap="round">
+        <path d="M -20 5 L -32 20"/><path d="M -10 8 L -14 26"/>
+        <path d="M 10 8 L 14 26"/><path d="M 20 5 L 32 20"/>
+      </g>
+      <ellipse cx="0" cy="0" rx="24" ry="16" fill="#EA4335" stroke="#3D2817" stroke-width="3"/>
+      <ellipse cx="-6" cy="-6" rx="14" ry="8" fill="#F58179" opacity="0.85"/>
+      <circle cx="-8" cy="-19" r="4" fill="#FDF6E4" stroke="#3D2817" stroke-width="2"/>
+      <circle cx="8"  cy="-19" r="4" fill="#FDF6E4" stroke="#3D2817" stroke-width="2"/>
+      <circle cx="-8" cy="-19" r="1.7" fill="#3D2817"/><circle cx="8" cy="-19" r="1.7" fill="#3D2817"/>
+      <path fill="#EA4335" stroke="#3D2817" stroke-width="2.5" stroke-linejoin="round"
+            d="M -26 0 L -38 -8 L -34 0 L -38 8 L -26 5 Z"/>
+      <path fill="#EA4335" stroke="#3D2817" stroke-width="2.5" stroke-linejoin="round"
+            d="M 26 0 L 38 -8 L 34 0 L 38 8 L 26 5 Z"/>
+    </g>
+    <!-- Pebbles -->
+    <g fill="var(--scene-sand-dark)" opacity="0.38">
+      <ellipse cx="470"  cy="150" rx="7"   ry="4.5"/>
+      <ellipse cx="700"  cy="196" rx="5.5" ry="3.6"/>
+      <ellipse cx="1290" cy="176" rx="6.5" ry="4"/>
+      <ellipse cx="880"  cy="86"  rx="5"   ry="3.2"/>
+    </g>
+  </g>
+
+  <!-- ===== DAMP SAND — how far the last wave reached.
+       The strongest overhead cue on a real beach. ===== -->
+  <rect y="176" width="1440" height="96" fill="url(#tide-damp)"/>
+  <g class="tide-ripples" fill="none" stroke="var(--scene-sand-dark)"
+     stroke-width="2" stroke-linecap="round" opacity="0.20">
+    <path d="M 40 216 Q 130 208 220 216 T 400 216"/>
+    <path d="M 470 228 Q 560 220 650 228 T 830 228"/>
+    <path d="M 900 212 Q 990 204 1080 212 T 1260 212"/>
+    <path d="M 1290 232 Q 1360 226 1430 232"/>
+    <path d="M 150 244 Q 250 237 350 244"/>
+    <path d="M 640 250 Q 740 243 840 250"/>
+    <path d="M 1010 246 Q 1110 239 1210 246"/>
+  </g>
+
+  <!-- ===== WATER — scalloped top edge is the shoreline ===== -->
+  <g class="tide-foam tide-foam--water">
+    <path fill="url(#tide-water)" d="M -300 252 Q -240 232 -180 252 T -60 252 T 60 252 T 180 252 T 300 252 T 420 252 T 540 252 T 660 252 T 780 252 T 900 252 T 1020 252 T 1140 252 T 1260 252 T 1380 252 T 1500 252 T 1620 252 T 1740 252 L 1740 420 L -300 420 Z"/>
+  </g>
+
+  <!-- Caustics on the sandy bottom -->
+  <g class="tide-caustics" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity="0.34">
+    <path d="M 90 356 Q 160 344 232 356 T 372 356"/>
+    <path d="M 470 382 Q 540 370 612 382 T 752 382"/>
+    <path d="M 860 352 Q 930 340 1002 352 T 1142 352"/>
+    <path d="M 1210 386 Q 1275 374 1342 386"/>
+  </g>
+  <g class="tide-caustics tide-caustics--b" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.26">
+    <path d="M 200 406 Q 268 396 338 406"/>
+    <path d="M 640 340 Q 706 330 774 340"/>
+    <path d="M 1040 408 Q 1108 398 1178 408"/>
+  </g>
+
+  <!-- ===== FOAM — three lacy bands, receding into the water ===== -->
+  <g class="tide-foam tide-foam--c" fill="#FFFFFF" opacity="0.22">
+    <path d="M -300 350 Q -270 341 -240 350 T -180 350 T -120 350 T -60 350 T 0 350 T 60 350 T 120 350 T 180 350 T 240 350 T 300 350 T 360 350 T 420 350 T 480 350 T 540 350 T 600 350 T 660 350 T 720 350 T 780 350 T 840 350 T 900 350 T 960 350 T 1020 350 T 1080 350 T 1140 350 T 1200 350 T 1260 350 T 1320 350 T 1380 350 T 1440 350 T 1500 350 T 1560 350 T 1620 350 T 1680 350 T 1740 350 L 1740 364 L -300 364 Z"/>
+  </g>
+  <g class="tide-foam tide-foam--b" fill="#FFFFFF" opacity="0.40">
+    <path d="M -300 302 Q -240 288 -180 302 T -60 302 T 60 302 T 180 302 T 300 302 T 420 302 T 540 302 T 660 302 T 780 302 T 900 302 T 1020 302 T 1140 302 T 1260 302 T 1380 302 T 1500 302 T 1620 302 T 1740 302 L 1740 322 L -300 322 Z"/>
+  </g>
+  <g class="tide-foam tide-foam--a">
+    <path fill="var(--scene-foam-hi)" d="M -300 248 Q -270 236 -240 248 T -180 248 T -120 248 T -60 248 T 0 248 T 60 248 T 120 248 T 180 248 T 240 248 T 300 248 T 360 248 T 420 248 T 480 248 T 540 248 T 600 248 T 660 248 T 720 248 T 780 248 T 840 248 T 900 248 T 960 248 T 1020 248 T 1080 248 T 1140 248 T 1200 248 T 1260 248 T 1320 248 T 1380 248 T 1440 248 T 1500 248 T 1560 248 T 1620 248 T 1680 248 T 1740 248 L 1740 288 L -300 288 Z"/>
+    <!-- Bubbles breaking along the leading edge -->
+    <g fill="var(--scene-foam-hi)" opacity="0.9"><circle cx="60" cy="237" r="3"/><circle cx="210" cy="242" r="5"/><circle cx="360" cy="237" r="3"/><circle cx="520" cy="242" r="5"/><circle cx="680" cy="237" r="3"/><circle cx="830" cy="242" r="5"/><circle cx="980" cy="237" r="3"/><circle cx="1130" cy="242" r="5"/><circle cx="1280" cy="237" r="3"/><circle cx="1400" cy="242" r="5"/></g>
+  </g>
+
+</svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -40 100 80" role="img" aria-label="Little crab">
+  <title>Crab</title>
+  <!-- Legs (behind body) -->
+  <g stroke="#3D2817" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M -20 5 L -32 20"/>
+    <path d="M -10 8 L -14 26"/>
+    <path d="M  10 8 L  14 26"/>
+    <path d="M  20 5 L  32 20"/>
+    <path d="M -22 -2 L -35 -6"/>
+    <path d="M  22 -2 L  35 -6"/>
+  </g>
+  <!-- Legs — red highlights -->
+  <g stroke="#EA4335" stroke-width="1.6" fill="none" stroke-linecap="round">
+    <path d="M -20 5 L -32 20"/>
+    <path d="M -10 8 L -14 26"/>
+    <path d="M  10 8 L  14 26"/>
+    <path d="M  20 5 L  32 20"/>
+  </g>
+
+  <!-- Body -->
+  <ellipse cx="0" cy="0" rx="24" ry="16" fill="#EA4335" stroke="#3D2817" stroke-width="3"/>
+  <!-- Body cel-shade highlight -->
+  <ellipse cx="-6" cy="-6" rx="14" ry="8" fill="#F58179" opacity="0.85"/>
+
+  <!-- Eyes on stalks -->
+  <line x1="-8"  y1="-14" x2="-8"  y2="-22" stroke="#3D2817" stroke-width="2.5"/>
+  <line x1=" 8"  y1="-14" x2=" 8"  y2="-22" stroke="#3D2817" stroke-width="2.5"/>
+  <circle cx="-8"  cy="-24" r="4" fill="#FDF6E4" stroke="#3D2817" stroke-width="2"/>
+  <circle cx=" 8"  cy="-24" r="4" fill="#FDF6E4" stroke="#3D2817" stroke-width="2"/>
+  <circle cx="-8"  cy="-24" r="1.8" fill="#3D2817"/>
+  <circle cx=" 8"  cy="-24" r="1.8" fill="#3D2817"/>
+
+  <!-- Claws (raised) -->
+  <path fill="#EA4335" stroke="#3D2817" stroke-width="2.5" stroke-linejoin="round"
+        d="M -26 0
+           L -38 -8
+           L -34 0
+           L -38 8
+           L -26 5 Z"/>
+  <path fill="#EA4335" stroke="#3D2817" stroke-width="2.5" stroke-linejoin="round"
+        d="M 26 0
+           L 38 -8
+           L 34 0
+           L 38 8
+           L 26 5 Z"/>
+
+  <!-- Little smile -->
+  <path fill="none" stroke="#3D2817" stroke-width="2" stroke-linecap="round"
+        d="M -6 6 Q 0 10 6 6"/>
+</svg>

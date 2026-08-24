@@ -1,0 +1,217 @@
+/* ============================================================
+   about.css — the About screen: what this is, who built it,
+   and the people behind it.
+
+   Same furniture as the rest of the site — .wrap for the shell,
+   surface cards on the warm ground, the four cluster hues on the
+   team avatars — so it reads as part of Campus Compass rather
+   than a bolted-on page.
+   ============================================================ */
+
+.screen--about {
+  position: relative;
+  padding-bottom: var(--space-8);
+}
+.screen--about .wrap {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Heading ---------- */
+.about-head {
+  max-width: 720px;
+  padding-block: var(--space-7) var(--space-6);
+}
+.about-head__kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-3);
+}
+.about-head__title {
+  font-family: var(--font-serif);
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1.2px;
+  line-height: 1.08;
+  color: var(--ink);
+}
+.about-head__lede {
+  margin-top: var(--space-4);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+/* ---------- Two cards: what it does, who made it ---------- */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.about-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+.about-card__title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+}
+.about-card__body {
+  margin-top: var(--space-4);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.about-card__body strong { color: var(--ink); }
+
+.about-list {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  list-style: none;
+}
+.about-list li {
+  position: relative;
+  padding-left: var(--space-5);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.about-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sun);
+}
+.about-list strong { color: var(--ink); }
+.about-list em {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  color: var(--ocean-deep);
+}
+
+/* ---------- The GDG card ---------- */
+.about-gdg {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.about-gdg__mark {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  max-width: none;
+}
+.about-gdg__org {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.about-card--gdg .btn { margin-top: var(--space-5); }
+
+/* ---------- The team ---------- */
+.about-team {
+  margin-top: var(--space-7);
+}
+.about-team__title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: var(--ink);
+  margin-bottom: var(--space-5);
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+}
+
+/* Placeholder avatar: initials until a photo is dropped in.
+   Sized and shaped so swapping in an <img> changes nothing. */
+.person__avatar {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  border: 1px solid var(--border);
+}
+.person__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-width: none;
+  display: block;
+}
+
+.person__text { min-width: 0; }
+.person__role {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.person__name {
+  margin-top: 3px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.person__title {
+  margin-top: 3px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.35;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .about-grid { grid-template-columns: 1fr; }
+  .about-head__title { font-size: 32px; }
+  .about-head { padding-block: var(--space-6) var(--space-5); }
+}
+
+@media (max-width: 480px) {
+  .about-head__title { font-size: 27px; }
+  .about-head__lede { font-size: 15.5px; }
+  .about-card { padding: var(--space-5); }
+  .team-grid { grid-template-columns: 1fr; }
+  .person { padding: var(--space-4); gap: var(--space-3); }
+  .person__avatar { width: 48px; height: 48px; font-size: 17px; }
+}

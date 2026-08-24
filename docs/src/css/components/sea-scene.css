@@ -1,0 +1,62 @@
+/* ============================================================
+   sea-scene.css — the TIDE LINE that closes every page.
+
+   Camera note: the hero looks OUT at the sea from eye level.
+   This scene looks straight DOWN at the water's edge. The two
+   share a world but not a viewpoint, which is what stops the
+   page from reading as "beach, then the same beach again".
+
+   Palm-frond shadows across the dry sand are the cue that sells
+   the overhead angle — shadows only fall like that from above.
+
+   Layout (viewBox 1440 x 420, top → bottom):
+     0   ─ dry sand, blends with the footer above it
+           · frond shadows · shells · starfish · crab
+     190 ─ damp sand
+     210 ─ shallow water (pale at the shore → deeper downward)
+           · caustics
+     ~200-330 ─ three foam bands drifting over the boundary
+   ============================================================ */
+
+.sea-scene {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  background: var(--surface-2);
+}
+.sea-scene svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---------- Foam bands drift along the tide line ----------
+   Scallop period is 240 user units, so a 240-unit shift lands
+   each band exactly on itself — the loop seam is invisible.
+   Paths run from -300 to 1740 so the translation never drags
+   an empty edge into frame. */
+.tide-foam { will-change: transform; }
+.tide-foam--a { animation: tideDrift  17s linear infinite; }
+.tide-foam--b { animation: tideDriftR 12s linear infinite; }
+.tide-foam--c { animation: tideDrift   8s linear infinite; }
+
+/* ---------- Caustics: slow light bloom on the shallows ---------- */
+.tide-caustics {
+  animation: causticPulse 7s ease-in-out infinite;
+  will-change: opacity;
+}
+.tide-caustics--b { animation-duration: 9s; animation-delay: -3s; }
+
+/* ---------- Ripple lines left in the damp sand ----------
+   Static on purpose: they are a record of where the water HAS
+   been, so they must not move with the live foam. */
+
+/* ---------- Sparkles on the wet sand ---------- */
+/* ---------- Night: the tide goes cool and quiet ---------- */
+:root[data-theme="dark"] .tide-items { filter: brightness(0.6) saturate(0.78); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tide-foam,
+  .tide-caustics,
+}

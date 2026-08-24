@@ -1,0 +1,74 @@
+/* ============================================================
+   featured.css — "Featured Organizations" strip on landing.
+   Reuses .card / .card-grid from card.css + layout.css so
+   featured cards match browse cards exactly; this file only
+   adds the section chrome and the badge ribbon.
+   ============================================================ */
+
+.landing-featured {
+  position: relative;
+  padding-block: var(--space-7) var(--space-8);
+  background: var(--surface-2);
+}
+
+.landing-featured__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.landing-featured__kicker {
+  margin: 0 0 var(--space-1);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+
+.landing-featured__title {
+  margin: 0;
+  font-size: clamp(1.3rem, 1.05rem + 1vw, 1.7rem);
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.landing-featured__link {
+  flex: 0 0 auto;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.landing-featured__link:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+/* --- Featured card = .card + a corner badge --- */
+.featured-card {
+  min-height: 260px;
+}
+
+.featured-card__badge {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--card-accent-ink, var(--ink));
+  background: var(--card-accent-soft, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--card-accent, var(--border)) 35%, transparent);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .landing-featured__head { align-items: flex-start; }
+}

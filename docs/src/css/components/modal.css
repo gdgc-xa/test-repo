@@ -1,0 +1,68 @@
+/* ============================================================
+   modal.css — the booth-as-modal shell.
+   Backdrop + centered scrolling panel + close affordance.
+   The BOOTH SCREEN content is styled by screens/booth.css.
+   ============================================================ */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  overflow-y: auto;
+}
+.modal[hidden] { display: none; }
+
+.modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: backdropIn 240ms ease-out both;
+  cursor: pointer;
+}
+
+.modal__panel {
+  position: relative;
+  max-width: 1000px;
+  width: 100%;
+  max-height: calc(100vh - var(--space-6));
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  animation: modalIn 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.modal__close {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+  display: grid; place-items: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 160ms, transform 160ms;
+}
+.modal__close:hover { background: var(--surface); transform: rotate(90deg); }
+.modal__close svg { width: 18px; height: 18px; }
+
+/* Prevent body scroll while modal is open */
+body.modal-open { overflow: hidden; }
+
+@media (max-width: 720px) {
+  .modal { padding: 0; }
+  .modal__panel {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    border: 0;
+  }
+}

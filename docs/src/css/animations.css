@@ -1,0 +1,114 @@
+/* ============================================================
+   animations.css — every @keyframes block for the site.
+   Components bind to these by name in their own CSS.
+   Timings are intentionally slow — ambient motion should read
+   as peripheral, never demand attention.
+   ============================================================ */
+
+/* --- Sparkle twinkle on wave crests --- */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.8); }
+  50%      { opacity: 1;    transform: scale(1.2); }
+}
+
+/* --- Reveal on scroll: fade + rise --- */
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Modal enter --- */
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* --- Compass rose gentle rotation toward current section
+       Applied via a CSS variable set from JS: --compass-rot. --- */
+@keyframes compassIdle {
+  0%, 100% { transform: rotate(calc(var(--compass-rot, 0deg) - 1.5deg)); }
+  50%      { transform: rotate(calc(var(--compass-rot, 0deg) + 1.5deg)); }
+}
+
+/* --- Palm tree tropical-breeze sway. Rotation origin sits
+       at the base of the trunk (right side of sea scene). --- */
+@keyframes palmSway {
+  0%, 100% { transform: rotate(-1.5deg); }
+  50%      { transform: rotate(1.5deg); }
+}
+
+/* ============================================================
+   LANDING HERO SCENE — cel-animation waves + clouds + sand pour
+   ============================================================ */
+
+/* --- Wave parallax: each layer is width:200% and slides
+       0 → -50% linearly, then wraps. Wave path period must
+       divide 50% of the SVG viewBox width evenly so the loop
+       is seamless. --- */
+@keyframes waveScrollLtr {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes waveScrollRtl {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+/* --- Ocean "breathing" — the whole water group rises + settles.
+       Applied at the ocean group level, composes on top of the
+       per-layer waveScroll. --- */
+@keyframes oceanBreathe {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+/* --- Foam glint on a wave crest: swells up, lifts, and fades
+       out where it sits. Each highlight owns its own cycle via a
+       stagger, so nothing ever changes position — the previous
+       version swapped three fixed position sets on steps(1) and
+       read as one bubble teleporting ~200 units sideways.
+       Translate is in viewBox units, not px, since these live in
+       an SVG with preserveAspectRatio="none". --- */
+@keyframes foamGlint {
+  0%,  100% { opacity: 0;    transform: translateY(1px)    scale(0.78); }
+  18%       { opacity: 0.85; transform: translateY(0)       scale(1); }
+  55%       { opacity: 0.7;  transform: translateY(-1.5px)  scale(1.05); }
+  82%       { opacity: 0;    transform: translateY(-3.5px)  scale(0.94); }
+}
+
+/* --- Tide-line foam drift (footer top-down scene).
+       Foam scallop periods divide 240 evenly, so a 240-unit
+       shift lands the band exactly on itself. --- */
+@keyframes tideDrift  { from { transform: translateX(0); }        to { transform: translateX(-240px); } }
+@keyframes tideDriftR { from { transform: translateX(-240px); }   to { transform: translateX(0); } }
+
+/* --- Underwater caustics: slow bloom, not a blink --- */
+@keyframes causticPulse {
+  0%, 100% { opacity: 0.30; }
+  50%      { opacity: 0.62; }
+}
+
+/* --- Venue map: the halo around the lit tent breathes so the eye
+       finds it without the square itself moving. --- */
+@keyframes venuePulse {
+  0%, 100% { transform: scale(1);    opacity: 0.50; }
+  50%      { transform: scale(1.09); opacity: 0.18; }
+}
+
+/* --- Reveal helper class (used by reveal-observer.js) --- */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity   700ms ease-out var(--reveal-delay, 0ms),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}

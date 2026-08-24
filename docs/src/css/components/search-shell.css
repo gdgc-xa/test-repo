@@ -1,0 +1,69 @@
+/* ============================================================
+   search-shell.css — search input + submit button in a rounded pill.
+   Two variants:
+     .search-shell           — hero size (landing)
+     .search-shell--compact  — browse header
+   ============================================================ */
+
+.search-shell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 8px 8px 8px 22px;
+  box-shadow: var(--shadow-md);
+  max-width: 660px;
+  width: 100%;
+  transition: box-shadow 200ms, border-color 200ms;
+}
+.search-shell:focus-within {
+  border-color: var(--ocean);
+  box-shadow: var(--focus-ring), var(--shadow-md);
+}
+
+.search-shell__icon {
+  width: 20px; height: 20px;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.search-shell__input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 var(--space-2);
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 15px;
+}
+.search-shell__input::placeholder { color: var(--muted); }
+.search-shell__input:focus { outline: none; }
+
+.search-shell__submit {
+  flex: 0 0 auto;
+  height: 44px;
+  padding: 0 22px;
+  min-height: 0;
+}
+
+/* --- Compact variant (browse) --- */
+.search-shell--compact {
+  padding: 6px 6px 6px 22px;
+  box-shadow: none;
+  max-width: none;
+}
+.search-shell--compact .search-shell__input,
+.search-shell--compact .search-shell__submit {
+  height: 40px;
+}
+.search-shell--compact .search-shell__submit {
+  padding: 0 20px;
+}
+
+@media (max-width: 480px) {
+  .search-shell { padding-left: 16px; }
+  .search-shell__submit { padding: 0 14px; }
+}

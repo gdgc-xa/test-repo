@@ -1,0 +1,64 @@
+/* ============================================================
+   ocean-waves.css — cel-animation-style animated surf.
+
+   Lives inside .hero-scene__surf (positioned by hero-scene.css
+   to straddle the shore line). Four stacked layers:
+
+     .wave--back        22s →   lightest, smallest amplitude, 55%
+     .wave--mid         14s →   medium
+     .wave--front        9s →   darkest, carries the foam blink
+     .wave--foam-edge   11s ←   cream strip, OPPOSITE direction
+
+   Seamless tiling: every layer is width:200% and slides
+   translateX(0) → translateX(-50%). Wave path periods divide
+   the 2400-unit viewBox evenly (400 / 300 / 200 / 240), so the
+   shape at x and x+1200 is identical and the seam is invisible.
+
+   Foam glints sit on the front crests (x = 50 + 200k, which is
+   that layer's crest period). Each one swells, lifts and fades
+   out in place on its own staggered cycle — none of them ever
+   moves horizontally.
+
+   Stagger must repeat every 1200 units: the layer is 200% wide
+   and slides translateX(0 → -50%), so a glint at x and the one
+   at x+1200 are the same glint either side of the loop seam and
+   have to share both their size and their delay, or the seam
+   becomes visible.
+   ============================================================ */
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  will-change: transform;
+  pointer-events: none;
+}
+.wave svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wave--back      { animation: waveScrollLtr 22s linear infinite; opacity: 0.55; }
+.wave--mid       { animation: waveScrollLtr 14s linear infinite; opacity: 0.80; }
+.wave--front     { animation: waveScrollLtr  9s linear infinite; }
+.wave--foam-edge { animation: waveScrollRtl 11s linear infinite; }
+
+/* --- Foam glints on the front crests --- */
+.foam-glint {
+  /* fill-box so scale() pivots on the ellipse itself; the default
+     SVG origin is the user-space corner and would slide it. */
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  opacity: 0;
+  animation: foamGlint 3.4s ease-in-out infinite;
+  animation-delay: var(--glint-delay, 0s);
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave { animation: none !important; }
+  .foam-glint { animation: none !important; opacity: 0.7; }
+}

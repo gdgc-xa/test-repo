@@ -1,0 +1,160 @@
+/* ============================================================
+   booth.css — booth composition (rendered INSIDE the modal panel).
+   Two columns (booth-grid): the org's own card on the left, the
+   Facebook preview and contact panel on the right. The logo sits in
+   the card's head rather than in a separate visual panel.
+   ============================================================ */
+
+.booth {
+  padding: var(--space-6) var(--space-6) var(--space-6);
+}
+
+.booth__crumb {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: var(--space-4);
+}
+.booth__crumb-sep { margin: 0 8px; color: var(--border-strong); }
+
+/* ---------- Booth hero ---------- */
+.booth-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.booth-hero__body {
+  position: relative;
+  padding: var(--space-6) var(--space-6) var(--space-6) var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.booth-hero__body::before {
+  content: "";
+  position: absolute;
+  left: var(--bar-x, var(--space-5));
+  top: var(--space-6);
+  bottom: var(--space-6);
+  width: 4px;
+  border-radius: 2px;
+  background: var(--booth-accent, var(--muted));
+}
+
+.booth-hero__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-5);
+  margin-top: var(--space-3);
+}
+.booth-hero__headtext {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;                 /* let long org names wrap, not overflow */
+}
+
+.booth-hero__tags {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.booth-hero__title {
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -1.2px;
+  line-height: 1.05;
+}
+
+.booth-hero__tagline {
+  font-size: 16px;
+  color: var(--ink-2);
+  max-width: 480px;
+  line-height: 1.5;
+}
+
+.booth-hero__meet {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 10px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--ink-2);
+  align-self: flex-start;
+}
+.booth-hero__meet svg { width: 18px; height: 18px; color: var(--sun-deep); flex: 0 0 auto; }
+
+.booth-hero__ctas {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* ---------- Emblem: the org's logo, in the card head ---------- */
+.booth-hero__emblem {
+  flex: 0 0 auto;
+  width: 104px; height: 104px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+/* ---------- Left column: the org card, then the fair map ---------- */
+.booth-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+/* ---------- Aside stack: Facebook preview + contact ---------- */
+.booth-aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .booth { padding: var(--space-4) var(--space-4) var(--space-6); }
+  .booth-hero__title { font-size: 30px; }
+  /* The accent bar sits at --bar-x; the text must clear it, so the
+     left padding is always bar + bar width + breathing room. At the
+     old values both were --space-5 and the bar drew straight over the
+     first few pixels of every line. */
+  .booth-hero__body {
+    --bar-x: var(--space-4);
+    padding: var(--space-5) var(--space-4) var(--space-5) var(--space-6);
+  }
+  .booth-hero__emblem { width: 88px; height: 88px; font-size: 26px; }
+}
+
+@media (max-width: 480px) {
+  /* Not enough width for name and logo side by side. */
+  .booth-hero__head { flex-direction: column-reverse; align-items: flex-start; gap: var(--space-4); }
+  .booth-hero__emblem { width: 72px; height: 72px; font-size: 22px; }
+}
+
+
+/* --- Roster logo filling the booth emblem --- */
+.booth-hero__logo {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}

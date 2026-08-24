@@ -1,0 +1,207 @@
+/* ============================================================
+   landing.css — bright cel-shaded "Sands of Time" hero.
+
+   Band offsets live HERE (not in hero-scene.css) so both the
+   scene backdrop and the content stack can read them and stay
+   in sync. --content-top is tuned so the hourglass base lands
+   exactly on --shore: the hourglass stands on the sand.
+
+     --content-top
+       + kicker + gap + tagline + gap        (≈100px)
+       + hourglass height                    (≈273px)
+       = --shore
+   ============================================================ */
+
+.screen--landing {
+  --scene-h:     1060px;  /* must exceed the content stack so the
+                             chips still sit on painted sand */
+  --horizon:     250px;
+  --shore:       520px;
+  --surf-h:      110px;
+  --content-top: 194px;
+
+  position: relative;
+  isolation: isolate;
+  /* Solid sand: the scene's own sand ends in this same color, so
+     the scene/screen boundary is invisible. The fade to the site
+     ground color happens inside .landing-theme instead. */
+  background: var(--scene-sand-bot);
+  overflow: hidden;
+}
+
+/* ---------- Content stack overlaid on the scene ---------- */
+.hero-content {
+  position: relative;
+  z-index: 7;
+  min-height: var(--scene-h);
+}
+.hero-content > .wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto;
+  padding-top: var(--content-top);
+}
+
+/* --- Script tagline "Sands of Time" (over sky, above the lockup) --- */
+.hero-tagline {
+  font-family: var(--font-script);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 44px;
+  line-height: 1;
+  color: var(--scene-tagline-fill);
+  paint-order: stroke fill;
+  -webkit-text-stroke: 5px var(--scene-tagline-stroke);
+  text-shadow: 0 4px 10px rgba(30, 60, 80, 0.28);
+  margin: 0 0 var(--space-3);
+  transform: rotate(-2deg);
+}
+
+/* --- Theme anchor line — the "Sands of Time" idea in one breath.
+       Sits between the lockup and the practical sub copy. --- */
+.hero-anchor {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--scene-ink-warm);
+  max-width: 620px;
+  line-height: 1.45;
+  margin-top: var(--space-3);
+  text-shadow: 0 1px 0 var(--scene-ink-halo);
+}
+
+/* --- Sub copy — sits on sand below the puzzles. No pill needed;
+       dark ink on warm sand has plenty of contrast. --- */
+.hero-sub {
+  font-size: 16.5px;
+  font-weight: 500;
+  color: var(--scene-ink);
+  max-width: 600px;
+  line-height: 1.6;
+  margin-top: var(--space-4);
+  text-shadow: 0 1px 0 var(--scene-ink-halo);
+}
+
+/* --- Hero search — white pill, teal action --- */
+.hero-search {
+  background: var(--scene-chip-bg);
+  border: 0;
+  box-shadow: 0 10px 26px rgba(90, 60, 20, 0.22);
+  margin-top: var(--space-4);
+  max-width: 600px;
+}
+.hero-search .search-shell__input { color: var(--scene-word-stroke); }
+.hero-search .search-shell__input::placeholder { color: #9A8674; }
+.hero-search__submit {
+  background: var(--scene-search-btn);
+  color: #FFFFFF;
+  border-radius: var(--radius-pill);
+  padding: 0 24px;
+  font-weight: 700;
+}
+.hero-search__submit:hover { background: #174F4F; }
+
+/* --- Cluster label + chips on the sand --- */
+.hero-cluster-label {
+  margin-top: var(--space-6);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  color: var(--scene-ink-muted);
+  text-transform: uppercase;
+}
+.hero-content .tag {
+  background: var(--scene-chip-bg);
+  border: 0;
+  color: var(--scene-chip-ink);
+  box-shadow: 0 4px 12px rgba(90, 60, 20, 0.20);
+  font-weight: 600;
+}
+.hero-content .tag:hover {
+  background: var(--scene-chip-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(90, 60, 20, 0.28);
+}
+
+/* --- Theme block on the continued sand.
+       This section owns the fade from beach sand back to the
+       site's ground color before the footer. --- */
+.landing-theme {
+  position: relative;
+  z-index: 7;
+  padding-block: var(--space-7) var(--space-8);
+  background: linear-gradient(180deg,
+    var(--scene-sand-bot) 0%,
+    #D9A768 45%,
+    var(--surface-2) 100%);
+}
+.landing-theme .theme-block {
+  background: var(--scene-card-cream);
+  border: 0;
+  box-shadow: 0 14px 36px rgba(90, 60, 20, 0.22);
+}
+
+/* ============================================================
+   NIGHT BEACH — landing-specific dark adjustments.
+   The scene tokens do most of the work; these are the pieces
+   that carry hardcoded warm values in the light design.
+   ============================================================ */
+:root[data-theme="dark"] .landing-theme {
+  background: linear-gradient(180deg,
+    var(--scene-sand-bot) 0%,
+    #3E3123 45%,
+    var(--ground-2) 100%);
+}
+:root[data-theme="dark"] .landing-theme .theme-block {
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+}
+:root[data-theme="dark"] .hero-search {
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+}
+:root[data-theme="dark"] .hero-search .search-shell__input::placeholder {
+  color: #8C9BAA;
+}
+:root[data-theme="dark"] .hero-search .search-shell__input {
+  color: var(--scene-chip-ink);
+}
+:root[data-theme="dark"] .hero-content .tag {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+:root[data-theme="dark"] .hero-content .tag:hover {
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
+}
+
+/* ============================================================
+   Responsive — band offsets and content-top shrink together
+   so the hourglass keeps landing on the shore line.
+   ============================================================ */
+@media (max-width: 1100px) {
+  .screen--landing {
+    --scene-h: 980px; --horizon: 225px; --shore: 470px; --content-top: 182px;
+  }
+  .hero-anchor { font-size: 18px; }
+}
+@media (max-width: 820px) {
+  .screen--landing {
+    --scene-h: 980px; --horizon: 195px; --shore: 405px;
+    --surf-h: 86px;  --content-top: 172px;
+  }
+  .hero-tagline { font-size: 30px; -webkit-text-stroke-width: 4px; }
+  .hero-anchor { font-size: 16px; }
+  .hero-sub { font-size: 15px; }
+}
+@media (max-width: 480px) {
+  .screen--landing {
+    --scene-h: 1000px; --horizon: 160px; --shore: 340px;
+    --surf-h: 70px;   --content-top: 148px;
+  }
+  .hero-tagline { font-size: 24px; -webkit-text-stroke-width: 3px; }
+  .hero-anchor { font-size: 15px; margin-top: var(--space-2); }
+  .hero-sub { font-size: 14px; margin-top: var(--space-3); }
+  .hero-cluster-label { margin-top: var(--space-5); }
+}

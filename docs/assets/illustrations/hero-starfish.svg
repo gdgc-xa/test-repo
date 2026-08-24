@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100" role="img" aria-label="Starfish">
+  <title>Starfish</title>
+  <path fill="#E68A2E" stroke="#3D2817" stroke-width="3" stroke-linejoin="round"
+        d="M 0 -38
+           L 10 -12
+           L 40 -8
+           L 18 8
+           L 26 38
+           L 0 22
+           L -26 38
+           L -18 8
+           L -40 -8
+           L -10 -12 Z"/>
+  <!-- Cel-shade highlight facet (upper-left) -->
+  <path fill="#F5B876" opacity="0.85"
+        d="M 0 -32
+           L 6 -14
+           L 22 -8
+           L -6 -6
+           L -22 -8
+           L -6 -14 Z"/>
+  <!-- Little dots (starfish texture) -->
+  <g fill="#B96A1A">
+    <circle cx="0"  cy="0"  r="2.5"/>
+    <circle cx="8"  cy="10" r="1.5"/>
+    <circle cx="-8" cy="10" r="1.5"/>
+    <circle cx="0"  cy="18" r="1.4"/>
+  </g>
+</svg>

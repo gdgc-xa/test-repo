@@ -1,0 +1,360 @@
+/* ============================================================
+   tokens.css — the ONLY file that defines color values.
+   Everything else references var(--…).
+   Two themes:
+     :root                 → Light (Sands of Time by day)
+     :root[data-theme=dark]→ Night at the beach
+   ============================================================ */
+
+:root {
+  /* ---------- Ground / Neutrals — warm sand ---------- */
+  --ground:        #F5EBD3;
+  --ground-2:      #EFE0BF;
+  --surface:       #FDF6E4;   /* card / panel background */
+  --surface-2:     #EAD9B1;   /* muted surface */
+  --ink:           #2B1E12;   /* primary text */
+  --ink-2:         #5B4530;   /* secondary text */
+  --muted:         #8B735B;   /* tertiary text / captions */
+  --border:        #E1CFA6;
+  --border-strong: #C8B27F;
+
+  /* ---------- Primary accents ---------- */
+  --ocean:         #2C7C8E;
+  --ocean-deep:    #1B5A69;
+  --ocean-soft:    #D5EBEE;
+  --sun:           #E68A2E;
+  --sun-deep:      #B96A1A;
+  --sun-soft:      #FBE4C8;
+
+  /* ---------- Category accents ---------- */
+  --blue:          #4285F4;   --blue-ink:   #1A56CB;   --blue-soft:   #E3ECFD;
+  --red:           #EA4335;   --red-ink:    #B21E10;   --red-soft:    #FCE0DE;
+  --yellow:        #EFB100;   --yellow-ink: #7E5B00;   --yellow-soft: #FCEEC1;
+  --green:         #34A853;   --green-ink:  #1B7A38;   --green-soft:  #DAEEDF;
+
+  /* ---------- Compass ---------- */
+  --compass-face:  #B8A576;
+  --compass-tick:  #C8B27F;
+
+  /* ---------- Sea scene (five ocean layers, foam, wet sand) ---------- */
+  --sea-foam:      #FFFFFF;
+  --sea-foam-soft: #E8F5F8;
+  --sea-1:         #7CC4D6;
+  --sea-2:         #3E9FB8;
+  --sea-3:         #1F6E88;
+  --sea-4:         #0F4E68;
+  --sea-5:         #082F41;
+  --sand-wet:      #D9B87E;
+  --sea-sky:       transparent;   /* night sky overlay */
+
+  /* ---------- Sailboat / bird / creature accents ---------- */
+  --boat-sail:     #FDF6E4;
+  --boat-sail-red: #EA4335;
+  --boat-hull:     #B96A1A;
+  --boat-flag:     #EFB100;
+  --bird-line:     #2B1E12;
+
+  /* ---------- Hourglass ---------- */
+  --glass-wood:    #8B5A2B;
+  --glass-wood-dk: #5B3F1F;
+  --glass-wood-lt: #A0703E;
+  --glass-body:    #FDF6E4;
+  --glass-shine:   #FFFFFF;
+  --glass-sand:    #E68A2E;
+  --glass-grain:   #F4B400;
+
+  /* ---------- Elevation shadow ---------- */
+  --shadow-sm: 0 2px 8px rgba(80,50,20,0.08);
+  --shadow-md: 0 6px 18px rgba(80,50,20,0.09);
+  --shadow-lg: 0 14px 40px rgba(80,50,20,0.14);
+  --shadow-modal: 0 30px 80px rgba(30,20,10,0.35);
+
+  /* ---------- Radii ---------- */
+  --radius-sm:  8px;
+  --radius:     14px;
+  --radius-lg:  22px;
+  --radius-xl:  30px;
+  --radius-pill: 999px;
+
+  /* ---------- Spacing rhythm ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* ---------- Layout ---------- */
+  --nav-h:       68px;
+  --nav-h-mob:   60px;
+  --content-max: 1200px;
+  --content-max-mob: 380px;
+
+  /* ---------- Focus ring ---------- */
+  --focus-ring: 0 0 0 3px rgba(44,124,142,0.45);
+
+  /* ---------- Typography stacks (per DESIGN.md — system-font strategy) ---------- */
+  --font-serif:  "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
+  --font-script: "Brush Script MT", "Segoe Script", "Snell Roundhand", cursive;
+  --font-body:   "Segoe UI Variable Display", "Segoe UI", -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:   Consolas, "SF Mono", Menlo, monospace;
+
+  /* ============================================================
+     LANDING HERO SCENE — bright cel-shaded palette.
+     Scoped to .screen--landing .hero-scene so the rest of the
+     site keeps its Sands-of-Time neutrals + night-beach dark.
+     ============================================================ */
+  --scene-sky-top:      #A8DDF0;
+  --scene-sky-mid:      #BFE6F5;
+  --scene-sky-bot:      #D4EFF7;
+  --scene-cloud:        #FFFFFF;
+  --scene-hill:         #4A9088;    /* used at 0.55 opacity */
+  --scene-sea-deep:     #2E9BC4;    /* at the horizon (far) */
+  /* --- Venue map: the printed org-fair map's own colour key.
+         These are the colours students see on the paper map, so they
+         are deliberately NOT the four cluster hues. --- */
+  --venue-field:        #E7F5E3;   /* the quad */
+  --venue-field-line:   #9CC49A;
+  --venue-building:     #A89078;   /* Chapel / SBM / Eng / Faber */
+  --venue-building-ink: #FFFFFF;
+  --venue-tent:         #FFFFFF;   /* the three marquee circles */
+  --venue-stage:        #16161A;
+
+  --venue-pin-ink:      #FFFFFF;  /* tent number on the lit square */
+  --venue-pin-halo:     rgba(0,0,0,0.55);
+  --vz-tech:            #16161A;
+  --vz-csg-aeco:        #4B2FD6;
+  --vz-media:           #F02C8C;
+  --vz-engineering:     #8B1A1A;
+  --vz-cas:             #E62020;
+  --vz-aggies:          #63C463;
+  --vz-sbm:             #F5C43C;
+  --vz-nursing:         #AECBF0;
+  --vz-compstud:        #7C8894;
+  --vz-soe:             #12468C;
+  --vz-sports:          #B45CE8;
+  --vz-service:         #D2820E;
+  --vz-faith:           #46D6BE;
+  --vz-socio:           #F8A6A6;
+  --vz-environment:     #1E6B25;
+  --vz-sci-eng-tech:    #8C3E6B;
+
+  --scene-sea-mid:      #3FAEBE;
+  --scene-sea-shallow:  #B8ECE8;    /* at the shore (near) */
+  --scene-water-1:      #7FD8D0;    /* back wave (lightest) */
+  --scene-water-2:      #5EC5C1;    /* middle wave */
+  --scene-water-3:      #4FB8B4;    /* front wave (darkest) */
+  --scene-water-shim:   #E8FBFA;    /* thin reflection strokes */
+  --scene-foam:         #F5EAD0;    /* foam edge cream */
+  --scene-foam-hi:      #FFFFFF;    /* foam blink highlight */
+  --scene-sand-wet:     #E8C48C;    /* damp sand just past the surf */
+  --scene-sand-top:     #F0D19A;
+  --scene-sand-bot:     #E0B070;
+  --scene-sand-dark:    #B8863E;    /* buried edge / footprints */
+  --scene-moon:         transparent; /* no moon by day */
+  --scene-moon-glow:    transparent;
+  --scene-moon-crater:  transparent;
+  --scene-star-dot:     transparent;
+
+  /* Wood + glass for the hero hourglass */
+  --scene-wood:         #8B6B4A;
+  --scene-wood-dk:      #3D2817;
+  --scene-wood-lt:      #A88564;
+  --scene-glass:        #E8F5F5;
+  --scene-glass-stroke: #3D2817;
+  --scene-hg-sand-lt:   #E5B87A;
+  --scene-hg-sand-dk:   #B8863E;
+
+  /* Wordmark colors */
+  --scene-word-orange:  #E8823A;
+  --scene-word-cream:   #FFF8E7;
+  --scene-word-stroke:  #3D2817;
+  --scene-tagline-fill:   #FFF8E7;
+  --scene-tagline-stroke: #E8823A;
+
+  /* Body copy sitting directly on the scene */
+  --scene-ink:       #4A3520;
+  --scene-ink-warm:  #5A3F1E;
+  --scene-ink-muted: #6B5232;
+  --scene-ink-halo:  rgba(255, 248, 231, 0.75);
+
+  /* Palm fronds */
+  --scene-frond:        #5FA850;
+  --scene-frond-hi:     #7BC26C;
+  --scene-frond-stem:   #2E5028;
+
+  /* Chip + search + card on bright background */
+  --scene-chip-bg:      #FFFFFF;
+  --scene-chip-ink:     #3D2817;
+  --scene-search-btn:   #1F6B6B;
+  --scene-card-cream:   #FFF8E7;
+
+  /* Beach accent colors (cel-shaded, dark-outlined) */
+  --scene-shell-1:      #F5D0BE;
+  --scene-shell-2:      #F4B8A0;
+  --scene-star:         #E68A2E;
+  --scene-star-dk:      #B96A1A;
+  --scene-crab:         #EA4335;
+  --scene-crab-dk:      #B21E10;
+}
+
+/* ============================================================
+   Night at the beach — dark mode
+   Warm palette shifts to deep-sand + moonlit ocean.
+   Sun becomes a lantern-warm accent; category accents brighten
+   slightly to hold contrast against dark surfaces.
+   ============================================================ */
+:root[data-theme="dark"] {
+  --ground:        #1A140D;   /* deep night sand */
+  --ground-2:      #221B12;
+  --surface:       #2A2116;   /* warm card in moonlight */
+  --surface-2:     #3A2E1E;
+  --ink:           #F5EBD3;   /* day's sand is night's text */
+  --ink-2:         #D9C8A6;
+  --muted:         #A48C6A;
+  --border:        #3E3020;
+  --border-strong: #5A4530;
+
+  --ocean:         #4FA7BA;   /* brighter for legibility */
+  --ocean-deep:    #2C7C8E;
+  --ocean-soft:    #1E3A46;
+  --sun:           #F4A050;   /* lantern glow */
+  --sun-deep:      #E68A2E;
+  --sun-soft:      #3A2818;
+
+  --blue:          #6BA0FF;   --blue-ink:   #A9C7FF;   --blue-soft:   #1E2A45;
+  --red:           #FF6B5F;   --red-ink:    #FFB0A9;   --red-soft:    #3A1D1B;
+  --yellow:        #F5C43C;   --yellow-ink: #FBE393;   --yellow-soft: #3A2E10;
+  --green:         #5DC076;   --green-ink:  #A9E4B7;   --green-soft:  #1B3524;
+
+  --compass-face:  #C8B27F;
+  --compass-tick:  #B8A576;
+
+  /* Night ocean — indigo-teal descending to midnight */
+  --sea-foam:      #E8F0FA;
+  --sea-foam-soft: #A8C4E0;
+  --sea-1:         #2A4A6A;
+  --sea-2:         #1E3654;
+  --sea-3:         #142440;
+  --sea-4:         #0A1830;
+  --sea-5:         #050A1A;
+  --sand-wet:      #6B5533;
+  --sea-sky:       #0F1626;
+
+  --boat-sail:     #E8DDBF;
+  --boat-sail-red: #C43A2E;
+  --boat-hull:     #7A4614;
+  --boat-flag:     #F5C43C;
+  --bird-line:     #C8B27F;
+
+  --glass-wood:    #6B4520;
+  --glass-wood-dk: #3A2510;
+  --glass-wood-lt: #7A5528;
+  --glass-body:    #2A2116;
+  --glass-shine:   rgba(255,255,255,0.35);
+  --glass-sand:    #F4A050;      /* amber lantern glow */
+  --glass-grain:   #FBD34E;
+
+  --shadow-sm:    0 2px 8px rgba(0,0,0,0.35);
+  --shadow-md:    0 6px 18px rgba(0,0,0,0.4);
+  --shadow-lg:    0 14px 40px rgba(0,0,0,0.5);
+  --shadow-modal: 0 30px 80px rgba(0,0,0,0.65);
+
+  --focus-ring: 0 0 0 3px rgba(79,167,186,0.55);
+
+  /* ============================================================
+     NIGHT BEACH — the landing scene after dark.
+     Same scene, different hour: the sun sets, a moon comes up,
+     the water goes deep indigo, and the hourglass sand is the
+     warmest thing on the page (it reads as a lantern).
+     ============================================================ */
+  --scene-sky-top:      #0E1F3D;   /* deep zenith */
+  --scene-sky-mid:      #1B3A5C;
+  --scene-sky-bot:      #2E5A78;   /* horizon glow just above the sea */
+  --scene-cloud:        #2C4B68;
+  --scene-hill:         #0A1526;   /* near-black headland silhouettes */
+
+  --scene-sea-deep:     #0A1A2E;   /* horizon, almost black */
+  --scene-sea-mid:      #10293F;
+  --scene-sea-shallow:  #2A5C6B;   /* moonlit shallows at the shore */
+  --scene-water-1:      #2F6E7E;   /* back wave, moonlit */
+  --scene-water-2:      #1E4C60;
+  --scene-water-3:      #14344A;   /* front wave, darkest */
+  --scene-water-shim:   #9FD8E8;
+  --scene-foam:         #B9D2DE;   /* cool foam, not cream */
+  /* --- Venue map at night: the quad reads as a lit field, the
+         zone hues keep their identity but lift for contrast. --- */
+  --venue-field:        #22303A;
+  --venue-field-line:   #3A4E5C;
+  --venue-building:     #4A3F33;
+  --venue-building-ink: #EDE3D4;
+  --venue-tent:         #33424E;
+  --venue-stage:        #0C0C0F;
+
+  --venue-pin-ink:      #FFFFFF;  /* tent number on the lit square */
+  --venue-pin-halo:     rgba(0,0,0,0.55);
+  --vz-tech:            #6E7480;
+  --vz-csg-aeco:        #8A78F0;
+  --vz-media:           #FF6FB0;
+  --vz-engineering:     #D4635F;
+  --vz-cas:             #FF6B5F;
+  --vz-aggies:          #7FD98A;
+  --vz-sbm:             #FBD34E;
+  --vz-nursing:         #B9D6F5;
+  --vz-compstud:        #9BA6B2;
+  --vz-soe:             #5A8FD6;
+  --vz-sports:          #C98BF0;
+  --vz-service:         #E8A63C;
+  --vz-faith:           #6FE3CF;
+  --vz-socio:           #FFB9B9;
+  --vz-environment:     #5FA86A;
+  --vz-sci-eng-tech:    #C07AA0;
+
+  --scene-foam-hi:      #E8F4FA;
+
+  --scene-sand-wet:     #5E4B33;
+  --scene-sand-top:     #6E5A3E;   /* sand under moonlight */
+  --scene-sand-bot:     #55442D;
+  --scene-sand-dark:    #33281A;
+  --scene-moon:         #FFF6DC;
+  --scene-moon-glow:    rgba(255, 246, 220, 0.30);
+  --scene-moon-crater:  #E6D6B4;
+  --scene-star-dot:     #FFFFFF;
+
+  --scene-wood:         #6B4B2C;
+  --scene-wood-dk:      #241708;
+  --scene-wood-lt:      #85623D;
+  --scene-glass:        #1B3040;
+  --scene-glass-stroke: #120C06;
+  --scene-hg-sand-lt:   #FFD79A;   /* glowing */
+  --scene-hg-sand-dk:   #E39A3C;
+
+  --scene-word-orange:  #F5A54F;
+  --scene-word-cream:   #23303F;   /* outline goes dark at night */
+  --scene-word-stroke:  #FFF3DC;   /* ink goes light */
+  --scene-tagline-fill:   #FFEBCB;
+  --scene-tagline-stroke: #A85B1C;
+
+  --scene-ink:       #E3D2B4;
+  --scene-ink-warm:  #F0DFC0;
+  --scene-ink-muted: #C3AF8D;
+  --scene-ink-halo:  rgba(0, 0, 0, 0.45);
+
+  --scene-frond:        #2C5A34;
+  --scene-frond-hi:     #3E7A44;
+  --scene-frond-stem:   #14301A;
+
+  --scene-chip-bg:      #23384C;
+  --scene-chip-ink:     #EEF6FF;
+  --scene-search-btn:   #2E8C8C;
+  --scene-card-cream:   #2A2116;
+
+  --scene-shell-1:      #C7A08C;
+  --scene-shell-2:      #B98D77;
+  --scene-star:         #C9812C;
+  --scene-star-dk:      #8A5615;
+  --scene-crab:         #B5342A;
+  --scene-crab-dk:      #781A12;
+}

@@ -1,0 +1,32 @@
+/* ============================================================
+   filter-note.css — intersection callout on browse.
+   Shown when 2+ chips are active. Names the active chips.
+   ============================================================ */
+
+.filter-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 14px 18px;
+  background: var(--sun-soft);
+  border: 1px solid color-mix(in srgb, var(--sun) 50%, transparent);
+  border-radius: var(--radius);
+  color: var(--ink-2);
+  font-size: 13px;
+  margin: var(--space-4) 0;
+  animation: reveal 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.filter-note strong {
+  color: var(--sun-deep);
+  font-weight: 700;
+  padding: 0 4px;
+}
+
+/* --- Empty-state variant --- */
+.filter-note--empty {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--ink-2);
+}
+.filter-note--empty strong { color: var(--ink); }

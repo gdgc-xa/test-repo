@@ -1,0 +1,65 @@
+/* ============================================================
+   button.css — .btn base + variants.
+   Variants: --primary (ocean), --sun (sun orange), --ghost (border only)
+   Sizes: default, --sm, --lg.
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 10px 20px;
+  min-height: 40px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 160ms, transform 160ms, box-shadow 160ms, color 160ms;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn:hover     { transform: translateY(-1px); }
+.btn:active    { transform: translateY(0); }
+.btn:disabled  { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn__icon { width: 16px; height: 16px; flex: 0 0 auto; }
+
+/* --- Primary (ocean) --- */
+.btn--primary {
+  background: var(--ocean);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn--primary:hover { background: var(--ocean-deep); }
+
+/* --- Sun (warm accent) --- */
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--border-strong);
+}
+.btn--ghost:hover {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+/* --- Size variants --- */
+.btn--sm {
+  padding: 6px 14px;
+  min-height: 30px;
+  font-size: 12px;
+}
+.btn--back {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+  padding: 6px 14px 6px 12px;
+  min-height: 30px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.btn--back:hover { background: var(--surface); }

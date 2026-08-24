@@ -1,0 +1,110 @@
+/* ============================================================
+   base.css — reset, body defaults, typography defaults,
+   focus ring, reduced-motion guard.
+   No colors here that aren't tokens.
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--ground);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Serif for headings, script for taglines — apply via class */
+
+h1, h2, h3, h4 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+p { margin: 0; }
+
+a {
+  color: var(--ocean);
+  text-decoration: none;
+}
+a:hover { color: var(--ocean-deep); }
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+img, svg { display: block; max-width: 100%; }
+
+input, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Global focus ring — visible only on keyboard nav */
+:focus { outline: none; }
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* Utility: visually hidden but accessible to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Screen container — one visible at a time */
+.screen { display: block; }
+.screen[hidden] { display: none; }
+
+/* ============================================================
+   Reduced motion — kill every ambient/reveal animation.
+   Individual components declare their animations bound with
+   `animation-name: <keyframes>`, and reveals set opacity via
+   .reveal / .revealed. Both are neutralized here.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1 !important; transform: none !important; }
+}

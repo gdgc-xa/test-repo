@@ -1,0 +1,481 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 2100" width="1440" height="2100" font-family="Segoe UI, -apple-system, Roboto, sans-serif">
+  <title>Campus Compass — 03 Virtual Booth (Sands of Time)</title>
+  <desc>Xavier University – Ateneo de Cagayan · Virtual booth for Google Developer Group with description, Facebook page mockup, and beach scene</desc>
+
+  <defs>
+    <symbol id="puzzle" viewBox="0 0 100 100">
+      <path d="M15 15 h30 v20 a10 10 0 1 0 0 20 v10 h-40 v-30 a10 10 0 1 1 0 -20 z"/>
+    </symbol>
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F9C58A"/>
+      <stop offset="60%" stop-color="#E68A2E"/>
+      <stop offset="100%" stop-color="#B96A1A"/>
+    </radialGradient>
+    <linearGradient id="visualGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D5EBEE"/>
+      <stop offset="100%" stop-color="#EAD9B1"/>
+    </linearGradient>
+    <linearGradient id="fbCover" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2C7C8E"/>
+      <stop offset="100%" stop-color="#1877F2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ground -->
+  <rect width="1440" height="2100" fill="#F5EBD3"/>
+  <ellipse cx="290" cy="0" rx="600" ry="220" fill="#E68A2E" fill-opacity="0.08"/>
+  <ellipse cx="1440" cy="80" rx="500" ry="220" fill="#2C7C8E" fill-opacity="0.06"/>
+
+  <!-- ============================================================ -->
+  <!-- BANNER + NAV                                                  -->
+  <!-- ============================================================ -->
+  <g id="Banner">
+    <rect width="1440" height="32" fill="#2B1E12"/>
+    <circle cx="580" cy="16" r="3" fill="#E68A2E"/>
+    <text x="596" y="20" fill="#F5EBD3" font-size="11" letter-spacing="1.2">WEBSITE PROTOTYPE · CAMPUS COMPASS · XAVIER UNIVERSITY – ATENEO DE CAGAYAN</text>
+  </g>
+
+  <g id="Nav">
+    <rect y="32" width="1440" height="68" fill="#F5EBD3" fill-opacity="0.85"/>
+    <line x1="0" y1="100" x2="1440" y2="100" stroke="#E1CFA6"/>
+    <g id="Nav-Brand" transform="translate(120, 50)">
+      <g id="Compass-Icon">
+        <circle cx="18" cy="18" r="15" fill="none" stroke="#B8A576" stroke-width="1.4"/>
+        <circle cx="18" cy="18" r="11.5" fill="none" stroke="#B8A576" stroke-width="0.7"/>
+        <polygon points="18,2 20,15 18,16 16,15" fill="#B8A576"/>
+        <polygon points="34,18 21,20 20,18 21,16" fill="#B8A576"/>
+        <polygon points="18,34 20,21 18,20 16,21" fill="#B8A576"/>
+        <polygon points="2,18 15,20 16,18 15,16" fill="#B8A576"/>
+        <polygon points="28,8 20,16 18,18 16,16" fill="#C8B27F" opacity="0.9"/>
+        <polygon points="28,28 20,20 18,18 16,20" fill="#C8B27F" opacity="0.9"/>
+        <polygon points="8,28 16,20 18,18 20,20" fill="#C8B27F" opacity="0.9"/>
+        <polygon points="8,8 16,16 18,18 20,16" fill="#C8B27F" opacity="0.9"/>
+        <circle cx="18" cy="18" r="1.4" fill="#B8A576"/>
+      </g>
+      <text x="52" y="15" font-size="16" font-weight="700" fill="#2B1E12" letter-spacing="-0.3">Campus Compass</text>
+      <text x="52" y="32" font-size="10" font-weight="600" fill="#8B735B" letter-spacing="0.5">XAVIER ATENEO · SANDS OF TIME</text>
+    </g>
+    <g id="Nav-Links" transform="translate(680, 71)">
+      <text x="0" y="4" font-size="14" fill="#5B4530" font-weight="500">Discover</text>
+      <text x="76" y="4" font-size="14" fill="#5B4530" font-weight="500">Browse orgs</text>
+      <text x="180" y="4" font-size="14" fill="#5B4530" font-weight="500">For orgs</text>
+      <text x="258" y="4" font-size="14" fill="#5B4530" font-weight="500">Events</text>
+    </g>
+    <g id="Nav-Actions" transform="translate(1080, 71)">
+      <circle cx="18" cy="0" r="18" fill="#FDF6E4" stroke="#E1CFA6"/>
+      <circle cx="18" cy="0" r="4" fill="none" stroke="#5B4530" stroke-width="1.5"/>
+      <g stroke="#5B4530" stroke-width="1.5" stroke-linecap="round">
+        <line x1="18" y1="-9" x2="18" y2="-7"/>
+        <line x1="18" y1="7" x2="18" y2="9"/>
+        <line x1="9" y1="0" x2="11" y2="0"/>
+        <line x1="25" y1="0" x2="27" y2="0"/>
+      </g>
+      <rect x="50" y="-16" width="86" height="32" rx="16" fill="none" stroke="#C8B27F"/>
+      <text x="93" y="5" text-anchor="middle" font-size="14" fill="#2B1E12" font-weight="600">Sign in</text>
+      <rect x="150" y="-16" width="120" height="32" rx="16" fill="#E68A2E"/>
+      <text x="210" y="5" text-anchor="middle" font-size="14" fill="#FFFFFF" font-weight="600">Add my org</text>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- BREADCRUMB                                                    -->
+  <!-- ============================================================ -->
+  <g id="Booth-Container" transform="translate(220, 130)">
+    <text x="0" y="0" font-size="13" fill="#8B735B">Discover  /  Browse  /  Google Developer Group on Campus</text>
+
+    <!-- ============================================================ -->
+    <!-- BOOTH HERO                                                    -->
+    <!-- ============================================================ -->
+    <g id="Booth-Hero" transform="translate(0, 30)">
+      <rect width="1000" height="420" rx="22" fill="#FDF6E4" stroke="#E1CFA6"/>
+
+      <!-- Left body (60%) -->
+      <g id="Booth-Hero-Body" transform="translate(40, 40)">
+        <!-- Accent rail -->
+        <rect x="-40" y="0" width="4" height="340" rx="2" fill="#4285F4"/>
+
+        <!-- Back button -->
+        <g id="Back-Btn">
+          <rect width="130" height="30" rx="15" fill="#EAD9B1" stroke="#E1CFA6"/>
+          <g transform="translate(14, 12)" stroke="#8B735B" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="3" x2="0" y2="3"/>
+            <polyline points="4,0 0,3 4,6"/>
+          </g>
+          <text x="30" y="20" font-size="13" fill="#5B4530" font-weight="500">Back to browse</text>
+        </g>
+
+        <!-- Category tags — updated to the 10-cluster system -->
+        <g id="Booth-Tags" transform="translate(0, 50)">
+          <rect width="140" height="26" rx="13" fill="#E3ECFD"/>
+          <circle cx="16" cy="13" r="4" fill="#1A56CB"/>
+          <text x="28" y="18" font-size="11" font-weight="700" fill="#1A56CB" letter-spacing="0.5">SCI · ENG · TECH</text>
+          <g transform="translate(148, 0)">
+            <rect width="140" height="26" rx="13" fill="#E3ECFD"/>
+            <circle cx="16" cy="13" r="4" fill="#1A56CB"/>
+            <text x="28" y="18" font-size="11" font-weight="700" fill="#1A56CB" letter-spacing="0.5">PROGRAM-BASED</text>
+          </g>
+        </g>
+
+        <!-- Headline -->
+        <g id="Booth-Title" font-family="Iowan Old Style, Palatino Linotype, Georgia, serif" font-weight="800" letter-spacing="-1.2">
+          <text x="0" y="115" font-size="40" fill="#2B1E12">Google Developer Group</text>
+          <text x="0" y="155" font-size="40" fill="#2B1E12">on Campus</text>
+        </g>
+
+        <!-- Tagline -->
+        <text x="0" y="192" font-size="16" fill="#5B4530">For students who love to build. Workshops, hackathons,</text>
+        <text x="0" y="212" font-size="16" fill="#5B4530">and open-source Fridays.</text>
+
+        <!-- Meeting -->
+        <g id="Meet" transform="translate(0, 232)">
+          <rect width="360" height="46" rx="12" fill="#EAD9B1" stroke="#E1CFA6"/>
+          <g transform="translate(16, 15)" fill="none" stroke="#B96A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="0" y="1" width="16" height="14" rx="2"/>
+            <line x1="12" y1="-2" x2="12" y2="4"/>
+            <line x1="4" y1="-2" x2="4" y2="4"/>
+            <line x1="0" y1="6" x2="16" y2="6"/>
+          </g>
+          <text x="46" y="30" font-size="14" fill="#5B4530">Thursdays · 5:30pm · Tech Hub 204</text>
+        </g>
+
+        <!-- CTAs -->
+        <g id="CTAs" transform="translate(0, 296)">
+          <g id="Btn-Join">
+            <rect width="140" height="44" rx="22" fill="#2C7C8E"/>
+            <text x="20" y="28" font-size="14.5" font-weight="600" fill="#FFFFFF">Join this org</text>
+            <path d="M 108 22 L 122 22 M 118 18 L 122 22 L 118 26" stroke="#FFFFFF" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g id="Btn-Save" transform="translate(150, 0)">
+            <rect width="150" height="44" rx="22" fill="none" stroke="#C8B27F"/>
+            <text x="20" y="28" font-size="14.5" font-weight="600" fill="#2B1E12">Save to my list</text>
+            <g transform="translate(120, 14)" fill="none" stroke="#5B4530" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M0 0 h14 v18 l-7 -5 l-7 5 z"/>
+            </g>
+          </g>
+        </g>
+      </g>
+
+      <!-- Right visual (40%) -->
+      <g id="Booth-Visual" transform="translate(600, 0)">
+        <rect width="400" height="420" rx="0" fill="url(#visualGrad)"/>
+        <use href="#puzzle" x="30" y="40" width="60" height="60" fill="#4285F4"/>
+        <use href="#puzzle" x="310" y="90" width="42" height="42" fill="#EA4335" transform="rotate(-14 331 111)"/>
+        <use href="#puzzle" x="60" y="290" width="48" height="48" fill="#34A853" transform="rotate(10 84 314)"/>
+        <use href="#puzzle" x="290" y="310" width="70" height="70" fill="#EFB100" transform="rotate(20 325 345)"/>
+
+        <!-- Emblem -->
+        <g transform="translate(200, 210)">
+          <rect x="-70" y="-70" width="140" height="140" rx="30" fill="#FDF6E4" stroke="#E1CFA6" filter="drop-shadow(0 14px 40px rgba(80,50,20,0.14))"/>
+          <text x="0" y="14" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="44" font-weight="800" fill="#1A56CB" letter-spacing="-1.5">GDG</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- ============================================================ -->
+    <!-- BOOTH GRID                                                    -->
+    <!-- ============================================================ -->
+    <g id="Booth-Grid" transform="translate(0, 480)">
+
+      <!-- MAIN COL: 2/3 (656 wide) -->
+      <g id="Main-Col" transform="translate(0, 0)">
+
+        <!-- About panel -->
+        <g id="Panel-About">
+          <rect width="656" height="290" rx="22" fill="#FDF6E4" stroke="#E1CFA6"/>
+          <text x="28" y="52" font-size="13" font-weight="700" fill="#8B735B" letter-spacing="1.5">ABOUT THE ORG</text>
+          <g font-size="15.5" fill="#5B4530">
+            <text x="28" y="88">GDG on Campus – Xavier Ateneo is a student-led community for</text>
+            <text x="28" y="112">anyone curious about building with Google technologies. We host</text>
+            <text x="28" y="136">workshops on web, mobile, AI, and cloud, plus hack nights where you</text>
+            <text x="28" y="160">ship something in a single sitting.</text>
+            <text x="28" y="200">No experience required. First-year students, non-CS majors, and</text>
+            <text x="28" y="224">side-project tinkerers are all part of the crew. If you can open a</text>
+            <text x="28" y="248">laptop, you can join a session.</text>
+          </g>
+        </g>
+
+        <!-- Events panel -->
+        <g id="Panel-Events" transform="translate(0, 310)">
+          <rect width="656" height="288" rx="22" fill="#FDF6E4" stroke="#E1CFA6"/>
+          <text x="28" y="52" font-size="13" font-weight="700" fill="#8B735B" letter-spacing="1.5">UPCOMING EVENTS</text>
+
+          <!-- Event 1 -->
+          <g transform="translate(28, 74)">
+            <rect width="600" height="60" rx="14" fill="#EAD9B1" stroke="#E1CFA6"/>
+            <g transform="translate(12, 8)">
+              <rect width="62" height="44" rx="10" fill="#FDF6E4" stroke="#E1CFA6"/>
+              <text x="31" y="17" text-anchor="middle" font-size="10" font-weight="700" fill="#1A56CB" letter-spacing="1">AUG</text>
+              <text x="31" y="37" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="20" font-weight="800" fill="#2B1E12">12</text>
+            </g>
+            <text x="90" y="27" font-size="14" font-weight="600" fill="#2B1E12">DevFest Info Session</text>
+            <text x="90" y="46" font-size="13" fill="#8B735B">Open to all majors · Tech Hub 204</text>
+          </g>
+
+          <!-- Event 2 -->
+          <g transform="translate(28, 144)">
+            <rect width="600" height="60" rx="14" fill="#EAD9B1" stroke="#E1CFA6"/>
+            <g transform="translate(12, 8)">
+              <rect width="62" height="44" rx="10" fill="#FDF6E4" stroke="#E1CFA6"/>
+              <text x="31" y="17" text-anchor="middle" font-size="10" font-weight="700" fill="#1A56CB" letter-spacing="1">AUG</text>
+              <text x="31" y="37" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="20" font-weight="800" fill="#2B1E12">24</text>
+            </g>
+            <text x="90" y="27" font-size="14" font-weight="600" fill="#2B1E12">Cloud Study Jam #1</text>
+            <text x="90" y="46" font-size="13" fill="#8B735B">GCP fundamentals · 3 hours</text>
+          </g>
+
+          <!-- Event 3 -->
+          <g transform="translate(28, 214)">
+            <rect width="600" height="60" rx="14" fill="#EAD9B1" stroke="#E1CFA6"/>
+            <g transform="translate(12, 8)">
+              <rect width="62" height="44" rx="10" fill="#FDF6E4" stroke="#E1CFA6"/>
+              <text x="31" y="17" text-anchor="middle" font-size="10" font-weight="700" fill="#1A56CB" letter-spacing="1">SEP</text>
+              <text x="31" y="37" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="20" font-weight="800" fill="#2B1E12">09</text>
+            </g>
+            <text x="90" y="27" font-size="14" font-weight="600" fill="#2B1E12">Hack Night: Build in a Bar</text>
+            <text x="90" y="46" font-size="13" fill="#8B735B">Ship something in 4 hours</text>
+          </g>
+        </g>
+
+        <!-- Leadership panel -->
+        <g id="Panel-Leaders" transform="translate(0, 618)">
+          <rect width="656" height="180" rx="22" fill="#FDF6E4" stroke="#E1CFA6"/>
+          <text x="28" y="52" font-size="13" font-weight="700" fill="#8B735B" letter-spacing="1.5">LEADERSHIP</text>
+
+          <!-- Leader 1 -->
+          <g transform="translate(28, 74)">
+            <rect width="196" height="72" rx="14" fill="#EAD9B1" stroke="#E1CFA6"/>
+            <circle cx="34" cy="36" r="20" fill="#E3ECFD"/>
+            <text x="34" y="41" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="14" font-weight="700" fill="#1A56CB">JM</text>
+            <text x="62" y="34" font-size="14" font-weight="600" fill="#2B1E12">James Marquez</text>
+            <text x="62" y="52" font-size="12" fill="#8B735B">Lead Organizer</text>
+          </g>
+          <!-- Leader 2 -->
+          <g transform="translate(232, 74)">
+            <rect width="196" height="72" rx="14" fill="#EAD9B1" stroke="#E1CFA6"/>
+            <circle cx="34" cy="36" r="20" fill="#E3ECFD"/>
+            <text x="34" y="41" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="14" font-weight="700" fill="#1A56CB">AR</text>
+            <text x="62" y="34" font-size="14" font-weight="600" fill="#2B1E12">Anna Reyes</text>
+            <text x="62" y="52" font-size="12" fill="#8B735B">Tech Lead</text>
+          </g>
+          <!-- Leader 3 -->
+          <g transform="translate(436, 74)">
+            <rect width="196" height="72" rx="14" fill="#EAD9B1" stroke="#E1CFA6"/>
+            <circle cx="34" cy="36" r="20" fill="#E3ECFD"/>
+            <text x="34" y="41" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="14" font-weight="700" fill="#1A56CB">LT</text>
+            <text x="62" y="34" font-size="14" font-weight="600" fill="#2B1E12">Luis Tan</text>
+            <text x="62" y="52" font-size="12" fill="#8B735B">Community Lead</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- ASIDE: 1/3 (328 wide) -->
+      <g id="Aside" transform="translate(676, 0)">
+
+        <!-- Facebook page mockup -->
+        <g id="FB-Card">
+          <rect width="324" height="420" rx="22" fill="#FDF6E4" stroke="#E1CFA6" filter="drop-shadow(0 6px 18px rgba(80,50,20,0.09))"/>
+
+          <!-- Cover -->
+          <g id="FB-Cover" clip-path="inset(0 0 300 0 round 22px 22px 0 0)">
+            <rect width="324" height="120" fill="url(#fbCover)"/>
+            <ellipse cx="64" cy="34" rx="60" ry="40" fill="#FFFFFF" fill-opacity="0.25"/>
+            <ellipse cx="275" cy="76" rx="40" ry="30" fill="#FFFFFF" fill-opacity="0.2"/>
+          </g>
+
+          <!-- Profile -->
+          <g id="FB-Profile" transform="translate(20, 78)">
+            <circle cx="42" cy="42" r="46" fill="#FDF6E4"/>
+            <circle cx="42" cy="42" r="42" fill="#E3ECFD"/>
+            <text x="42" y="52" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="28" font-weight="800" fill="#1A56CB">GDG</text>
+          </g>
+
+          <!-- Name + handle -->
+          <g id="FB-Meta" transform="translate(20, 200)">
+            <text x="0" y="0" font-size="17" font-weight="700" fill="#2B1E12">Google Developer Group</text>
+            <text x="0" y="20" font-size="17" font-weight="700" fill="#2B1E12">on Campus</text>
+            <g transform="translate(232, -14)">
+              <circle cx="0" cy="0" r="8" fill="#1877F2"/>
+              <path d="M -3 0 L -1 2 L 3 -2" stroke="#FFFFFF" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <text x="0" y="40" font-size="13" fill="#8B735B">@gdg.xavierateneo · Community</text>
+          </g>
+
+          <!-- Stats -->
+          <g id="FB-Stats" transform="translate(20, 258)">
+            <text x="0" y="0" font-size="13" fill="#5B4530">
+              <tspan font-weight="700" fill="#2B1E12">3.2k</tspan>
+              <tspan> followers</tspan>
+            </text>
+            <text x="110" y="0" font-size="13" fill="#5B4530">
+              <tspan font-weight="700" fill="#2B1E12">2.8k</tspan>
+              <tspan> likes</tspan>
+            </text>
+            <line x1="0" y1="14" x2="284" y2="14" stroke="#E1CFA6"/>
+          </g>
+
+          <!-- Actions -->
+          <g id="FB-Actions" transform="translate(20, 288)">
+            <rect x="0" y="0" width="140" height="36" rx="8" fill="#1877F2"/>
+            <text x="52" y="24" font-size="13.5" font-weight="600" fill="#FFFFFF">Like page</text>
+            <path d="M 20 12 v12 M 20 12 l6 -6 v6 h-6" fill="#FFFFFF" transform="translate(6, 6)"/>
+            <rect x="146" y="0" width="140" height="36" rx="8" fill="#EAD9B1" stroke="#E1CFA6"/>
+            <text x="198" y="24" font-size="13.5" font-weight="600" fill="#2B1E12">Message</text>
+          </g>
+
+          <!-- Link -->
+          <g id="FB-Link" transform="translate(0, 348)">
+            <rect width="324" height="52" fill="#EAD9B1" stroke="#E1CFA6" stroke-width="0"/>
+            <line x1="0" y1="0" x2="324" y2="0" stroke="#E1CFA6"/>
+            <g transform="translate(16, 18)">
+              <rect width="16" height="16" rx="3" fill="#1877F2"/>
+              <text x="8" y="12" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="12" font-weight="800" fill="#FFFFFF">f</text>
+            </g>
+            <text x="42" y="30" font-family="Consolas, SF Mono, Menlo, monospace" font-size="12" font-weight="600" fill="#1877F2">facebook.com/gdg.xavierateneo</text>
+            <text x="304" y="30" text-anchor="end" font-size="14" fill="#8B735B">↗</text>
+          </g>
+        </g>
+
+        <!-- Meta list panel -->
+        <g id="Panel-Meta" transform="translate(0, 440)">
+          <rect width="324" height="240" rx="22" fill="#FDF6E4" stroke="#E1CFA6"/>
+          <text x="28" y="52" font-size="13" font-weight="700" fill="#8B735B" letter-spacing="1.5">AT A GLANCE</text>
+
+          <g transform="translate(28, 76)">
+            <text x="0" y="16" font-size="14" fill="#8B735B">Categories</text>
+            <text x="268" y="16" text-anchor="end" font-size="13" font-weight="600" fill="#2B1E12">Sci·Eng·Tech · Program</text>
+            <line x1="0" y1="30" x2="268" y2="30" stroke="#E1CFA6"/>
+
+            <text x="0" y="56" font-size="14" fill="#8B735B">Founded</text>
+            <text x="268" y="56" text-anchor="end" font-size="14" font-weight="600" fill="#2B1E12">2019</text>
+            <line x1="0" y1="70" x2="268" y2="70" stroke="#E1CFA6"/>
+
+            <text x="0" y="96" font-size="14" fill="#8B735B">Open to</text>
+            <text x="268" y="96" text-anchor="end" font-size="14" font-weight="600" fill="#2B1E12">All years</text>
+            <line x1="0" y1="110" x2="268" y2="110" stroke="#E1CFA6"/>
+
+            <text x="0" y="136" font-size="14" fill="#8B735B">Dues</text>
+            <text x="268" y="136" text-anchor="end" font-size="14" font-weight="600" fill="#2B1E12">Free</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER (on sand, sits between content and the ocean)          -->
+  <!-- ============================================================ -->
+  <g id="Footer" transform="translate(0, 1680)">
+    <rect width="1440" height="100" fill="#EAD9B1"/>
+    <g id="Footer-Brand" transform="translate(120, 45)">
+      <text x="0" y="0" font-size="14" font-weight="700" fill="#2B1E12">Campus Compass</text>
+      <text x="0" y="18" font-size="12" fill="#8B735B">Xavier University – Ateneo de Cagayan</text>
+    </g>
+    <!-- GDG "Created by" credit -->
+    <g id="GDG-Credit" transform="translate(560, 22)">
+      <rect x="0" y="0" width="330" height="56" rx="12" fill="#FDF6E4" fill-opacity="0.55" stroke="#B8A576" stroke-opacity="0.4"/>
+      <text x="14" y="20" font-size="10" font-weight="700" fill="#8B735B" letter-spacing="1.5">CREATED BY</text>
+      <g transform="translate(110, 28)">
+        <g fill="#F4B400">
+          <polygon points="0,-14 2,-10 -2,-10"/>
+          <polygon points="0,14 2,10 -2,10"/>
+          <polygon points="14,0 10,2 10,-2"/>
+          <polygon points="-14,0 -10,2 -10,-2"/>
+          <polygon points="10,-10 7.5,-6.5 6,-8"/>
+          <polygon points="10,10 7.5,6.5 6,8"/>
+          <polygon points="-10,10 -7.5,6.5 -6,8"/>
+          <polygon points="-10,-10 -7.5,-6.5 -6,-8"/>
+        </g>
+        <circle r="8" fill="#E68A2E"/>
+        <text y="3" text-anchor="middle" font-family="Iowan Old Style, Georgia, serif" font-size="7" font-weight="800" fill="#FDF6E4">&lt;/&gt;</text>
+      </g>
+      <text x="132" y="26" font-size="13" font-weight="700" fill="#2B1E12">Google Developer Group</text>
+      <text x="132" y="42" font-size="11" font-style="italic" fill="#4285F4">Xavier Ateneo</text>
+      <text x="220" y="42"
+            font-family="'Brush Script MT','Segoe Script','Snell Roundhand',cursive"
+            font-size="14" font-style="italic" font-weight="700"
+            fill="#8B735B" stroke="#5B3F1F" stroke-width="0.4"
+            paint-order="stroke fill">Sands of Time</text>
+    </g>
+    <text x="1320" y="55" text-anchor="end" font-size="12" fill="#5B4530">Prototype · Ready for the Figma "Website Prototype" rebuild</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- SEA SCENE (below footer, page ends in ocean)                  -->
+  <!-- ============================================================ -->
+  <g id="Sea-Scene" transform="translate(0, 1780)">
+    <rect width="1440" height="30" fill="#EAD9B1"/>
+    <path fill="#D9B87E" opacity="0.9" d="M0,20 Q160,10 320,30 Q460,50 600,20 Q740,-5 880,25 Q1020,50 1160,20 Q1300,-5 1440,25 L1440,50 L0,50 Z"/>
+
+    <path fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"
+          d="M0,30 Q130,50 260,30 Q380,15 500,45 Q620,70 720,70 Q820,70 940,45 Q1060,15 1180,30 Q1310,50 1440,30"/>
+    <path fill="#FFFFFF" d="M0,35 Q130,55 260,35 Q380,20 500,50 Q620,75 720,75 Q820,75 940,50 Q1060,20 1180,35 Q1310,55 1440,35 L1440,110 L0,110 Z"/>
+    <path fill="#E8F5F8" d="M0,80 Q130,95 260,80 Q380,68 500,92 Q620,112 720,112 Q820,112 940,92 Q1060,68 1180,80 Q1310,95 1440,80 L1440,130 L0,130 Z"/>
+    <path fill="#FFFFFF" opacity="0.65" d="M0,100 Q140,88 280,100 T560,100 T840,100 T1120,100 T1440,100 L1440,120 L0,120 Z"/>
+
+    <path fill="#7CC4D6" d="M0,115 Q140,100 280,115 T560,115 T840,115 T1120,115 T1440,115 L1440,320 L0,320 Z"/>
+    <path fill="#3E9FB8" d="M0,150 Q140,135 280,150 T560,150 T840,150 T1120,150 T1440,150 L1440,320 L0,320 Z"/>
+    <path fill="#1F6E88" d="M0,195 Q140,180 280,195 T560,195 T840,195 T1120,195 T1440,195 L1440,320 L0,320 Z"/>
+    <path fill="#0F4E68" d="M0,240 Q140,225 280,240 T560,240 T840,240 T1120,240 T1440,240 L1440,320 L0,320 Z"/>
+    <path fill="#082F41" opacity="0.85" d="M0,285 Q140,270 280,285 T560,285 T840,285 T1120,285 T1440,285 L1440,320 L0,320 Z"/>
+
+    <g stroke="#FFFFFF" fill="none" stroke-linecap="round">
+      <path stroke-width="5" opacity="0.9" d="M60,165 Q170,148 280,168"/>
+      <path stroke-width="4.5" opacity="0.75" d="M320,190 Q450,172 580,192"/>
+      <path stroke-width="5" opacity="0.9" d="M620,170 Q740,152 860,172"/>
+      <path stroke-width="4.5" opacity="0.75" d="M900,195 Q1030,178 1160,198"/>
+      <path stroke-width="5" opacity="0.9" d="M1200,170 Q1310,152 1420,172"/>
+      <path stroke-width="3.5" opacity="0.75" d="M90,225 Q200,215 310,225"/>
+      <path stroke-width="3.5" opacity="0.7" d="M400,240 Q510,230 620,240"/>
+      <path stroke-width="3.5" opacity="0.75" d="M700,225 Q810,215 920,225"/>
+      <path stroke-width="3.5" opacity="0.7" d="M1020,245 Q1120,235 1220,245"/>
+      <path stroke-width="3.5" opacity="0.75" d="M1260,225 Q1340,217 1420,225"/>
+      <path stroke-width="3" opacity="0.5" d="M150,275 Q240,268 340,275"/>
+      <path stroke-width="3" opacity="0.5" d="M540,280 Q640,272 740,280"/>
+      <path stroke-width="3" opacity="0.5" d="M920,275 Q1020,268 1130,275"/>
+      <path stroke-width="3" opacity="0.5" d="M1220,285 Q1310,278 1400,285"/>
+      <path stroke-width="2.5" opacity="0.35" d="M300,305 Q400,300 500,305"/>
+      <path stroke-width="2.5" opacity="0.35" d="M800,310 Q900,305 1000,310"/>
+    </g>
+
+    <g fill="#FFFFFF" opacity="0.95">
+      <ellipse cx="180" cy="128" rx="5" ry="2"/>
+      <ellipse cx="400" cy="122" rx="4" ry="1.5"/>
+      <ellipse cx="680" cy="125" rx="6" ry="2"/>
+      <ellipse cx="960" cy="128" rx="5" ry="2"/>
+      <ellipse cx="1220" cy="122" rx="4" ry="1.5"/>
+      <circle cx="90" cy="210" r="2.5"/>
+      <circle cx="340" cy="205" r="2"/>
+      <circle cx="560" cy="215" r="2.5"/>
+      <circle cx="800" cy="205" r="2"/>
+      <circle cx="1080" cy="215" r="2.5"/>
+      <circle cx="1340" cy="205" r="2"/>
+      <path d="M240,175 L242,172 L244,175 L242,178 Z"/>
+      <path d="M500,158 L502,155 L504,158 L502,161 Z"/>
+      <path d="M900,182 L902,179 L904,182 L902,185 Z"/>
+      <path d="M1180,158 L1182,155 L1184,158 L1182,161 Z"/>
+      <path d="M660,255 L662,252 L664,255 L662,258 Z"/>
+      <path d="M1050,265 L1052,262 L1054,265 L1052,268 Z"/>
+    </g>
+
+    <g id="Sea-Sailboat" transform="translate(1080, 92) scale(1.15)">
+      <path d="M0,-20 L0,4" stroke="#2B1E12" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M0,-20 L14,4 L0,4 Z" fill="#FDF6E4" stroke="#2B1E12" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M0,-12 L-10,4 L0,4 Z" fill="#EA4335" stroke="#2B1E12" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M-14,4 L14,4 L11,11 L-11,11 Z" fill="#B96A1A" stroke="#2B1E12" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M0,-20 L5,-17 L0,-14" fill="#EFB100" stroke="#2B1E12" stroke-width="0.8" stroke-linejoin="round"/>
+    </g>
+
+    <g id="Sea-Sailboat-Distant" transform="translate(1360, 108) scale(0.6)">
+      <path d="M0,-16 L0,3" stroke="#2B1E12" stroke-width="1.2" fill="none"/>
+      <path d="M0,-16 L11,3 L0,3 Z" fill="#FDF6E4" stroke="#2B1E12" stroke-width="1"/>
+      <path d="M-9,3 L9,3 L7,8 L-7,8 Z" fill="#5B4530" stroke="#2B1E12" stroke-width="1"/>
+    </g>
+
+    <g fill="none" stroke="#2B1E12" stroke-width="1.5" stroke-linecap="round" opacity="0.7">
+      <path d="M180,55 Q186,49 192,55 Q198,49 204,55"/>
+      <path d="M310,70 Q316,64 322,70 Q328,64 334,70"/>
+      <path d="M720,50 Q726,44 732,50 Q738,44 744,50"/>
+    </g>
+  </g>
+
+</svg>

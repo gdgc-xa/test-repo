@@ -1,0 +1,166 @@
+/* ============================================================
+   card.css — org card for the browse grid.
+   Category-colored left rail. Whole card is a click target.
+   Ghost variant (dashed border, no content) for filtered-out slots.
+   ============================================================ */
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--ink);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 220ms, border-color 220ms;
+  text-align: left;
+  min-height: 280px;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+/* --- Category-colored left rail (accent) --- */
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--card-accent, var(--muted));
+}
+
+/* --- Head row: emblem tile + name + tag row --- */
+.card__head {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.card__emblem {
+  width: 52px; height: 52px;
+  border-radius: 12px;
+  background: var(--card-accent-soft, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--card-accent, var(--border)) 25%, transparent);
+  display: grid; place-items: center;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+/* Roster logo, when the source document had one */
+.card__logo {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Fallback for orgs listed without a logo */
+.card__initials {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--card-accent-ink, var(--ink));
+}
+.card__headtext { min-width: 0; }
+.card__short {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.card__title {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card__tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Contact-address fallback line reads as data, not prose */
+.card__desc--contact {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--muted);
+  word-break: break-all;
+  -webkit-line-clamp: 2;
+}
+
+.card__body {
+  flex: 1;
+}
+.card__desc {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+.card__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card__meta svg { flex: 0 0 auto; color: #1877F2; }
+.card__meta--muted { color: var(--muted); font-style: italic; }
+.card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 12px;
+  transition: background 160ms;
+}
+.card:hover .card__cta { background: var(--sun-soft); }
+
+/* --- Ghost / dashed placeholder for filtered-out orgs --- */
+.card--ghost {
+  cursor: default;
+  border-style: dashed;
+  border-color: var(--border);
+  background: transparent;
+  opacity: 0.25;
+  pointer-events: none;
+  min-height: 280px;
+}
+.card--ghost:hover { transform: none; box-shadow: none; }
+.card--ghost::before { display: none; }

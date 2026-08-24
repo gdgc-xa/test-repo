@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -24 100 62" role="img" aria-label="Scallop shell">
+  <title>Scallop shell</title>
+
+  <!-- Fan body: narrow hinge at the bottom, fluted rim opening upward.
+       The wide 140° spread is what makes the ribs read as radiating
+       from a hinge rather than as parallel lines. -->
+  <path fill="#F5D0BE" stroke="#3D2817" stroke-width="3.2" stroke-linejoin="round"
+        d="M -7 29
+           C -26 27 -40 22 -43 14
+           Q -42 6 -36 2
+           Q -34 -6 -26 -8
+           Q -21 -15 -14 -14
+           Q -7 -19 0 -16
+           Q 7 -19 14 -14
+           Q 21 -15 26 -8
+           Q 34 -6 36 2
+           Q 42 6 43 14
+           C 40 22 26 27 7 29 Z"/>
+
+  <!-- Cel-shade highlight on the upper-left facet -->
+  <path fill="#FFEDDF" opacity="0.85"
+        d="M -36 8 C -34 -2 -24 -11 -12 -13 C -20 -6 -27 1 -30 11 Z"/>
+
+  <!-- Ribs radiating from the hinge out to the flutes -->
+  <g fill="none" stroke="#B96A1A" stroke-width="2.2" stroke-linecap="round">
+    <path d="M -3 25 L -33 9"/>
+    <path d="M -3 25 L -25 -2"/>
+    <path d="M -2 25 L -13 -9"/>
+    <path d="M  0 25 L  0 -12"/>
+    <path d="M  2 25 L 13 -9"/>
+    <path d="M  3 25 L 25 -2"/>
+    <path d="M  3 25 L 33 9"/>
+  </g>
+
+  <!-- Hinge ears -->
+  <path fill="#F5D0BE" stroke="#3D2817" stroke-width="2.6" stroke-linejoin="round"
+        d="M -7 29 L -17 25 L -9 22 Z"/>
+  <path fill="#F5D0BE" stroke="#3D2817" stroke-width="2.6" stroke-linejoin="round"
+        d="M 7 29 L 17 25 L 9 22 Z"/>
+  <!-- Hinge -->
+  <circle cx="0" cy="27" r="2.6" fill="#3D2817"/>
+</svg>

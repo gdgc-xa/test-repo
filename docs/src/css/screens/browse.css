@@ -1,0 +1,93 @@
+/* ============================================================
+   browse.css — browse-specific composition.
+   Explore-head layout, search + toolbar spacing, grid.
+   ============================================================ */
+
+.screen--browse {
+  position: relative;
+  isolation: isolate;
+}
+
+.browse-head {
+  padding-block: var(--space-6);
+}
+
+.browse-crumb {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: var(--space-4);
+}
+.browse-crumb a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.browse-crumb a:hover { color: var(--ink-2); }
+.browse-crumb__sep {
+  margin: 0 8px;
+  color: var(--border-strong);
+}
+
+.browse-title {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+}
+
+.browse-count {
+  font-size: 14px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --- Compact search sits between explore-head and filter toolbar --- */
+.browse-search {
+  margin-block: var(--space-4);
+}
+
+/* --- Filter toolbar left copy --- */
+.filter-toolbar__help {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.filter-toolbar__help-icon {
+  color: var(--muted);
+  width: 16px; height: 16px;
+}
+.filter-toolbar__help strong { color: var(--ink); font-weight: 700; }
+
+/* --- Clear filters button (fades in via .is-visible from JS) --- */
+.clear-filters {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms, visibility 0s linear 200ms;
+}
+.clear-filters.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 200ms;
+}
+
+/* --- The chip row --- */
+.browse-chips {
+  margin-bottom: var(--space-4);
+}
+
+/* --- Grid pad + ghost footnote --- */
+.browse-grid { margin-top: var(--space-4); }
+
+.grid-footnote {
+  margin-top: var(--space-5);
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (max-width: 620px) {
+  .browse-title { font-size: 24px; }
+}

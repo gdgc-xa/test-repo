@@ -1,0 +1,64 @@
+/* ============================================================
+   tag.css — rounded pill category tag with color-coded dot.
+   Used on: landing hero cluster cloud, org cards.
+   Interactive: clicking a landing tag routes to browse with
+   that cluster preselected.
+   Color is set per-instance via `--tag-accent: var(--blue|red|...)`.
+   ============================================================ */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 14px 8px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 160ms, border-color 160ms, transform 160ms;
+}
+.tag:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+.tag::before {
+  content: "";
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--tag-accent, var(--muted));
+  flex: 0 0 auto;
+}
+
+/* --- Card variant — smaller, tinted with accent-soft --- */
+.tag--card {
+  padding: 3px 8px 3px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  background: var(--tag-accent-soft, var(--surface-2));
+  border-color: transparent;
+  color: var(--tag-accent-ink, var(--ink));
+}
+.tag--card::before { display: none; }
+.tag--card:hover { transform: none; background: var(--tag-accent-soft, var(--surface-2)); }
+
+/* --- Booth variant — bigger, with dot and category-soft background --- */
+.tag--booth {
+  padding: 6px 12px 6px 10px;
+  background: var(--tag-accent-soft, var(--surface));
+  color: var(--tag-accent-ink, var(--ink));
+  border-color: transparent;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.tag--booth::before {
+  background: var(--tag-accent-ink, var(--ink));
+}

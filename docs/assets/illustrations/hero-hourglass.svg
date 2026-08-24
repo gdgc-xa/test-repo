@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260" role="img" aria-label="Hourglass — sand pouring">
+  <title>Hourglass with pouring sand</title>
+  <defs>
+    <linearGradient id="hg-sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#E5B87A"/>
+      <stop offset="1"   stop-color="#B8863E"/>
+    </linearGradient>
+    <linearGradient id="hg-glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#F5FCFC" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#D8ECEC" stop-opacity="0.60"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Wooden side posts (behind bulbs) -->
+  <line x1="34"  y1="20" x2="34"  y2="240" stroke="#8B6B4A" stroke-width="7" stroke-linecap="round"/>
+  <line x1="166" y1="20" x2="166" y2="240" stroke="#8B6B4A" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Top wood cap -->
+  <rect x="20" y="8" width="160" height="18" rx="4" fill="#A88564" stroke="#3D2817" stroke-width="2.5"/>
+  <ellipse cx="100" cy="8" rx="80" ry="6" fill="#8B6B4A" stroke="#3D2817" stroke-width="1.8"/>
+
+  <!-- Upper glass bulb (cel-shaded: translucent fill + single highlight curve) -->
+  <path fill="url(#hg-glass)" stroke="#3D2817" stroke-width="3" stroke-linejoin="round"
+        d="M 40 26 Q 40 90 100 122 Q 160 90 160 26 Z"/>
+  <!-- Upper bulb single-arc highlight -->
+  <path fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" opacity="0.85"
+        d="M 54 34 Q 50 60 60 92"/>
+
+  <!-- Sand in upper bulb (~80% full, slight concave top surface) -->
+  <path fill="url(#hg-sand)" stroke="#8B5A2B" stroke-width="1.2" stroke-linejoin="round"
+        d="M 47 32
+           Q 100 46 153 32
+           L 100 119
+           Z"/>
+  <!-- Sand concave-surface highlight (top edge dipping in the middle) -->
+  <path fill="none" stroke="#8B5A2B" stroke-width="1.6" stroke-linecap="round" opacity="0.65"
+        d="M 47 32 Q 100 46 153 32"/>
+
+  <!-- Falling sand STREAM through the neck (thin vertical) -->
+  <rect x="98.5" y="120" width="3" height="60" fill="url(#hg-sand)" rx="1.5"/>
+  <!-- Two small stream grains for texture -->
+  <circle cx="100" cy="135" r="1.6" fill="#F4B400"/>
+  <circle cx="100" cy="158" r="1.4" fill="#F4B400"/>
+
+  <!-- Lower glass bulb -->
+  <path fill="url(#hg-glass)" stroke="#3D2817" stroke-width="3" stroke-linejoin="round"
+        d="M 40 232 Q 40 154 100 122 Q 160 154 160 232 Z"/>
+  <!-- Lower bulb single-arc highlight -->
+  <path fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" opacity="0.75"
+        d="M 54 226 Q 50 194 60 168"/>
+
+  <!-- Sand pile in lower bulb (growing rounded pile) -->
+  <path fill="url(#hg-sand)" stroke="#8B5A2B" stroke-width="1.2" stroke-linejoin="round"
+        d="M 50 232
+           Q 80 190 100 190
+           Q 120 190 150 232
+           Z"/>
+  <!-- Little sand puff at the top of the growing pile — where the stream lands -->
+  <ellipse cx="100" cy="192" rx="8" ry="3" fill="#F4B400" opacity="0.55"/>
+
+  <!-- Bottom wood cap -->
+  <rect x="20" y="234" width="160" height="18" rx="4" fill="#8B6B4A" stroke="#3D2817" stroke-width="2.5"/>
+  <ellipse cx="100" cy="252" rx="80" ry="6" fill="#8B6B4A" stroke="#3D2817" stroke-width="1.8"/>
+</svg>
