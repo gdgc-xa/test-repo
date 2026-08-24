@@ -46,7 +46,7 @@ export const FEATURED = [
   { id: 'gdgoc-xa',  note: 'Tech community' },
   { id: 'aces' },
   { id: 'cssc' },
-
+  { id: 'jpiche', note: 'Recruiting now', cta: 'Join now →' },
   // Add more featured orgs above this line, e.g.:
   // { id: 'jpia', note: 'Recruiting now', cta: 'Join now →' },
 ];
