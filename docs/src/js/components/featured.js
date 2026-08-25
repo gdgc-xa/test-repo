@@ -1,11 +1,11 @@
 /* ============================================================
    components/featured.js — resolves data/featured.js against the
-   ORGS roster. No rendering here: featured orgs use the exact
-   same cardHtml() template as every other org card (card.js),
-   so Discover and Browse never visually diverge.
+   ORGS roster. No rendering here: every screen paints featured
+   cards with the same cardHtml() template as regular org cards
+   (card.js), passing along note/cta as the only optional extras.
 
-   To change WHICH orgs are featured, edit data/featured.js —
-   nothing in this file needs to change for that.
+   To change WHICH orgs are featured, or their note/cta text,
+   edit data/featured.js — nothing in this file needs to change.
    ============================================================ */
 
 import { ORGS } from '../data/organizations.js';
@@ -17,7 +17,8 @@ const ORG_BY_ID = Object.fromEntries(ORGS.map(o => [o.id, o]));
  * Resolves data/featured.js entries against the ORGS roster.
  * Unknown ids are dropped (with a console.warn) instead of
  * breaking whichever screen is reading the list.
- * @returns {Org[]} orgs, in the order given by data/featured.js
+ * @returns {{org: Org, note?: string, cta?: string}[]}
+ *          in the order given by data/featured.js
  */
 export function resolveFeatured() {
   const resolved = [];
@@ -31,7 +32,7 @@ export function resolveFeatured() {
       );
       continue;
     }
-    resolved.push(org);
+    resolved.push({ org, note: entry.note, cta: entry.cta });
   }
   return resolved;
 }

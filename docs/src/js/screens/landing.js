@@ -66,17 +66,20 @@ function hydrateFeatured(root) {
   const container = root.querySelector('[data-featured-grid]');
   if (!section || !container) return;
 
-  const orgs = FEATURED_ENABLED ? resolveFeatured() : [];
+  const entries = FEATURED_ENABLED ? resolveFeatured() : [];
 
   // Nothing to feature (disabled, or every configured id was bad) —
   // hide the section instead of leaving an empty band on the page.
-  if (orgs.length === 0) {
+  if (entries.length === 0) {
     section.hidden = true;
     return;
   }
 
-  // Same cardHtml() template as Browse — no badge, no special styling.
-  container.innerHTML = orgs.map((org, i) => cardHtml(org, i)).join('');
+  // Same cardHtml() template as Browse — note/cta are the only
+  // opt-in extras, everything else is identical to a regular card.
+  container.innerHTML = entries
+    .map((entry, i) => cardHtml(entry.org, i, { note: entry.note, cta: entry.cta }))
+    .join('');
   watchReveals(container);
 
   // Clicking a featured card opens that org's booth, same as browse.

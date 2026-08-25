@@ -77,6 +77,39 @@
   margin-bottom: var(--space-4);
 }
 
+/* --- Browse Featured section (separate from the main grid) --- */
+.browse-featured {
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border);
+}
+.browse-featured__kicker {
+  margin: 0 0 var(--space-1);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+.browse-featured__title {
+  margin: 0 0 var(--space-4);
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.4rem);
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* --- "All orgs" label separating the featured section from the rest --- */
+.browse-section-label {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* --- Grid pad + ghost footnote --- */
 .browse-grid { margin-top: var(--space-4); }
 

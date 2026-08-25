@@ -411,7 +411,7 @@
         <div class="landing-featured__head">
           <div>
             <p class="landing-featured__kicker reveal">Featured</p>
-            <h3 class="landing-featured__title reveal">Organizations</h3>
+            <h3 class="landing-featured__title reveal">Organizations to know this term</h3>
           </div>
           <a class="landing-featured__link reveal" href="?screen=browse" data-nav="browse">Browse all orgs →</a>
         </div>
@@ -492,6 +492,18 @@
         <div class="chip-row browse-chips" data-chip-row></div>
 
       </section>
+
+      <!-- ==== BROWSE FEATURED ====
+           Same data/featured.js list as the Discover strip. Only
+           shown when no chip is picked and no search is typed;
+           hides itself if the list is empty or disabled. -->
+      <section class="browse-featured" data-browse-featured-section hidden>
+        <p class="browse-featured__kicker">Featured</p>
+        <h2 class="browse-featured__title">Organizations to know this term</h2>
+        <div class="browse-featured__grid card-grid" data-browse-featured-grid></div>
+      </section>
+
+      <p class="browse-section-label" data-browse-section-label hidden>All orgs</p>
 
       <section class="browse-grid card-grid" data-card-grid></section>
 

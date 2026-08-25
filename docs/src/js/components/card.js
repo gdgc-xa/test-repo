@@ -12,9 +12,16 @@ import { SHORT_LABEL, COLOR_OF } from '../data/categories.js';
 /**
  * @param {Org} org  — organization record
  * @param {number} i — index within the filtered list (drives reveal stagger)
+ * @param {{note?: string, cta?: string}} [opts] — optional featured-only
+ *        extras: `note` shows a small corner badge, `cta` overrides the
+ *        default "Know more →" button text. Both come from
+ *        data/featured.js; regular browse cards never pass these, so
+ *        the template is identical either way apart from these two
+ *        opt-in bits.
  * @returns {string} HTML string
  */
-export function cardHtml(org, i = 0) {
+export function cardHtml(org, i = 0, opts = {}) {
+  const { note, cta } = opts;
   const primaryColor = COLOR_OF[org.tags[0]] || 'blue';
   const staggerMs    = Math.min(i * 60, 420);
 
@@ -53,11 +60,16 @@ export function cardHtml(org, i = 0) {
        </span>`
     : `<span class="card__meta card__meta--muted">Email only</span>`;
 
+  const badge = note
+    ? `<span class="card__badge">${escapeHtml(note)}</span>`
+    : '';
+
   return `
     <button class="card reveal"
             data-org-id="${escapeAttr(org.id)}"
             style="--card-accent: ${accent}; --card-accent-soft: ${accentSoft}; --card-accent-ink: ${accentInk}; --reveal-delay: ${staggerMs}ms;"
             aria-label="Open ${escapeAttr(org.name)} booth">
+      ${badge}
       <div class="card__head">
         <span class="card__emblem" aria-hidden="true">${emblem}</span>
         <div class="card__headtext">
@@ -69,7 +81,7 @@ export function cardHtml(org, i = 0) {
       <div class="card__body">${body}</div>
       <div class="card__foot">
         ${foot}
-        <span class="card__cta">Know more →</span>
+        <span class="card__cta">${escapeHtml(cta || 'Know more →')}</span>
       </div>
     </button>
   `;

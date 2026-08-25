@@ -27,6 +27,22 @@
   border-color: var(--border-strong);
 }
 
+/* --- Optional corner badge (org's own note, e.g. "Recruiting now") --- */
+.card__badge {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--card-accent-ink, var(--ink));
+  background: var(--card-accent-soft, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--card-accent, var(--border)) 35%, transparent);
+  white-space: nowrap;
+}
+
 /* --- Category-colored left rail (accent) --- */
 .card::before {
   content: "";

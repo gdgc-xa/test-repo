@@ -71,6 +71,17 @@ export function initBrowse(root) {
     });
   }
 
+  // --- Featured strip: attach click delegation once ---
+  const featuredGrid = root.querySelector('[data-browse-featured-grid]');
+  if (featuredGrid && !featuredGrid.__wiredCards) {
+    featuredGrid.__wiredCards = true;
+    featuredGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.card');
+      if (!card) return;
+      openBooth(card.dataset.orgId);
+    });
+  }
+
   render(root);
 }
 
@@ -103,41 +114,37 @@ function search(orgs, query) {
   });
 }
 
-/**
- * Floats featured orgs (data/featured.js) to the front of the list,
- * in that file's order, followed by everyone else in their normal
- * order. Same list Discover reads — no separate roster to maintain.
- * Reordering only; nothing is added, removed, or badged.
- */
-function withFeaturedFirst(orgs) {
-  const featured = resolveFeatured().filter(org => orgs.includes(org));
-  if (featured.length === 0) return orgs;
-  const featuredIds = new Set(featured.map(o => o.id));
-  const rest = orgs.filter(org => !featuredIds.has(org.id));
-  return [...featured, ...rest];
-}
-
 // ---------- Render ----------
 
 function render(root) {
-  const chipRow = root.querySelector('[data-chip-row]');
-  const grid    = root.querySelector('[data-card-grid]');
-  const title   = root.querySelector('[data-browse-title]');
-  const count   = root.querySelector('[data-browse-count]');
-  const clear   = root.querySelector('[data-clear-filters]');
-  const foot    = root.querySelector('[data-grid-footnote]');
+  const chipRow        = root.querySelector('[data-chip-row]');
+  const featuredSection = root.querySelector('[data-browse-featured-section]');
+  const featuredGrid    = root.querySelector('[data-browse-featured-grid]');
+  const sectionLabel   = root.querySelector('[data-browse-section-label]');
+  const grid           = root.querySelector('[data-card-grid]');
+  const title          = root.querySelector('[data-browse-title]');
+  const count          = root.querySelector('[data-browse-count]');
+  const clear          = root.querySelector('[data-clear-filters]');
+  const foot           = root.querySelector('[data-grid-footnote]');
 
   // Re-render chips (active state changes)
   if (chipRow) renderChipRow(chipRow, state.active);
 
-  // Filter
+  // Featured orgs get pulled into their own section only in the
+  // default view (no chip, no search) — a chip or search always
+  // shows one plain filtered list, featured or not.
   const isDefaultView = !state.active && !state.query;
+  const showFeatured   = isDefaultView && SHOW_FEATURED_IN_BROWSE;
+  const featuredEntries = showFeatured ? resolveFeatured() : [];
+  const featuredIds     = new Set(featuredEntries.map(e => e.org.id));
+
+  // Filter (main list never includes an org that's shown above it)
   let filtered = search(byCluster(ORGS, state.active), state.query);
-  if (isDefaultView && SHOW_FEATURED_IN_BROWSE) {
-    filtered = withFeaturedFirst(filtered);
+  if (featuredIds.size > 0) {
+    filtered = filtered.filter(org => !featuredIds.has(org.id));
   }
-  const total    = ORGS.length;
-  const shownCount = filtered.length;
+  const total       = ORGS.length;
+  const shownCount  = filtered.length + featuredEntries.length;
   const hiddenCount = total - shownCount;
 
   // Title
@@ -151,7 +158,7 @@ function render(root) {
     }
   }
 
-  // Count
+  // Count (reflects everything visible, featured section included)
   if (count) count.textContent = `${shownCount} org${shownCount === 1 ? '' : 's'}`;
 
   // Clear button visibility
@@ -159,13 +166,36 @@ function render(root) {
     clear.classList.toggle('is-visible', !!state.active || !!state.query);
   }
 
-  // Grid
+  // Featured section
+  if (featuredSection && featuredGrid) {
+    if (featuredEntries.length === 0) {
+      featuredSection.hidden = true;
+    } else {
+      featuredSection.hidden = false;
+      featuredGrid.innerHTML = featuredEntries
+        .map((entry, i) => cardHtml(entry.org, i, { note: entry.note, cta: entry.cta }))
+        .join('');
+      watchReveals(featuredGrid);
+    }
+  }
+
+  // "All orgs" label above the main grid — only worth showing
+  // when there's a featured section above it to distinguish from.
+  if (sectionLabel) {
+    sectionLabel.hidden = featuredEntries.length === 0;
+  }
+
+  // Main grid
   if (grid) {
     if (shownCount === 0) {
       grid.innerHTML = `
         <div class="filter-note filter-note--empty" style="grid-column: 1 / -1;">
           <strong>Nothing matches that.</strong>&nbsp;Try a different cluster, or clear the filters and start again.
         </div>`;
+    } else if (filtered.length === 0) {
+      // Every org is featured and pulled into the section above —
+      // leave the main grid empty rather than showing nothing at all.
+      grid.innerHTML = '';
     } else {
       const cards = filtered.map((org, i) => cardHtml(org, i)).join('');
       const ghosts = Array.from({ length: hiddenCount }, () => ghostCardHtml()).join('');
@@ -175,9 +205,9 @@ function render(root) {
     wireCardClicks(grid);
   }
 
-  // Footnote
+  // Footnote (ghost cards only ever come from an active chip/search)
   if (foot) {
-    if (hiddenCount > 0 && shownCount > 0) {
+    if (hiddenCount > 0 && filtered.length > 0) {
       foot.textContent = `Ghost cards indicate the ${hiddenCount} org${hiddenCount === 1 ? '' : 's'} filtered out. Clear the filter to see everything again.`;
       foot.hidden = false;
     } else {
@@ -189,19 +219,22 @@ function render(root) {
   syncUrl();
 }
 
+function openBooth(id) {
+  const params = new URLSearchParams(location.search);
+  params.set('org', id);
+  if (!params.get('screen')) params.set('screen', 'browse');
+  history.pushState(null, '', `?${params.toString()}`);
+  renderBooth(id);
+}
+
 function wireCardClicks(grid) {
   if (grid.__wiredCards) return;
   grid.__wiredCards = true;
   grid.addEventListener('click', (e) => {
     const card = e.target.closest('.card:not(.card--ghost)');
     if (!card) return;
-    const id = card.dataset.orgId;
     // Push URL without triggering a browse re-init flash.
-    const params = new URLSearchParams(location.search);
-    params.set('org', id);
-    if (!params.get('screen')) params.set('screen', 'browse');
-    history.pushState(null, '', `?${params.toString()}`);
-    renderBooth(id);
+    openBooth(card.dataset.orgId);
   });
 }
 
