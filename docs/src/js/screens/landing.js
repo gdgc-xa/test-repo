@@ -6,7 +6,8 @@
 
 import { CATEGORIES, COLOR_OF, SHORT_LABEL } from '../data/categories.js';
 import { attachSearchShell } from '../components/search-shell.js';
-import { resolveFeatured, featuredCardHtml } from '../components/featured.js';
+import { resolveFeatured } from '../components/featured.js';
+import { cardHtml } from '../components/card.js';
 import { FEATURED_ENABLED } from '../data/featured.js';
 import { watchReveals } from '../reveal-observer.js';
 import { navigate } from '../router.js';
@@ -65,21 +66,22 @@ function hydrateFeatured(root) {
   const container = root.querySelector('[data-featured-grid]');
   if (!section || !container) return;
 
-  const entries = FEATURED_ENABLED ? resolveFeatured() : [];
+  const orgs = FEATURED_ENABLED ? resolveFeatured() : [];
 
   // Nothing to feature (disabled, or every configured id was bad) —
   // hide the section instead of leaving an empty band on the page.
-  if (entries.length === 0) {
+  if (orgs.length === 0) {
     section.hidden = true;
     return;
   }
 
-  container.innerHTML = entries.map((entry, i) => featuredCardHtml(entry, i)).join('');
+  // Same cardHtml() template as Browse — no badge, no special styling.
+  container.innerHTML = orgs.map((org, i) => cardHtml(org, i)).join('');
   watchReveals(container);
 
   // Clicking a featured card opens that org's booth, same as browse.
   container.addEventListener('click', (e) => {
-    const btn = e.target.closest('.featured-card');
+    const btn = e.target.closest('.card');
     if (!btn) return;
     navigate({ org: btn.dataset.orgId });
   });

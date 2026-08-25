@@ -1,8 +1,9 @@
 /* ============================================================
    featured.css — "Featured Organizations" strip on landing.
-   Reuses .card / .card-grid from card.css + layout.css so
-   featured cards match browse cards exactly; this file only
-   adds the section chrome and the badge ribbon.
+   Cards here are plain .card / .card-grid from card.css +
+   layout.css — no dedicated card variant, so they render
+   pixel-identical to Browse cards. This file only styles the
+   section chrome (kicker, title, "browse all" link).
    ============================================================ */
 
 .landing-featured {
@@ -47,26 +48,6 @@
 .landing-featured__link:hover {
   color: var(--ink);
   text-decoration: underline;
-}
-
-/* --- Featured card = .card + a corner badge --- */
-.featured-card {
-  min-height: 260px;
-}
-
-.featured-card__badge {
-  position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--card-accent-ink, var(--ink));
-  background: var(--card-accent-soft, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--card-accent, var(--border)) 35%, transparent);
-  white-space: nowrap;
 }
 
 @media (max-width: 640px) {

@@ -8,6 +8,8 @@
 
 import { CATEGORIES, COLOR_OF, SHORT_LABEL } from '../data/categories.js';
 import { ORGS } from '../data/organizations.js';
+import { SHOW_FEATURED_IN_BROWSE } from '../data/featured.js';
+import { resolveFeatured } from '../components/featured.js';
 import { renderChipRow } from '../components/chip.js';
 import { cardHtml, ghostCardHtml } from '../components/card.js';
 import { attachSearchShell, setSearchValue } from '../components/search-shell.js';
@@ -101,6 +103,20 @@ function search(orgs, query) {
   });
 }
 
+/**
+ * Floats featured orgs (data/featured.js) to the front of the list,
+ * in that file's order, followed by everyone else in their normal
+ * order. Same list Discover reads — no separate roster to maintain.
+ * Reordering only; nothing is added, removed, or badged.
+ */
+function withFeaturedFirst(orgs) {
+  const featured = resolveFeatured().filter(org => orgs.includes(org));
+  if (featured.length === 0) return orgs;
+  const featuredIds = new Set(featured.map(o => o.id));
+  const rest = orgs.filter(org => !featuredIds.has(org.id));
+  return [...featured, ...rest];
+}
+
 // ---------- Render ----------
 
 function render(root) {
@@ -115,7 +131,11 @@ function render(root) {
   if (chipRow) renderChipRow(chipRow, state.active);
 
   // Filter
-  const filtered = search(byCluster(ORGS, state.active), state.query);
+  const isDefaultView = !state.active && !state.query;
+  let filtered = search(byCluster(ORGS, state.active), state.query);
+  if (isDefaultView && SHOW_FEATURED_IN_BROWSE) {
+    filtered = withFeaturedFirst(filtered);
+  }
   const total    = ORGS.length;
   const shownCount = filtered.length;
   const hiddenCount = total - shownCount;
