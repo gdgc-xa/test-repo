@@ -55,7 +55,7 @@
    ============================================================ */
 
 export const FEATURED = [
-  { id: 'gdgoc-xa', note: 'Example: Accepting Partnerships', cta: 'Example: Join now →' },
+  { id: 'gdgoc-xa', note: 'Example: Mu Accept ug Gwapa', cta: 'Join kung Gwapa ka' },
   {id: 'csg', note: 'Org sa Mga Gwapo', cta: 'ang di mujoin, bayot!'},
   // Add more featured orgs above this line, e.g.:
   // { id: 'jpia', note: 'New this term' },
