@@ -130,7 +130,7 @@ export const TENT_ORGS = {
   '6A': ['xafs', 'xucdt'],
   '7A': ['xu-xceed', 'gdgoc-xa'],
   '8A': ['siraj-mro', 'xu-rcy'],
-  '9A': ['AECO Kazoku', 'ATTG', 'Forerunners'],
+  '9A': ['kazoku', 'attg', 'forerunners'],
   '1B': ['xu-ams', 'arc'],
   '2B': ['axuos', 'scholars-guild'],
   '3B': ['xadso', 'da'],

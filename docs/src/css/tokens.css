@@ -26,6 +26,15 @@
   --sun-deep:      #B96A1A;
   --sun-soft:      #FBE4C8;
 
+  /* ---------- Start-up org status pill ----------
+     Deliberately NOT one of the four cluster hues — a start-up is a
+     status, not a twelfth cluster. Warm like the sun accent, but the
+     ink is darker than --sun-deep so 11px bold clears 4.5:1 on the
+     soft fill (--sun-deep itself only reaches 3.3:1 there). */
+  --startup-soft:  #FBE4C8;
+  --startup-ink:   #8A4A0C;
+  --startup-edge:  #E68A2E;
+
   /* ---------- Category accents ---------- */
   --blue:          #4285F4;   --blue-ink:   #1A56CB;   --blue-soft:   #E3ECFD;
   --red:           #EA4335;   --red-ink:    #B21E10;   --red-soft:    #FCE0DE;
@@ -35,6 +44,40 @@
   /* ---------- Compass ---------- */
   --compass-face:  #B8A576;
   --compass-tick:  #C8B27F;
+
+  /* ============================================================
+     THE XAVIER CUP — pitch green, trophy gold, floodlit white.
+     Defined in BOTH skins on purpose: the Cup tab keeps its own
+     identity whichever design the visitor has chosen. Everything
+     world-cup-shaped reads from these and nothing else.
+     ============================================================ */
+  --cup-green:      #0E7A43;
+  --cup-green-dk:   #0A5B32;
+  --cup-green-lt:   #1E9A58;
+  --cup-green-soft: #DDF0E4;
+  --cup-gold:       #EFB100;
+  --cup-gold-dk:    #B98604;
+  --cup-gold-lt:    #FBD96B;
+  --cup-gold-soft:  #FCEFCF;
+  --cup-navy:       #10243A;
+  --cup-line:       rgba(255, 255, 255, 0.88);
+  --cup-ink-on:     #FFFFFF;          /* text on green */
+
+  /* Hero stadium bands */
+  --cup-sky-top:    #7FC8EA;
+  --cup-sky-mid:    #A6DCF1;
+  --cup-sky-bot:    #D7F0F7;
+  --cup-stand-back: #23415C;
+  --cup-stand-mid:  #2F5578;
+  --cup-stand-front:#3C6A92;
+  --cup-crowd:      rgba(255, 255, 255, 0.55);
+  --cup-hoarding:   #0C3A6B;
+  --cup-pitch-1:    #2F9E5B;          /* mow stripe A */
+  --cup-pitch-2:    #268A50;          /* mow stripe B */
+  --cup-pitch-3:    #1C7042;          /* far edge, fading to the page */
+  --cup-mast:       #35506B;
+  --cup-glow:       rgba(255, 248, 214, 0.55);
+  --cup-shadow:     rgba(8, 40, 24, 0.28);
 
   /* ---------- Sea scene (five ocean layers, foam, wet sand) ---------- */
   --sea-foam:      #FFFFFF;
@@ -224,6 +267,11 @@
   --sun-deep:      #E68A2E;
   --sun-soft:      #3A2818;
 
+  /* Start-up pill after dark — lantern-warm ink on deep sand. */
+  --startup-soft:  #3A2818;
+  --startup-ink:   #F4A050;
+  --startup-edge:  #E68A2E;
+
   --blue:          #6BA0FF;   --blue-ink:   #A9C7FF;   --blue-soft:   #1E2A45;
   --red:           #FF6B5F;   --red-ink:    #FFB0A9;   --red-soft:    #3A1D1B;
   --yellow:        #F5C43C;   --yellow-ink: #FBE393;   --yellow-soft: #3A2E10;
@@ -231,6 +279,34 @@
 
   --compass-face:  #C8B27F;
   --compass-tick:  #B8A576;
+
+  /* ---------- The Xavier Cup after dark — a floodlit night match ---------- */
+  --cup-green:      #1E9A58;
+  --cup-green-dk:   #0E7A43;
+  --cup-green-lt:   #34B871;
+  --cup-green-soft: #12301F;
+  --cup-gold:       #F5C43C;
+  --cup-gold-dk:    #C98A12;
+  --cup-gold-lt:    #FBE08A;
+  --cup-gold-soft:  #33280C;
+  --cup-navy:       #070F1A;
+  --cup-line:       rgba(236, 255, 242, 0.72);
+  --cup-ink-on:     #FFFFFF;
+
+  --cup-sky-top:    #060D1B;
+  --cup-sky-mid:    #0C1B2E;
+  --cup-sky-bot:    #14293F;
+  --cup-stand-back: #0B1622;
+  --cup-stand-mid:  #12202F;
+  --cup-stand-front:#1A2C3E;
+  --cup-crowd:      rgba(255, 244, 214, 0.30);
+  --cup-hoarding:   #081F36;
+  --cup-pitch-1:    #116039;
+  --cup-pitch-2:    #0E5231;
+  --cup-pitch-3:    #0A3E26;
+  --cup-mast:       #1E2E40;
+  --cup-glow:       rgba(255, 246, 214, 0.42);
+  --cup-shadow:     rgba(0, 0, 0, 0.5);
 
   /* Night ocean — indigo-teal descending to midnight */
   --sea-foam:      #E8F0FA;
@@ -357,4 +433,119 @@
   --scene-star-dk:      #8A5615;
   --scene-crab:         #B5342A;
   --scene-crab-dk:      #781A12;
+}
+
+/* ============================================================
+   WORLD CUP SKIN — data-skin="worldcup" on <html>.
+
+   Only the palette changes here; the structural swaps (which
+   scene is painted, hourglass vs trophy) are in skins.css.
+   The four cluster hues are deliberately untouched: they are the
+   org taxonomy, not the season's decoration.
+
+   Two blocks, and they must stay in step — anything declared in
+   the day block needs a night value below it, or dark mode will
+   inherit a daylight colour.
+   ============================================================ */
+:root[data-skin="worldcup"] {
+  /* ---------- Ground / neutrals — chalk and clipped grass ---------- */
+  --ground:        #EDF4EE;
+  --ground-2:      #DFECE1;
+  --surface:       #FFFFFF;
+  --surface-2:     #E4EFE6;
+  --ink:           #11251A;
+  --ink-2:         #3A5444;
+  --muted:         #6B8574;
+  --border:        #D2E2D6;
+  --border-strong: #AEC8B5;
+
+  /* ---------- Primary accents — pitch green and trophy gold ---------- */
+  --ocean:         #0E7A43;
+  --ocean-deep:    #0A5B32;
+  --ocean-soft:    #DDF0E4;
+  --sun:           #EFB100;
+  --sun-deep:      #B98604;
+  --sun-soft:      #FCEFCF;
+
+  --startup-soft:  #FCEFCF;
+  --startup-ink:   #8A5E08;
+  --startup-edge:  #EFB100;
+
+  --compass-face:  #C9A227;
+  --compass-tick:  #AEC8B5;
+
+  --focus-ring: 0 0 0 3px rgba(14, 122, 67, 0.45);
+
+  --shadow-sm: 0 2px 8px rgba(12, 48, 28, 0.08);
+  --shadow-md: 0 6px 18px rgba(12, 48, 28, 0.10);
+  --shadow-lg: 0 14px 40px rgba(12, 48, 28, 0.16);
+  --shadow-modal: 0 30px 80px rgba(6, 26, 16, 0.38);
+
+  /* ---------- Hero content sitting on the pitch ----------
+     The lockup, tagline and chips are shared markup; re-pointing
+     these tokens re-dresses them without touching a rule. */
+  --scene-ink:       #F2FBF4;
+  --scene-ink-warm:  #FFFFFF;
+  --scene-ink-muted: #CFE7D7;
+  --scene-ink-halo:  rgba(6, 40, 22, 0.55);
+
+  --scene-word-orange:  #FBD96B;   /* "Campus" */
+  --scene-word-cream:   #0A3A22;   /* the outline around both words */
+  --scene-word-stroke:  #FFFFFF;   /* "Compass" */
+  --scene-tagline-fill:   #FFFFFF;
+  --scene-tagline-stroke: #0A5B32;
+
+  --scene-chip-bg:      #FFFFFF;
+  --scene-chip-ink:     #11251A;
+  --scene-search-btn:   #0A5B32;
+  --scene-card-cream:   #FFFFFF;
+}
+
+:root[data-skin="worldcup"][data-theme="dark"] {
+  --ground:        #0C1712;
+  --ground-2:      #101F18;
+  --surface:       #16261D;
+  --surface-2:     #1D3227;
+  --ink:           #E9F5EC;
+  --ink-2:         #BED6C6;
+  --muted:         #86A392;
+  --border:        #263E30;
+  --border-strong: #3B5A48;
+
+  --ocean:         #34B871;
+  --ocean-deep:    #1E9A58;
+  --ocean-soft:    #12301F;
+  --sun:           #F5C43C;
+  --sun-deep:      #C98A12;
+  --sun-soft:      #33280C;
+
+  --startup-soft:  #33280C;
+  --startup-ink:   #F5C43C;
+  --startup-edge:  #C98A12;
+
+  --compass-face:  #E3C766;
+  --compass-tick:  #3B5A48;
+
+  --focus-ring: 0 0 0 3px rgba(52, 184, 113, 0.5);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.55);
+  --shadow-modal: 0 30px 80px rgba(0, 0, 0, 0.7);
+
+  --scene-ink:       #DCEFE2;
+  --scene-ink-warm:  #F0FBF3;
+  --scene-ink-muted: #A8C7B4;
+  --scene-ink-halo:  rgba(0, 0, 0, 0.6);
+
+  --scene-word-orange:  #FBD96B;
+  --scene-word-cream:   #04160D;
+  --scene-word-stroke:  #F2FBF4;
+  --scene-tagline-fill:   #F2FBF4;
+  --scene-tagline-stroke: #0A3A22;
+
+  --scene-chip-bg:      #1D3227;
+  --scene-chip-ink:     #E9F5EC;
+  --scene-search-btn:   #1E9A58;
+  --scene-card-cream:   #16261D;
 }

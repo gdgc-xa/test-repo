@@ -56,13 +56,18 @@ export function cardHtml(org, i = 0, opts = {}) {
          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
            <path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.7-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z"/>
          </svg>
-         ${escapeHtml(org.fbHandle || 'Facebook page')}
+         ${escapeHtml(fbLabel(org))}
        </span>`
     : `<span class="card__meta card__meta--muted">Email only</span>`;
 
-  const badge = note
-    ? `<span class="card__badge">${escapeHtml(note)}</span>`
-    : '';
+  // Corner badges, stacked. A start-up org always announces itself; an
+  // optional featured `note` sits underneath rather than fighting it for
+  // the same corner.
+  const badges = [
+    org.startup ? `<span class="card__badge card__badge--startup">Start-Up Org</span>` : '',
+    note        ? `<span class="card__badge">${escapeHtml(note)}</span>`                : '',
+  ].filter(Boolean).join('');
+  const badge = badges ? `<div class="card__badges">${badges}</div>` : '';
 
   return `
     <button class="card reveal"
@@ -93,6 +98,20 @@ export function cardHtml(org, i = 0, opts = {}) {
  */
 export function ghostCardHtml() {
   return `<div class="card card--ghost" aria-hidden="true"></div>`;
+}
+
+/**
+ * What to print for the org's Facebook page. A page with no vanity
+ * handle still has a real address, so show that address rather than a
+ * generic "Facebook page" — the reader can see where the link goes.
+ * (.card__meta already truncates with an ellipsis when it is long.)
+ */
+function fbLabel(org) {
+  if (org.fbHandle) return org.fbHandle;
+  return String(org.fbUrl || '')
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/\/$/, '');
 }
 
 /** Initials for orgs the roster listed without a logo. */

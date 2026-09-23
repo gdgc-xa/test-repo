@@ -62,3 +62,20 @@
 .tag--booth::before {
   background: var(--tag-accent-ink, var(--ink));
 }
+
+/* --- Start-up variant — a status pill, not a cluster pill. Its own
+       --startup-* accent instead of one of the four cluster hues, a
+       visible border the cluster pills do not have, and inert: unlike
+       the landing tags it routes nowhere. --- */
+.tag--startup {
+  background: var(--startup-soft);
+  color: var(--startup-ink);
+  border-color: color-mix(in srgb, var(--startup-edge) 45%, transparent);
+  cursor: default;
+}
+.tag--startup::before { background: var(--startup-ink); }
+.tag--startup:hover {
+  background: var(--startup-soft);
+  border-color: color-mix(in srgb, var(--startup-edge) 45%, transparent);
+  transform: none;
+}

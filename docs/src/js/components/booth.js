@@ -26,6 +26,13 @@ export function boothHtml(org) {
       </span>`;
   }).join('');
 
+  // A start-up org is a status, not a cluster: same pill shape so it reads
+  // in the same row, but its own --startup-* accent and a visible border so
+  // it is never mistaken for one of the four cluster hues.
+  const statusTag = org.startup
+    ? `<span class="tag tag--booth tag--startup">Start-Up Org</span>`
+    : '';
+
   return `
     <div class="booth"
          style="--booth-accent: ${accent}; --booth-accent-ink: ${accentInk};">
@@ -51,7 +58,7 @@ export function boothHtml(org) {
 
             <div class="booth-hero__head">
               <div class="booth-hero__headtext">
-                <div class="booth-hero__tags">${tags}</div>
+                <div class="booth-hero__tags">${tags}${statusTag}</div>
                 <h1 class="booth-hero__title">${escapeHtml(org.name)}</h1>
                 ${(org.description || org.tagline)
                   ? `<p class="booth-hero__tagline">${escapeHtml(org.description || org.tagline)}</p>`
@@ -126,11 +133,19 @@ function metaPanel(org) {
         <div class="panel__row">
           <span class="panel__row-label">Facebook</span>
           ${org.fbUrl
-            ? `<a class="panel__row-value panel__row-value--link" href="${escapeHtml(org.fbUrl)}" target="_blank" rel="noopener noreferrer">${org.fbHandle ? '@' + escapeHtml(org.fbHandle) : 'Facebook page'}</a>`
+            ? `<a class="panel__row-value panel__row-value--link" href="${escapeHtml(org.fbUrl)}" target="_blank" rel="noopener noreferrer">${org.fbHandle ? '@' + escapeHtml(org.fbHandle) : escapeHtml(fbLabel(org))}</a>`
             : `<span class="panel__row-value panel__row-value--none">Not listed</span>`}
         </div>
       </div>
     </section>`;
+}
+
+/** Address of a page that has no vanity handle, minus the scheme. */
+function fbLabel(org) {
+  return String(org.fbUrl || '')
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/\/$/, '');
 }
 
 function escapeHtml(s) {

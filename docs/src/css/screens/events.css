@@ -1,0 +1,50 @@
+/* ============================================================
+   events.css — the Events tab.
+
+   It borrows the browse head wholesale (.browse-crumb,
+   .browse-title, .browse-count, .filter-toolbar) so the two list
+   screens are the same screen with different contents. Only what
+   is genuinely new to events lives here.
+   ============================================================ */
+
+.screen--events {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: var(--space-8);
+}
+.screen--events .wrap { position: relative; z-index: 1; }
+
+.events-head { padding-block: var(--space-6) var(--space-2); }
+
+.events-head__kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-2);
+}
+.events-head__lede {
+  max-width: 640px;
+  margin-top: var(--space-3);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.events-chips { margin-bottom: var(--space-5); }
+
+/* --- Featured band --- */
+.events-featured {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border);
+}
+.events-featured__grid { margin-top: var(--space-4); }
+
+.events-grid { margin-top: var(--space-4); }
+
+@media (max-width: 620px) {
+  .events-head { padding-block: var(--space-5) var(--space-2); }
+  .events-head__lede { font-size: 14.5px; }
+}

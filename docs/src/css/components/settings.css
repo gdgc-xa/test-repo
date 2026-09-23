@@ -1,0 +1,89 @@
+/* ============================================================
+   settings.css — the gear panel: appearance, design, motion.
+
+   A segmented control rather than a switch: with three rows and
+   two named options each, the labels are the affordance. A row
+   turned off in data/site.js is simply absent, and the panel
+   closes up around it.
+   ============================================================ */
+
+.settings-btn svg { width: 18px; height: 18px; }
+.settings-btn:hover { transform: rotate(45deg); }
+
+.settings { padding: var(--space-6); }
+
+.settings__kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.settings__title {
+  margin-top: var(--space-2);
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+}
+
+.settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border);
+}
+.settings__row:first-of-type { margin-top: var(--space-4); border-top: 1px solid var(--border); }
+.settings__row[hidden] { display: none; }
+
+.settings__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.settings__name { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.settings__hint { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+
+/* ---------- Segmented control ---------- */
+.seg {
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.seg__btn {
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 160ms, color 160ms, box-shadow 160ms;
+}
+.seg__btn:hover { color: var(--ink); }
+.seg__btn[aria-pressed="true"] {
+  background: var(--ocean);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.settings__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+.settings__note { font-size: 12px; color: var(--muted); font-style: italic; }
+
+/* The sheet's own actions row keeps the toggle and the gear together */
+.nav-sheet__actions { display: flex; align-items: center; gap: var(--space-3); }
+
+@media (max-width: 520px) {
+  .settings { padding: var(--space-5) var(--space-4) var(--space-6); }
+  .settings__row { flex-direction: column; align-items: stretch; gap: var(--space-3); }
+  .seg { width: 100%; }
+  .seg__btn { flex: 1; text-align: center; }
+}

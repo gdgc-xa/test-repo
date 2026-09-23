@@ -150,7 +150,7 @@ function render(root) {
   // Title
   if (title) {
     if (!state.active && !state.query) {
-      title.textContent = 'All Xavier Ateneo orgs';
+      title.textContent = 'Xavier Ateneo Organizations';
     } else if (state.active) {
       title.textContent = `${SHORT_LABEL[state.active]} orgs`;
     } else {

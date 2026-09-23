@@ -6,10 +6,18 @@
    parsed straight from the document so the spelling, e-mail
    addresses and Facebook handles match it exactly.
 
-   69 organizations across 11 clusters. Logos were lifted from
+   75 organizations across 11 clusters. Logos were lifted from
    the same PDF and re-encoded to 320px WebP; orgs the roster
    listed without a logo carry `logo: null` and fall back to
-   their initials in the UI.
+   their initials in the UI (nothing does at present — all 75
+   have artwork).
+
+   `startup: true` marks a start-up organization — one still in
+   AECO's provisional/incubation stage rather than fully
+   accredited. It is a status, not a cluster: a start-up org still
+   carries its normal cluster tag and shows up under that chip.
+   The UI surfaces it as a "Start-Up Org" pill on the card and in
+   the booth.
 
    `pending: true` means the long-form copy (description,
    meeting time, officers, events) has not been supplied yet —
@@ -582,7 +590,7 @@ export const ORGS = [
     pending: true,
   },
 
-  // ---------- Sports and Recreation (3) ----------
+  // ---------- Sports and Recreation (5) ----------
   {
     id: 'rodeo',
     name: 'Xavier University Rodeo Enthusiasts',
@@ -620,6 +628,36 @@ export const ORGS = [
     fbUrl: 'https://www.facebook.com/XUJKA35',
     fbHandle: 'XUJKA35',
     logo: 'assets/orgs/xu-jka.webp',
+    pending: true,
+  },
+  {
+    id: 'xabsc',
+    name: 'Xavier Ateneo Baseball and Softball Club',
+    short: 'XABSC',
+    tags: ['sports'],
+    keywords: ['baseball', 'softball', 'sports', 'athletics', 'aeco'],
+    description: 'The co-curricular student organization for baseball and softball enthusiasts at Xavier Ateneo.',
+    emails: [],
+    fbUrl: 'https://www.facebook.com/XACRUBSS',
+    fbHandle: 'XACRUBSS',
+    logo: 'assets/orgs/xabsc.webp',
+    pending: true,
+  },
+  {
+    id: 'cmma',
+    name: 'Crusader Mixed Martial Arts',
+    short: 'CMMA',
+    tags: ['sports'],
+    keywords: ['martial arts', 'mma', 'self-defense', 'combat sports', 'aeco'],
+    description: 'A student organization promoting martial arts disciplines, combat sports, and self-defense.',
+    emails: ['xucrusadermma@gmail.com'],
+    // Numeric profile.php page. The roster's "XU-AECO-Crusader-Mixed-Martial-Arts"
+    // is the page's display name, not a vanity handle, so it is not one here
+    // either — same call as OSAS: gate on the URL, never invent a
+    // facebook.com/<name> path that would 404.
+    fbUrl: 'https://www.facebook.com/profile.php?id=61565463236791',
+    fbHandle: null,
+    logo: 'assets/orgs/cmma.webp',
     pending: true,
   },
 
@@ -731,7 +769,7 @@ export const ORGS = [
     pending: true,
   },
 
-  // ---------- Socio-Cultural (5) ----------
+  // ---------- Socio-Cultural (9) ----------
   {
     id: 'ecosoc',
     name: 'Economics Society',
@@ -795,6 +833,65 @@ export const ORGS = [
     fbUrl: 'https://www.facebook.com/profile.php?id=61565492102620',
     fbHandle: null,
     logo: 'assets/orgs/osas.webp',
+    pending: true,
+  },
+  {
+    id: 'attg',
+    name: 'Ateneo Table Top Guild',
+    short: 'ATTG',
+    tags: ['socio-cultural'],
+    startup: true,
+    keywords: ['tabletop', 'board games', 'ttrpg', 'card games', 'aeco', 'gaming', 'start-up org', 'startup', 'new org'],
+    description: 'A student guild for tabletop games, roleplaying games, and board gaming at Xavier Ateneo.',
+    emails: ['official.attg.org@gmail.com'],
+    fbUrl: 'https://www.facebook.com/AteneoTabletopGuild',
+    fbHandle: 'AteneoTabletopGuild',
+    logo: 'assets/orgs/attg.webp',
+    pending: true,
+  },
+  {
+    id: 'kazoku',
+    name: 'Kazoku',
+    short: 'Kazoku',
+    tags: ['socio-cultural'],
+    startup: true,
+    keywords: ['kazoku', 'japanese culture', 'anime', 'manga', 'cosplay', 'aeco', 'start-up org', 'startup', 'new org'],
+    description: 'The Japanese culture and pop-culture appreciation student organization of Xavier Ateneo.',
+    emails: ['officialkazoku.xu@gmail.com'],
+    // Legacy page URL carrying a numeric suffix — "XU-Aeco-Kazoku" on its
+    // own does not resolve, so there is no vanity handle to display.
+    fbUrl: 'https://www.facebook.com/XU-Aeco-Kazoku-100095037218933/',
+    fbHandle: null,
+    logo: 'assets/orgs/kazoku.webp',
+    pending: true,
+  },
+  {
+    id: 'forerunners',
+    name: 'Forerunners',
+    short: 'Forerunners',
+    tags: ['socio-cultural'],
+    startup: true,
+    keywords: ['forerunners', 'christian fellowship', 'spiritual formation', 'faith', 'aeco', 'start-up org', 'startup', 'new org'],
+    description: 'A Christ-centered student organization focused on Christian fellowship and spiritual formation.',
+    emails: [],
+    // Numeric profile.php page — "Forerunners-XU-AECO" is the roster's
+    // display name for it, not a vanity handle.
+    fbUrl: 'https://www.facebook.com/profile.php?id=61565581634235',
+    fbHandle: null,
+    logo: 'assets/orgs/forerunners.webp',
+    pending: true,
+  },
+  {
+    id: 'xello',
+    name: 'Xavier English Language and Literature Organization',
+    short: 'XELLO',
+    tags: ['socio-cultural'],
+    keywords: ['english', 'literature', 'language', 'humanities', 'xello'],
+    description: 'The student organization for English and Literature majors and enthusiasts at Xavier Ateneo.',
+    emails: ['xello1920@gmail.com'],
+    fbUrl: 'https://www.facebook.com/OfficialXELLO',
+    fbHandle: 'OfficialXELLO',
+    logo: 'assets/orgs/xello.webp',
     pending: true,
   },
 

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260" role="img" aria-label="Championship trophy">
+  <title>The Xavier Cup trophy</title>
+  <defs>
+    <linearGradient id="tr-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#FBD96B"/>
+      <stop offset="0.5" stop-color="#EFB100"/>
+      <stop offset="1"   stop-color="#C98A12"/>
+    </linearGradient>
+    <linearGradient id="tr-gold-dk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#D99B2B"/>
+      <stop offset="1" stop-color="#A9700D"/>
+    </linearGradient>
+    <linearGradient id="tr-plinth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A88564"/>
+      <stop offset="1" stop-color="#6B4A2C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Handles (behind the bowl) -->
+  <path fill="url(#tr-gold-dk)" stroke="#3D2817" stroke-width="3" stroke-linejoin="round"
+        d="M 46 62 C 8 64 4 124 46 132 L 46 114 C 26 108 28 82 46 80 Z"/>
+  <path fill="url(#tr-gold-dk)" stroke="#3D2817" stroke-width="3" stroke-linejoin="round"
+        d="M 154 62 C 192 64 196 124 154 132 L 154 114 C 174 108 172 82 154 80 Z"/>
+
+  <!-- Bowl -->
+  <path fill="url(#tr-gold)" stroke="#3D2817" stroke-width="3.2" stroke-linejoin="round"
+        d="M 42 58 L 158 58 L 150 118 Q 141 164 100 174 Q 59 164 50 118 Z"/>
+
+  <!-- Rim -->
+  <rect x="36" y="42" width="128" height="20" rx="10"
+        fill="url(#tr-gold)" stroke="#3D2817" stroke-width="3"/>
+  <rect x="44" y="47" width="60" height="5" rx="2.5" fill="#FFF0B8" opacity="0.8"/>
+
+  <!-- Single-arc highlight, same language as the hourglass glass -->
+  <path fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" opacity="0.7"
+        d="M 66 74 Q 60 112 76 146"/>
+
+  <!-- Engraved medallion -->
+  <circle cx="100" cy="108" r="24" fill="#FBE9A8" stroke="#3D2817" stroke-width="2.6"/>
+  <path fill="#C98A12" stroke="#8A5E08" stroke-width="1.2" stroke-linejoin="round"
+        d="M 100 90 L 105.5 102 L 118 103.8 L 109 112.5 L 111.2 125 L 100 119 L 88.8 125 L 91 112.5 L 82 103.8 L 94.5 102 Z"/>
+
+  <!-- Stem -->
+  <path fill="url(#tr-gold-dk)" stroke="#3D2817" stroke-width="3" stroke-linejoin="round"
+        d="M 88 174 L 112 174 L 116 206 L 84 206 Z"/>
+  <!-- Collar -->
+  <rect x="78" y="168" width="44" height="12" rx="6" fill="url(#tr-gold)" stroke="#3D2817" stroke-width="2.6"/>
+
+  <!-- Plinths -->
+  <rect x="62" y="204" width="76" height="20" rx="5"
+        fill="url(#tr-plinth)" stroke="#3D2817" stroke-width="3"/>
+  <rect x="48" y="222" width="104" height="26" rx="7"
+        fill="url(#tr-plinth)" stroke="#3D2817" stroke-width="3"/>
+  <rect x="58" y="230" width="84" height="8" rx="4" fill="#EFB100" stroke="#3D2817" stroke-width="2"/>
+</svg>

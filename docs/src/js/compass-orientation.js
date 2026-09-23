@@ -2,15 +2,17 @@
    compass-orientation.js — delight #2
    The compass rose in the nav idles with a soft wobble, and
    slowly rotates to point toward the current screen: N for
-   Landing, E for Browse, W for About. This is done by
-   setting --compass-rot on document.documentElement, which the
-   compassIdle keyframe reads.
+   Discover, E for Browse, SE for Events, SW for the Cup, W for
+   About. This is done by setting --compass-rot on
+   document.documentElement, which the compassIdle keyframe reads.
    ============================================================ */
 
 const ANGLES = {
-  landing: 0,     // north
+  landing:  0,    // north
   browse:  90,    // east
-  booth:  180,    // south (when the modal is open)
+  events: 135,    // south-east
+  booth:  180,    // south (when the booth modal is open)
+  cup:    225,    // south-west
   about:  270,    // west
 };
 

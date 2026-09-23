@@ -112,3 +112,45 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ============================================================
+   EVENTS / XAVIER CUP
+   ============================================================ */
+
+/* --- The live dot on an Ongoing pill: breathes, never blinks --- */
+@keyframes livePulse {
+  0%, 100% { opacity: 1;    transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.78); }
+}
+
+/* --- The banner trophy lifts and settles, like the palms sway --- */
+@keyframes trophyFloat {
+  0%, 100% { transform: translateY(0)    rotate(-1deg); }
+  50%      { transform: translateY(-9px) rotate(1deg); }
+}
+
+/* --- Floodlights: a very slow swell, not a flicker. A stadium
+       lamp that actually flickered would read as broken. --- */
+@keyframes floodFlicker {
+  0%, 100% { opacity: 0.50; }
+  50%      { opacity: 0.68; }
+}
+
+/* ============================================================
+   MOTION SETTING — the Reduced option in Settings.
+   Mirrors the prefers-reduced-motion block in base.css, but is
+   driven by the visitor's explicit choice, so someone whose OS
+   setting says one thing can still ask this site for the other.
+   ============================================================ */
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+:root[data-motion="reduced"] .reveal {
+  opacity: 1 !important;
+  transform: none !important;
+}

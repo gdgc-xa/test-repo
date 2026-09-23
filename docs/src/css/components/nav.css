@@ -137,3 +137,16 @@
 @media (prefers-reduced-motion: reduce) {
   .nav-toggle svg line { transition-duration: 0s; }
 }
+
+/* ============================================================
+   Five nav items instead of three — Events and the Xavier Cup
+   joined Discover, Organizations and About. Between the desktop
+   layout and the hamburger there is a band where all five fit
+   only if they tighten up, so they do.
+   ============================================================ */
+@media (max-width: 1080px) {
+  .site-nav__wrap { gap: var(--space-3); }
+  .nav-links { gap: 2px; }
+  .nav-links__item { padding: 8px 10px; font-size: 13px; }
+  .brand__sub { display: none; }
+}

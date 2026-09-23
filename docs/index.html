@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-skin="worldcup" data-motion="full">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -32,14 +32,46 @@
   <link rel="stylesheet" href="src/css/components/hero-scene.css"/>
   <link rel="stylesheet" href="src/css/components/hero-lockup.css"/>
   <link rel="stylesheet" href="src/css/components/ocean-waves.css"/>
+  <link rel="stylesheet" href="src/css/components/status.css"/>
+  <link rel="stylesheet" href="src/css/components/detail.css"/>
+  <link rel="stylesheet" href="src/css/components/cup-map.css"/>
+  <link rel="stylesheet" href="src/css/components/settings.css"/>
 
   <link rel="stylesheet" href="src/css/screens/landing.css"/>
   <link rel="stylesheet" href="src/css/components/featured.css"/>
   <link rel="stylesheet" href="src/css/screens/browse.css"/>
   <link rel="stylesheet" href="src/css/screens/booth.css"/>
   <link rel="stylesheet" href="src/css/screens/about.css"/>
+  <link rel="stylesheet" href="src/css/screens/events.css"/>
+  <link rel="stylesheet" href="src/css/screens/cup.css"/>
+
+  <!-- Skin layer LAST of the design files: it overrides the beach
+       scene with the World Cup one, so it has to win. -->
+  <link rel="stylesheet" href="src/css/skins.css"/>
 
   <link rel="stylesheet" href="src/css/animations.css"/>
+
+  <!-- Saved appearance, applied before the first paint.
+       appearance.js owns these three values; this tiny copy exists
+       only so the page never flashes the wrong design for a frame.
+       Keep the storage keys in sync with src/js/appearance.js. -->
+  <script>
+    (function () {
+      try {
+        var d = document.documentElement;
+        var theme = localStorage.getItem('campus-compass:theme');
+        var skin = localStorage.getItem('campus-compass:skin');
+        var motion = localStorage.getItem('campus-compass:motion');
+        d.setAttribute('data-theme',
+          theme === 'dark' || theme === 'light'
+            ? theme
+            : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+        if (skin === 'worldcup' || skin === 'sands') d.setAttribute('data-skin', skin);
+        if (motion === 'full' || motion === 'reduced') d.setAttribute('data-motion', motion);
+        else if (matchMedia('(prefers-reduced-motion: reduce)').matches) d.setAttribute('data-motion', 'reduced');
+      } catch (e) { /* private mode — defaults in the markup stand */ }
+    })();
+  </script>
 </head>
 
 <body>
@@ -76,18 +108,30 @@
         </span>
         <span class="brand__text">
           <span class="brand__name">Campus Compass</span>
-          <span class="brand__sub">Xavier Ateneo · Sands of Time</span>
+          <!-- data-season: the wording comes from data/site.js → season,
+               so it changes with the design skin. -->
+          <span class="brand__sub" data-season="brandSub">Xavier Ateneo · The Xavier Cup</span>
         </span>
       </a>
 
+      <!-- Labels for the two configurable tabs are stamped from
+           data/site.js by router.js; the text here is the fallback. -->
       <nav class="nav-links" aria-label="Main">
         <button class="nav-links__item" data-nav="landing" data-nav-item="landing">Discover</button>
-        <button class="nav-links__item" data-nav="browse"  data-nav-item="browse">Browse Organizations</button>
+        <button class="nav-links__item" data-nav="browse"  data-nav-item="browse">Organizations</button>
+        <button class="nav-links__item" data-nav="events"  data-nav-item="events">Events</button>
+        <button class="nav-links__item" data-nav="cup"     data-nav-item="cup">Xavier Cup</button>
         <button class="nav-links__item" data-nav="about"   data-nav-item="about">About</button>
       </nav>
 
       <div class="nav-actions">
         <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
+        <button class="theme-toggle settings-btn" data-open-settings aria-label="Open settings" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.2"/>
+            <path d="M19.4 14a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H4a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 5.6 7.6a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.5V4a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V10a1.7 1.7 0 0 0 1.5 1H20a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+          </svg>
+        </button>
       </div>
 
       <button class="nav-toggle" aria-label="Menu">
@@ -114,11 +158,16 @@
     <nav class="nav-sheet__links" aria-label="Mobile">
       <button class="nav-sheet__item" data-nav="landing" data-nav-item="landing">Discover</button>
       <button class="nav-sheet__item" data-nav="browse"  data-nav-item="browse">Browse Organizations</button>
+      <button class="nav-sheet__item" data-nav="events"  data-nav-item="events">Events</button>
+      <button class="nav-sheet__item" data-nav="cup"     data-nav-item="cup">The Xavier Cup</button>
       <button class="nav-sheet__item" data-nav="about"   data-nav-item="about">About</button>
     </nav>
     <div class="nav-sheet__foot">
       <span class="nav-sheet__label">Appearance</span>
-      <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
+      <div class="nav-sheet__actions">
+        <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
+        <button class="btn btn--ghost btn--sm" data-open-settings hidden>Settings</button>
+      </div>
     </div>
   </div>
 
@@ -306,10 +355,68 @@
       <img class="palm-frond palm-frond--right-2" src="assets/illustrations/palm-frond.svg" alt=""/>
     </div>
 
+    <!-- ============================================================
+         WORLD CUP SCENE — the other design, painted only when
+         data-skin="worldcup". It is a sibling of .hero-scene rather
+         than a rewrite of it, so the Sands of Time beach survives
+         intact and Settings can switch between the two.
+
+         Same three bands as the beach, same offsets, so the lockup
+         still lands on --shore:
+           SKY  →  STANDS (at --horizon)  →  PITCH (at --shore)
+         ============================================================ -->
+    <div class="cup-scene" aria-hidden="true">
+      <div class="cup-scene__sky"></div>
+
+      <!-- Floodlight towers, standing behind the stands -->
+      <span class="floodlight floodlight--left">
+        <span class="floodlight__head"></span>
+        <span class="floodlight__glow"></span>
+      </span>
+      <span class="floodlight floodlight--right">
+        <span class="floodlight__head"></span>
+        <span class="floodlight__glow"></span>
+      </span>
+
+      <!-- Terraces: three tiers of crowd, darkest at the back -->
+      <div class="cup-scene__stands">
+        <span class="stand-tier stand-tier--back"></span>
+        <span class="stand-tier stand-tier--mid"></span>
+        <span class="stand-tier stand-tier--front"></span>
+      </div>
+
+      <!-- Pitch-side hoardings, the band between crowd and grass -->
+      <div class="cup-scene__hoarding"></div>
+
+      <!-- The pitch. Mow stripes are a repeating gradient; the
+           markings are one SVG with non-scaling strokes, so the
+           lines stay the same weight at every viewport width. -->
+      <div class="cup-scene__pitch">
+        <svg class="pitch-lines" viewBox="0 0 1200 420" preserveAspectRatio="none">
+          <g fill="none" stroke="var(--cup-line)" stroke-width="3" vector-effect="non-scaling-stroke">
+            <line x1="0" y1="26" x2="1200" y2="26"/>
+            <ellipse cx="600" cy="26" rx="150" ry="52"/>
+            <circle cx="600" cy="26" r="4" fill="var(--cup-line)"/>
+            <rect x="380" y="330" width="440" height="120"/>
+            <rect x="500" y="392" width="200" height="60"/>
+            <path d="M 470 330 Q 600 404 730 330"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Bunting in the corners, where the palms hang on the beach -->
+      <img class="pennant-string pennant-string--left"  src="assets/illustrations/pennants.svg" alt=""/>
+      <img class="pennant-string pennant-string--right" src="assets/illustrations/pennants.svg" alt=""/>
+
+      <!-- A ball on the grass, where the starfish sits on the sand -->
+      <img class="cup-accent cup-accent--ball" src="assets/illustrations/cup-ball.svg" alt=""/>
+      <img class="cup-accent cup-accent--ball2" src="assets/illustrations/cup-ball.svg" alt=""/>
+    </div>
+
     <!-- ==== HERO CONTENT (overlaid on the scene) ==== -->
     <div class="hero-content">
       <div class="wrap">
-        <h2 class="hero-tagline reveal" style="--reveal-delay: 0ms;">Sands of Time</h2>
+        <h2 class="hero-tagline reveal" data-season="heroTagline" style="--reveal-delay: 0ms;">The Xavier Cup</h2>
 
         <!-- Unified "Campus [hourglass] Compass" lockup.
              The hourglass stands on the shore line; the four
@@ -362,7 +469,11 @@
                 <circle cx="50" cy="50" r="2.4" fill="currentColor"/>
               </svg>
             </span>
-            <img class="lockup__hourglass" src="assets/illustrations/hero-hourglass.svg" alt="Hourglass"/>
+            <!-- Two centrepieces, one per design. The skin layer shows
+                 exactly one; both are sized by the same rules so the
+                 lockup geometry never moves. -->
+            <img class="lockup__hourglass lockup__piece lockup__piece--sands" src="assets/illustrations/hero-hourglass.svg" alt="Hourglass"/>
+            <img class="lockup__hourglass lockup__piece lockup__piece--worldcup" src="assets/illustrations/hero-trophy.svg" alt="Trophy"/>
             <span class="lockup__hourglass-shadow" aria-hidden="true"></span>
             <span class="lockup__sand-mound" aria-hidden="true"></span>
           </span>
@@ -376,8 +487,8 @@
           <img class="hero-puzzle hero-puzzle--blue"   src="assets/illustrations/primitives/puzzle-blue.svg"   alt="" aria-hidden="true"/>
         </div>
 
-        <p class="hero-anchor reveal" style="--reveal-delay: 170ms;">
-          Every org is a grain in the sand. Every cluster a piece of the puzzle.
+        <p class="hero-anchor reveal" data-season="heroAnchor" style="--reveal-delay: 170ms;">
+          Every org is a team. Every cluster a side of the draw.
         </p>
 
         <p class="hero-sub reveal" style="--reveal-delay: 210ms;">
@@ -411,7 +522,7 @@
         <div class="landing-featured__head">
           <div>
             <p class="landing-featured__kicker reveal">Featured</p>
-            <h3 class="landing-featured__title reveal">Organizations to know this term</h3>
+            <h3 class="landing-featured__title reveal">Organizations</h3>
           </div>
           <a class="landing-featured__link reveal" href="?screen=browse" data-nav="browse">Browse all orgs →</a>
         </div>
@@ -499,7 +610,7 @@
            hides itself if the list is empty or disabled. -->
       <section class="browse-featured" data-browse-featured-section hidden>
         <p class="browse-featured__kicker">Featured</p>
-        <h2 class="browse-featured__title">Organizations to know this term</h2>
+        <h2 class="browse-featured__title">Organizations</h2>
         <div class="browse-featured__grid card-grid" data-browse-featured-grid></div>
       </section>
 
@@ -508,6 +619,187 @@
       <section class="browse-grid card-grid" data-card-grid></section>
 
       <p class="grid-footnote" data-grid-footnote hidden></p>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       EVENTS — every campus event, ordered by date.
+       Content comes from src/js/data/events.js; this is only the
+       skeleton that screens/events.js fills.
+       ============================================================ -->
+  <main id="screen-events" class="screen screen--events" hidden data-screen="events">
+    <div class="ground-wash" aria-hidden="true"></div>
+
+    <div class="wrap">
+      <section class="events-head">
+        <nav class="browse-crumb" aria-label="Breadcrumb">
+          <a href="./" data-nav="landing">Discover</a>
+          <span class="browse-crumb__sep">/</span>
+          <span>Events</span>
+        </nav>
+
+        <p class="events-head__kicker" data-events-kicker>What&rsquo;s on</p>
+        <div class="explore-head">
+          <h1 class="browse-title" data-events-title>Campus Events</h1>
+          <span class="browse-count" data-events-count>&mdash;</span>
+        </div>
+        <p class="events-head__lede" data-events-lede></p>
+
+        <div class="browse-search" data-events-search-section>
+          <form class="search-shell search-shell--compact" data-events-search onsubmit="return false;">
+            <svg class="search-shell__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="9" cy="9" r="6"/><line x1="17" y1="17" x2="13.5" y2="13.5"/>
+            </svg>
+            <input class="search-shell__input" type="search"
+                   placeholder="Search events &mdash; try 'orientation', 'workshop', 'gym'&hellip;"
+                   aria-label="Search events"/>
+            <button class="btn btn--primary search-shell__submit" type="submit">Search</button>
+          </form>
+        </div>
+
+        <div class="filter-toolbar">
+          <span class="filter-toolbar__help">
+            <svg class="filter-toolbar__help-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+              <circle cx="8" cy="8" r="6.4"/><polyline points="8,4.4 8,8 10.4,9.6"/>
+            </svg>
+            Sorted by date &mdash; what is on now, then what is coming.
+          </span>
+          <button class="btn btn--ghost btn--sm clear-filters" data-events-clear type="button">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/>
+            </svg>
+            Clear filters
+          </button>
+        </div>
+
+        <div class="chip-row events-chips" data-events-chips></div>
+      </section>
+
+      <section class="events-featured" data-events-featured-section hidden>
+        <p class="browse-featured__kicker" data-events-featured-kicker>Featured</p>
+        <h2 class="browse-featured__title" data-events-featured-title>Don&rsquo;t miss these</h2>
+        <div class="card-grid events-featured__grid" data-events-featured-grid></div>
+      </section>
+
+      <p class="browse-section-label" data-events-section-label hidden>All events</p>
+
+      <section class="card-grid events-grid" data-events-grid></section>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       THE XAVIER CUP — the university-wide season.
+       Content comes from src/js/data/xavier-cup.js; screens/cup.js
+       fills every [data-cup-*] slot below.
+       ============================================================ -->
+  <main id="screen-cup" class="screen screen--cup" hidden data-screen="cup">
+
+    <!-- Banner. This is the one place the World Cup theme is loud
+         whichever skin is on, which is the point of a season tab. -->
+    <section class="cup-hero" data-cup-hero>
+      <div class="cup-hero__scene" aria-hidden="true">
+        <span class="cup-hero__stripes"></span>
+        <svg class="cup-hero__lines" viewBox="0 0 1200 260" preserveAspectRatio="none">
+          <g fill="none" stroke="var(--cup-line)" stroke-width="2.5" vector-effect="non-scaling-stroke" opacity="0.7">
+            <ellipse cx="600" cy="258" rx="190" ry="66"/>
+            <line x1="0" y1="258" x2="1200" y2="258"/>
+            <rect x="60" y="150" width="200" height="140"/>
+            <rect x="940" y="150" width="200" height="140"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="wrap cup-hero__wrap">
+        <div class="cup-hero__text">
+          <p class="cup-hero__kicker" data-cup-kicker>University-wide</p>
+          <h1 class="cup-hero__title" data-cup-name>The Xavier Cup</h1>
+          <p class="cup-hero__tagline" data-cup-tagline></p>
+          <p class="cup-hero__lede" data-cup-lede></p>
+        </div>
+        <img class="cup-hero__trophy" src="assets/illustrations/hero-trophy.svg" alt="" aria-hidden="true"/>
+      </div>
+
+      <div class="wrap">
+        <div class="cup-counters" data-cup-counters>
+          <div class="cup-counter cup-counter--ongoing">
+            <span class="cup-counter__value" data-cup-count="ongoing">0</span>
+            <span class="cup-counter__label">Being played now</span>
+          </div>
+          <div class="cup-counter">
+            <span class="cup-counter__value" data-cup-count="upcoming">0</span>
+            <span class="cup-counter__label">Upcoming</span>
+          </div>
+          <div class="cup-counter">
+            <span class="cup-counter__value" data-cup-count="finished">0</span>
+            <span class="cup-counter__label">Finished</span>
+          </div>
+          <div class="cup-counter">
+            <span class="cup-counter__value" data-cup-count="venues">0</span>
+            <span class="cup-counter__label">Venues in play</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap">
+
+      <!-- SEARCH — deliberately its own thing. Searching never moves
+           the map; the two are separate ways into the same fixtures. -->
+      <section class="cup-section" data-cup-search-section>
+        <div class="cup-section__head">
+          <div>
+            <h2 class="cup-section__title">Find a game</h2>
+            <p class="cup-section__hint">Search by college, sport, round or venue. Open any result for the full description and where it is being played.</p>
+          </div>
+        </div>
+        <form class="search-shell search-shell--compact" data-cup-search onsubmit="return false;">
+          <svg class="search-shell__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="9" cy="9" r="6"/><line x1="17" y1="17" x2="13.5" y2="13.5"/>
+          </svg>
+          <input class="search-shell__input" type="search"
+                 placeholder="Search fixtures &mdash; try 'basketball', 'engineering', 'gym'&hellip;"
+                 aria-label="Search fixtures"/>
+          <button class="btn btn--primary search-shell__submit" type="submit">Search</button>
+        </form>
+        <div class="cup-results" data-cup-results hidden></div>
+      </section>
+
+      <!-- CONSOLIDATED MAP -->
+      <section class="cup-section" data-cup-map-section>
+        <div class="cup-section__head">
+          <div>
+            <h2 class="cup-section__title">Where the games are</h2>
+            <p class="cup-section__hint">Every venue in play this season, on one map. Select a pin to see what is upcoming, ongoing and finished there.</p>
+          </div>
+        </div>
+
+        <div class="cup-map-grid">
+          <div class="cup-map-panel">
+            <div class="cup-map-panel__inner" data-cup-map></div>
+            <div class="cup-map-panel__legend" data-cup-legend></div>
+          </div>
+          <aside class="venue-panel" data-cup-venue-panel aria-live="polite"></aside>
+        </div>
+      </section>
+
+      <!-- FULL FIXTURE LIST -->
+      <section class="cup-section" data-cup-schedule-section>
+        <div class="cup-section__head">
+          <div>
+            <h2 class="cup-section__title">Fixtures</h2>
+            <p class="cup-section__hint">Live first, then what is next, then results.</p>
+          </div>
+          <span class="browse-count" data-cup-schedule-count>&mdash;</span>
+        </div>
+        <div class="chip-row cup-chips" data-cup-status-chips></div>
+        <div class="chip-row cup-chips cup-chips--sports" data-cup-sport-chips></div>
+        <div class="card-grid cup-grid" data-cup-grid></div>
+      </section>
+
+      <!-- NEWS & UPDATES -->
+      <section class="cup-section" data-cup-news-section>
+        <div class="panel cup-news" data-cup-news></div>
+      </section>
     </div>
   </main>
 
@@ -533,10 +825,12 @@
         <article class="about-card">
           <h2 class="about-card__title">What you can do here</h2>
           <ul class="about-list">
-            <li><strong>Browse all 69 organizations</strong> across the eleven Xavier Ateneo clusters, one cluster at a time.</li>
+            <li><strong>Browse all 75 organizations</strong> across the eleven Xavier Ateneo clusters, one cluster at a time.</li>
             <li><strong>Search by interest</strong> &mdash; type <em>coders</em>, <em>farm</em>, <em>music</em> or <em>volunteer</em> and get the orgs that actually match.</li>
             <li><strong>Open any org</strong> for what they do, how to reach them, and their Facebook page.</li>
             <li><strong>Find their tent</strong> on the fair map, with the spot lit and a landmark to walk toward.</li>
+            <li><strong>Check what&rsquo;s on</strong> under Events &mdash; every campus event, in date order, with the host org attached.</li>
+            <li><strong>Follow The Xavier Cup</strong> &mdash; every fixture, one map of the venues, and the season&rsquo;s news in one tab.</li>
           </ul>
         </article>
 
@@ -549,9 +843,9 @@
             </div>
           </div>
           <p class="about-card__body">
-            Campus Compass was made for <strong>Sands of Time</strong>, the General
-            Assembly Organizational Trip, by the GDG on Campus student developer
-            community at Xavier Ateneo.
+            Campus Compass was made for <strong>All Organizations</strong>, and
+            <strong>Future Events</strong> inside the Campus, by the
+            GDG on Campus student developer community at Xavier Ateneo. Contact us for Partnership!
           </p>
           <a class="btn btn--primary" href="https://www.facebook.com/gdgcxavier" target="_blank" rel="noopener noreferrer">
             Visit our Facebook page
@@ -561,6 +855,10 @@
           </a>
         </article>
       </section>
+
+      <!-- Contact — filled by screens/about.js from data/site.js →
+           contact. Set contact.email to null there to drop it. -->
+      <section class="about-contact" data-about-contact hidden></section>
 
       <section class="about-team">
         <h2 class="about-team__title">People behind the project</h2>
@@ -586,6 +884,86 @@
   </div>
 
   <!-- ============================================================
+       DETAIL MODAL — shared by the Events tab and the Xavier Cup.
+       Same shell as the booth, deliberately: one way to open a
+       thing, one way to close it. Content is written by
+       components/event-detail.js and components/game-detail.js.
+       ============================================================ -->
+  <div id="detail-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <div class="modal__backdrop" aria-hidden="true"></div>
+    <div class="modal__panel">
+      <button class="modal__close" data-close-modal aria-label="Close">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="3" x2="15" y2="15"/>
+          <line x1="15" y1="3" x2="3" y2="15"/>
+        </svg>
+      </button>
+      <div class="modal__panel-content"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SETTINGS — appearance, design and motion.
+       Rows are shown/hidden by src/js/settings.js according to
+       data/site.js → settings; the switching itself is owned by
+       src/js/appearance.js.
+       ============================================================ -->
+  <div id="settings-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal__backdrop" aria-hidden="true"></div>
+    <div class="modal__panel modal__panel--narrow">
+      <button class="modal__close" data-close-modal aria-label="Close settings">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="3" x2="15" y2="15"/>
+          <line x1="15" y1="3" x2="3" y2="15"/>
+        </svg>
+      </button>
+
+      <div class="settings">
+        <p class="settings__kicker">Settings</p>
+        <h2 class="settings__title" id="settings-title">How this site looks</h2>
+
+        <div class="settings__row" data-settings-row="appearance">
+          <div class="settings__label">
+            <span class="settings__name">Appearance</span>
+            <span class="settings__hint">Light for daytime, dark for the evening.</span>
+          </div>
+          <div class="seg" role="group" aria-label="Appearance">
+            <button class="seg__btn" type="button" data-set-theme="light" aria-pressed="false">Light</button>
+            <button class="seg__btn" type="button" data-set-theme="dark"  aria-pressed="false">Dark</button>
+          </div>
+        </div>
+
+        <div class="settings__row" data-settings-row="design">
+          <div class="settings__label">
+            <span class="settings__name">Design</span>
+            <span class="settings__hint">This season&rsquo;s World Cup look, or the original Sands of Time beach.</span>
+          </div>
+          <div class="seg" role="group" aria-label="Design">
+            <button class="seg__btn" type="button" data-set-skin="worldcup" aria-pressed="false">World Cup</button>
+            <button class="seg__btn" type="button" data-set-skin="sands"    aria-pressed="false">Sands of Time</button>
+          </div>
+        </div>
+
+        <div class="settings__row" data-settings-row="motion">
+          <div class="settings__label">
+            <span class="settings__name">Motion</span>
+            <span class="settings__hint">Turn off the ambient animation if it is distracting.</span>
+          </div>
+          <div class="seg" role="group" aria-label="Motion">
+            <button class="seg__btn" type="button" data-set-motion="full"    aria-pressed="false">Full</button>
+            <button class="seg__btn" type="button" data-set-motion="reduced" aria-pressed="false">Reduced</button>
+          </div>
+        </div>
+
+        <div class="settings__foot">
+          <p class="settings__note">Saved on this device only.</p>
+          <button class="btn btn--primary btn--sm" type="button" data-settings-done>Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
        FOOTER (present on every screen)
        ============================================================ -->
   <footer class="site-footer">
@@ -602,12 +980,12 @@
           <span class="gdg-credit__org">Google Developer Group</span>
           <span>
             <span class="gdg-credit__loc">Xavier Ateneo</span>
-            <span class="gdg-credit__season">Sands of Time</span>
+            <span class="gdg-credit__season" data-season="footerSeason">Xavier Cup</span>
           </span>
         </div>
       </div>
 
-      <p class="site-footer__tagline">Built for Sands of Time · General Assembly Organizational Trip</p>
+      <p class="site-footer__tagline" data-season="footerTagline">Built for The Xavier Cup · University-wide Season</p>
     </div>
   </footer>
 

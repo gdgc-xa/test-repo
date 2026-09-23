@@ -1,13 +1,33 @@
 # Campus Compass
 
-> **Xavier University – Ateneo de Cagayan** · A campus-wide directory of every student organization, adapted for the **Sands of Time** organizational trip theme.
+> **Xavier University – Ateneo de Cagayan** · A campus-wide directory of every student
+> organization, plus the campus events calendar and **The Xavier Cup** season.
 > Created by **GDG on Campus – Xavier Ateneo**.
+>
+> The site ships in the **World Cup** design. The original **Sands of Time** beach design
+> is still here in full and can be switched back to from the gear icon in the nav.
 
 Static HTML / CSS / vanilla JS. No frameworks, no build step, no npm dependencies.
 
-> **Picking this up after a break?** Read [HANDOFF.md](HANDOFF.md) first —
-> it covers the session history, the two scene geometries, a known regression,
-> and the gotchas that will otherwise cost you an hour each.
+---
+
+## The one-minute version
+
+Five screens: **Discover · Organizations · Events · The Xavier Cup · About**.
+
+Everything you are likely to want to change lives in `src/js/data/`:
+
+| I want to… | Edit |
+|---|---|
+| Add or remove an event | `data/events.js` → `EVENTS` |
+| Add a fixture, a venue, or a news post | `data/xavier-cup.js` |
+| Turn a whole tab off, rename it, change the contact e-mail | `data/site.js` |
+| Change which design the site opens in | `data/site.js` → `skin.defaultSkin` |
+| Feature an org on Discover/Browse | `data/featured.js` |
+| Add or correct an org | `data/organizations.js` |
+
+No file in `src/js/screens/` or `src/js/components/` contains content. If you find
+yourself editing a template to change a word, the word belongs in a data file.
 
 ---
 
@@ -44,8 +64,14 @@ campus-compass/
 │   │   ├── layout.css               # page-level layout: max-widths, section grid, responsive breakpoints
 │   │   ├── animations.css           # every @keyframes block (drift, wave, sand, reveal, modal…)
 │   │   │
+│   │   ├── skins.css                # World Cup ⇄ Sands of Time: which scene is painted
+│   │   │
 │   │   ├── components/              # one file, one component. Never reach into a sibling.
 │   │   │   ├── nav.css              # top navigation bar
+│   │   │   ├── status.css           # Upcoming / Ongoing / Finished pill
+│   │   │   ├── detail.css           # inside of the shared event/fixture modal
+│   │   │   ├── cup-map.css          # Xavier Cup venue map, pins, venue panel
+│   │   │   ├── settings.css         # the gear panel and its segmented controls
 │   │   │   ├── nav-sheet.css        # mobile hamburger sheet (<=820px)
 │   │   │   ├── venue-map.css        # org-fair map panel in the booth
 │   │   │   ├── button.css           # .btn base + --primary, --sun, --ghost, --back
@@ -64,12 +90,17 @@ campus-compass/
 │   │   └── screens/
 │   │       ├── landing.css          # hero stage, primitives positioning, dune divider
 │   │       ├── browse.css           # explore-head, chip row, grid layout
-│   │       └── booth.css            # booth split (rendered inside modal panel)
+│   │       ├── booth.css            # booth split (rendered inside modal panel)
+│   │       ├── events.css           # Events tab
+│   │       └── cup.css              # The Xavier Cup tab
 │   │
 │   ├── js/
 │   │   ├── main.js                  # entry: hydrate + init router + observers + delights
 │   │   ├── router.js                # SPA screen switching driven by URL query string
-│   │   ├── theme-toggle.js          # light/dark toggle, persisted to localStorage
+│   │   ├── appearance.js            # theme + design skin + motion, persisted to localStorage
+│   │   ├── settings.js              # the gear panel
+│   │   ├── lib/dates.js             # every date the site prints + the status logic
+│   │   ├── lib/html.js              # escaping + link safety for the newer templates
 │   │   ├── reveal-observer.js       # shared IntersectionObserver + watchReveals()
 │   │   │
 │   │   ├── footprints.js            # delight #1 — footprints in the sand footer
@@ -80,7 +111,10 @@ campus-compass/
 │   │   ├── data/venue.js             # the quad, its tents, who stands where
 │   │   │
 │   │   ├── data/
+│   │   │   ├── site.js              # THE SWITCHBOARD — tabs, contact, default skin, season words
 │   │   │   ├── categories.js        # CATEGORIES[], SHORT_LABEL, FULL_LABEL, COLOR_OF, THEME_OF
+│   │   │   ├── events.js            # EVENTS[] + the Events tab's own switches
+│   │   │   ├── xavier-cup.js        # CUP_CONFIG, CUP_MAP, GAMES[], CUP_NEWS
 │   │   │   └── organizations.js     # ORGS[] and fetchOrgFromFacebook(handle) STUB
 │   │   │
 │   │   ├── components/
@@ -89,11 +123,20 @@ campus-compass/
 │   │   │   ├── search-shell.js      # attachSearchShell(), setSearchValue()
 │   │   │   ├── booth.js             # boothHtml(org) — big booth template
 │   │   │   ├── facebook-card.js     # fbCardHtml(org)
+│   │   │   ├── status.js            # the Upcoming / Ongoing / Finished pill
+│   │   │   ├── event-card.js        # one event as a card (+ the search matcher)
+│   │   │   ├── event-detail.js      # the event modal's contents
+│   │   │   ├── game-card.js         # one fixture as a card, sport glyphs, scoreline
+│   │   │   ├── game-detail.js       # the fixture modal's contents
+│   │   │   ├── cup-map.js           # the consolidated venue map + pins
+│   │   │   ├── detail-modal.js      # the shell events and fixtures share
 │   │   │   └── modal.js             # openModal / closeModal + focus trap + Esc
 │   │   │
 │   │   └── screens/
 │   │       ├── landing.js           # tag cloud hydration + hero search wiring
 │   │       ├── browse.js            # filter state + intersect + grid render
+│   │       ├── events.js            # date ordering, status filter, search, detail
+│   │       ├── cup.js               # counters, search, map, venue panel, fixtures, news
 │   │       └── booth.js             # renderBooth(id) — opens booth-modal
 │   │
 │   └── html/                        # (unused — screens are hydrated by JS, no partials)
@@ -124,15 +167,22 @@ campus-compass/
 ### Categories (11 clusters)
 `src/js/data/categories.js` — one edit updates everywhere: chip row, tag cloud, card tags, booth tags, legend copy.
 
-### Orgs (69)
+### Orgs (75)
 `src/js/data/organizations.js` — pure data, generated from the official roster PDF
 ("Link + Name and Description + Org Head"), so names, e-mails and Facebook handles
 match the source exactly.
 
-* **69 orgs across 11 clusters** (the roster adds **Religious** to the original ten).
-* **All 69 have logos**, re-encoded to 320px WebP in `assets/orgs/` — from the
+* **75 orgs across 11 clusters** (the roster adds **Religious** to the original ten).
+* **All 75 have logos**, re-encoded to 320px WebP in `assets/orgs/` — from the
   roster PDF except XU-XCEED and IIEE, whose page pictures were supplied
-  separately. Cards still fall back to initials when `logo` is null.
+  separately. Cards still fall back to initials when `logo` is null, though
+  nothing needs that at present. XELLO's roster artwork is a cover photo with
+  the seal small and centred, so its WebP is a centre crop on the seal rather
+  than the whole picture.
+* **Three are start-up orgs.** ATTG, Kazoku and Forerunners carry
+  `startup: true`, which renders a "Start-Up Org" pill on the card and in the
+  booth. It is a *status*, not a cluster — they still carry their normal
+  cluster tag and still turn up under that chip.
 * Every entry carries `pending: true` — the long-form copy (description, meeting
   time, officers, events) is not in the roster. `fetchOrgFromFacebook(handle)` is
   the slot for it.
@@ -149,14 +199,74 @@ match the source exactly.
 - `?screen=browse&filter=<id>` or `?filters=a,b` → browse with preselected chip(s)
 - `?screen=browse&q=<text>` → browse w/ search query
 - `?…&org=<id>` → open the booth modal (independent of screen)
+- `?screen=events` → events; `&event=<id>` opens one; `&status=…&q=…` filter the list
+- `?screen=cup` → the Xavier Cup; `&game=<id>` opens a fixture;
+  `&venue=<id>` selects a venue on the map; `&status=…&sport=…&q=…` filter the list
 
-### Themes
-- Light — the day palette from `DESIGN.md` §2.
-- Dark — **night at the beach**: deep-sand ground, cream text, moonlit indigo ocean, amber lantern-glow hourglass, faint stars in the sky above the sea.
+A tab switched off in `data/site.js` is refused by the router — an old link to it
+lands on Discover rather than an empty screen, and its nav entry is removed from the
+DOM entirely rather than hidden.
 
-Toggle in the nav (sun / moon icon). Persists to `localStorage`. First-time visitors get the OS `prefers-color-scheme` value.
+### Designs and themes
+
+Two axes, both saved per device and both switchable from the **gear icon** in the nav:
+
+**Design (`data-skin`)**
+- `worldcup` — the current season. Floodlit stadium hero, pitch stripes, trophy in the
+  lockup, bunting in the corners, green-and-gold palette.
+- `sands` — the original **Sands of Time** beach, untouched: sea, surf, hourglass,
+  palms, the closing tide scene.
+
+Both designs exist in the markup at the same time and exactly one is shown
+(`src/css/skins.css`), which is what makes the switch instant. Colour lives in
+`tokens.css`; structure lives in `skins.css`. The default is set in
+`data/site.js → skin.defaultSkin`, and `skin.allowToggle: false` locks everyone to it.
+
+The season wording (brand subtitle, hero tagline, footer line) comes from
+`data/site.js → season`, one set per design, stamped onto any `[data-season]` element.
+
+**Theme (`data-theme`)**
+- Light and dark, for either design. Dark is *night at the beach* under Sands of Time
+  and *a floodlit night match* under World Cup.
+
+**Motion (`data-motion`)** — a third row in Settings, so someone whose OS says one
+thing can still ask this site for the other. `prefers-reduced-motion` is still honoured
+on its own.
+
+All three are applied by a small inline script in `<head>` before first paint, so the
+page never flashes the wrong design. `src/js/appearance.js` owns them after that.
+
+### The Xavier Cup
+
+`data/xavier-cup.js` holds four independent things: `CUP_CONFIG` (which sections
+appear at all), `CUP_MAP` (the campus map — landmarks and venues in viewBox units),
+`GAMES` (the fixtures) and `CUP_NEWS` (the posts).
+
+Upcoming / Ongoing / Finished is worked out from the clock in `lib/dates.js`, and the
+tab re-checks every 60 seconds so a match goes live while the page is open. A manual
+`status` on a fixture beats the clock — that is how a postponement is expressed.
+
+The search box and the map are deliberately independent: searching never moves the
+map, and selecting a venue never clears a search.
+
+There is a wireframe pack for this tab (`xavier-cup-wireframes.pdf`) covering the
+desktop and mobile layouts, component anatomy, states and URLs.
+
+### Events
+
+`data/events.js`. Add an object, save. The tab sorts by date on its own — ongoing
+first, then soonest upcoming, then most recent result — and pulls the host org's name,
+logo and cluster colour from `organizations.js` when the event names an `org`.
 
 ---
+
+### Facebook pages without a vanity handle
+
+Five pages in the roster have no vanity handle — GEMS, OSAS, CMMA and
+Forerunners are numeric `profile.php?id=…` links, and Kazoku is a legacy
+`/Name-<digits>/` URL. They carry `fbHandle: null`, and the card, booth and
+page card print the page's own address instead of a generic "Facebook page"
+label — never `facebook.com/<display name>`, which would not resolve.
 
 ## Facebook API integration slot
 
@@ -170,7 +280,8 @@ Toggle in the nav (sun / moon icon). Persists to `localStorage`. First-time visi
 2. **Mobile hamburger dropdown** — the `<button class="nav-toggle">` shows below 820px but has no attached menu; the user's decision to strip prototype affordances left the nav paths accessible via URL bar / breadcrumbs. Add a mobile nav sheet when needed.
 3. **Sign in / Add my org** buttons — visual only, no auth or form yet.
 4. **Save to my list / Join this org** CTAs in the booth — stub buttons.
-5. **Events / For orgs** nav links point back to Discover — no dedicated screens yet.
+5. ~~**Events / For orgs** nav links point back to Discover~~ — Events now has its own
+   screen, and The Xavier Cup was added alongside it. "For orgs" was dropped.
 
 ## Extracted illustrations
 
@@ -189,4 +300,5 @@ Small mockup-only decorations that were not extracted separately (they exist ins
 
 ## Credit
 
-Designed and built by **Google Developer Group on Campus – Xavier Ateneo** for the **Sands of Time** organizational trip.
+Designed and built by **Google Developer Group on Campus – Xavier Ateneo**, for the
+**Sands of Time** organizational trip and **The Xavier Cup** season.

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 150" role="img" aria-label="Bunting">
+  <title>Bunting pennants</title>
+  <path fill="none" stroke="#3D2817" stroke-width="3.5" stroke-linecap="round"
+        d="M 0 10 Q 105 62 210 44 Q 315 26 420 78"/>
+  <g stroke="#3D2817" stroke-width="2.6" stroke-linejoin="round">
+    <path fill="#4285F4" d="M 18 19 L 52 33 L 27 57 Z"/>
+    <path fill="#EA4335" d="M 66 39 L 100 47 L 78 74 Z"/>
+    <path fill="#EFB100" d="M 114 50 L 148 53 L 129 82 Z"/>
+    <path fill="#34A853" d="M 162 53 L 196 51 L 180 82 Z"/>
+    <path fill="#4285F4" d="M 210 45 L 244 39 L 231 71 Z"/>
+    <path fill="#EA4335" d="M 258 35 L 292 28 L 282 61 Z"/>
+    <path fill="#EFB100" d="M 306 26 L 340 24 L 333 57 Z"/>
+    <path fill="#34A853" d="M 354 30 L 388 38 L 376 69 Z"/>
+  </g>
+</svg>

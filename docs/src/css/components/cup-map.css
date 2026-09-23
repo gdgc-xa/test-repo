@@ -1,0 +1,303 @@
+/* ============================================================
+   cup-map.css — the consolidated venue map and the panel beside it.
+
+   The map is inline SVG, so every colour below is a token and the
+   whole thing re-themes with the site. Pins are real controls:
+   they take focus, they announce a pressed state, and they are
+   sized for a thumb, not a mouse.
+   ============================================================ */
+
+.cup-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* ---------- The ground ---------- */
+.cup-map__ground { fill: var(--surface-2); }
+.cup-map__area {
+  fill: var(--cup-green-soft);
+  stroke: color-mix(in srgb, var(--cup-green) 30%, transparent);
+  stroke-width: 2;
+}
+.cup-map__area-label {
+  fill: var(--muted);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-anchor: middle;
+}
+.cup-map__path {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 10;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+.cup-map__building {
+  fill: color-mix(in srgb, var(--muted) 82%, var(--ink));
+  stroke: color-mix(in srgb, var(--ink) 18%, transparent);
+  stroke-width: 1.5;
+}
+.cup-map__building-label {
+  fill: var(--surface);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/* ---------- Pins ---------- */
+.cup-pin { cursor: pointer; }
+.cup-pin.is-static { cursor: default; pointer-events: none; }
+
+.cup-pin__hit { fill: transparent; }
+.cup-pin__dot {
+  fill: var(--cup-green);
+  stroke: var(--surface);
+  stroke-width: 4;
+  transition: fill 180ms, r 180ms;
+}
+.cup-pin__roof {
+  fill: none;
+  stroke: var(--cup-green-dk);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cup-pin__count {
+  fill: #fff;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.cup-pin__labelbg {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+.cup-pin__label {
+  fill: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.cup-pin:hover .cup-pin__dot { fill: var(--cup-green-lt); }
+.cup-pin:focus-visible { outline: none; }
+.cup-pin:focus-visible .cup-pin__dot {
+  stroke: var(--cup-gold);
+  stroke-width: 6;
+}
+
+/* A venue with nothing booked is still drawn — it is part of the
+   campus — but it recedes. */
+.cup-pin.is-empty .cup-pin__dot { fill: var(--border-strong); }
+.cup-pin.is-empty .cup-pin__roof { stroke: var(--muted); }
+.cup-pin.is-empty .cup-pin__labelbg { opacity: 0.6; }
+.cup-pin.is-empty .cup-pin__label { fill: var(--muted); }
+
+/* Selected */
+.cup-pin__halo {
+  fill: none;
+  stroke: var(--cup-gold);
+  stroke-width: 4;
+}
+.cup-pin.is-selected .cup-pin__dot { fill: var(--cup-gold-dk); }
+.cup-pin.is-selected .cup-pin__labelbg {
+  fill: var(--cup-gold-dk);
+  stroke: var(--cup-gold-dk);
+}
+.cup-pin.is-selected .cup-pin__label { fill: #fff; }
+
+/* Live: the ring breathes so the eye finds it without the pin moving */
+.cup-pin__pulse {
+  fill: color-mix(in srgb, var(--red) 45%, transparent);
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: venuePulse 2.4s ease-in-out infinite;
+}
+.cup-pin.is-live .cup-pin__dot { fill: var(--red); }
+
+/* ---------- Legend ---------- */
+.cup-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.cup-legend__item { display: inline-flex; align-items: center; gap: 7px; }
+.cup-legend__swatch {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--border);
+}
+.cup-legend__swatch--live  { background: var(--red); }
+.cup-legend__swatch--has   { background: var(--cup-green); }
+.cup-legend__swatch--empty { background: var(--border-strong); }
+.cup-legend__item--hint { color: var(--muted); font-style: italic; }
+
+/* ============================================================
+   VENUE PANEL — what is on at the selected venue, or the list of
+   venues when nothing is selected. The list matters: on a phone
+   the map is a picture, and this is how you actually use it.
+   ============================================================ */
+
+.venue-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  align-self: stretch;
+}
+.venue-panel__head { padding-bottom: var(--space-4); border-bottom: 1px solid var(--border); }
+.venue-panel__title {
+  margin-top: var(--space-1);
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+}
+.venue-panel__hint {
+  margin-top: var(--space-2);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.venue-panel__clear { margin-top: var(--space-4); }
+.venue-panel__empty {
+  margin-top: var(--space-4);
+  font-size: 13.5px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ---------- Venue list ---------- */
+.venue-rows { display: flex; flex-direction: column; margin-top: var(--space-2); }
+.venue-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 11px var(--space-2);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 150ms;
+}
+.venue-row:last-child { border-bottom: 0; }
+.venue-row:hover { background: var(--surface-2); }
+.venue-row__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.venue-row__count {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.venue-row__live {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--red-soft);
+  color: var(--red-ink);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.venue-row.is-empty .venue-row__name { color: var(--muted); }
+
+/* ---------- Grouped fixtures at one venue ---------- */
+.venue-group { margin-top: var(--space-4); }
+.venue-group__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-2);
+}
+.venue-group__label span {
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  font-size: 10.5px;
+}
+
+.mini-game {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  margin-bottom: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms, transform 160ms, background 160ms;
+}
+.mini-game:hover {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  transform: translateY(-1px);
+}
+.mini-game__time {
+  grid-column: 1;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ocean);
+}
+.mini-game__title {
+  grid-column: 1;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.mini-game__meta {
+  grid-column: 1;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.mini-game__status { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cup-pin__pulse { animation: none !important; }
+}
+
+/* ---------- Phones ----------
+   At this width a pin label is three pixels tall and unreadable,
+   and the venue list below the map says the same thing properly.
+   Drop the labels, keep the counts, and let the list do the work. */
+@media (max-width: 720px) {
+  .cup-map:not(.cup-map--mini) .cup-pin__labelgroup { display: none; }
+  .cup-map:not(.cup-map--mini) .cup-pin__count { font-size: 26px; }
+  .cup-map__area-label { font-size: 19px; }
+  .cup-map__building-label { font-size: 17px; }
+}

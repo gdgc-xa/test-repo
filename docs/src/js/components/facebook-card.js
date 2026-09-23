@@ -50,16 +50,30 @@ export function fbCardHtml(org) {
         </div>
 
         <div id="fb-card-name-${org.id}" class="fb-card__name">${escapeHtml(org.name)}</div>
-        <div class="fb-card__handle">${org.fbHandle ? '@' + escapeHtml(org.fbHandle) : 'Facebook page'}</div>
+        ${org.fbHandle
+          ? `<div class="fb-card__handle">@${escapeHtml(org.fbHandle)}</div>`
+          : ''}
       </div>
 
       <a class="fb-card__link" href="${escapeHtml(org.fbUrl)}" target="_blank" rel="noopener noreferrer">
         <span class="fb-card__link-mark">f</span>
-        ${org.fbHandle ? 'facebook.com/' + escapeHtml(org.fbHandle) : 'View page on Facebook'}
+        <span class="fb-card__link-text">${org.fbHandle ? 'facebook.com/' + escapeHtml(org.fbHandle) : escapeHtml(fbLabel(org))}</span>
         <span class="fb-card__link-arrow" aria-hidden="true">↗</span>
       </a>
     </aside>
   `;
+}
+
+/**
+ * The page's address, minus the scheme, for pages with no vanity handle.
+ * Numeric profile.php pages are still real pages — printing the address
+ * beats a generic label, and it matches where the link actually goes.
+ */
+function fbLabel(org) {
+  return String(org.fbUrl || '')
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/\/$/, '');
 }
 
 function escapeHtml(s) {

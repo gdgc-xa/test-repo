@@ -91,7 +91,15 @@
   font-size: 12px;
   flex: 0 0 auto;
 }
-.fb-card__link-arrow { margin-left: auto; color: var(--muted); }
+/* Pages with no vanity handle print their full address here, which can be
+   longer than the card — truncate rather than push the arrow off the edge. */
+.fb-card__link-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fb-card__link-arrow { margin-left: auto; padding-left: var(--space-2); color: var(--muted); }
 
 /* Pending — grayed out when FB API hasn't populated */
 .fb-card__emblem img {

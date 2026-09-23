@@ -244,3 +244,58 @@
   .person--featured .person__avatar { width: 60px; height: 60px; font-size: 20px; }
   .person--featured .person__name { font-size: 18px; }
 }
+
+/* ============================================================
+   CONTACT — rendered by screens/about.js from data/site.js.
+   Full width under the two cards: it is the one thing on this
+   screen a reader might have come looking for.
+   ============================================================ */
+.about-contact { margin-top: var(--space-5); }
+.about-contact[hidden] { display: none; }
+
+.about-card--contact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  border-left: 4px solid var(--ocean);
+}
+.about-contact__text { min-width: 0; }
+.about-contact__mail {
+  display: inline-block;
+  margin-top: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ocean);
+  word-break: break-all;
+}
+.about-contact__mail:hover { text-decoration: underline; }
+.about-contact__alt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+.about-contact__alt-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.about-contact__alt-mail {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ocean);
+  word-break: break-all;
+}
+.about-contact__btn { flex: 0 0 auto; }
+
+@media (max-width: 720px) {
+  .about-card--contact { flex-direction: column; align-items: flex-start; }
+  .about-contact__btn { width: 100%; }
+}

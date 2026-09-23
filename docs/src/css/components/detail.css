@@ -1,0 +1,235 @@
+/* ============================================================
+   detail.css — the inside of the shared detail modal, used by an
+   event and by a Xavier Cup fixture.
+
+   Same furniture as the booth (screens/booth.css): a hero at the
+   top, a wide main column, a narrow aside of facts. Somebody who
+   has opened an org booth already knows how to read this one.
+   ============================================================ */
+
+/* The settings panel is the one modal that should not be 1000px wide. */
+.modal__panel--narrow { max-width: 560px; }
+
+.detail {
+  padding: var(--space-6);
+  --detail-accent: var(--ocean);
+}
+
+/* ---------- Hero ---------- */
+.detail__hero {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border);
+  padding-right: 48px;        /* clear of the close button */
+}
+.detail__hero--game { flex-direction: column; gap: var(--space-3); }
+
+.detail__datetile {
+  flex: 0 0 auto;
+  width: 84px;
+  padding: var(--space-3) 0;
+  border-radius: var(--radius);
+  background: var(--detail-accent);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+}
+.detail__datetile .date-tile__day { font-size: 32px; }
+
+.detail__headtext { min-width: 0; }
+.detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--space-3);
+}
+.detail__title {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.7px;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.detail__when {
+  margin-top: var(--space-2);
+  font-size: 14.5px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.detail__rel { color: var(--detail-accent); }
+
+/* ---------- Body split ---------- */
+.detail__grid {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  align-items: start;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+.detail__body {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+.detail__cta { margin-top: var(--space-4); }
+
+/* ---------- Facts ---------- */
+.detail-facts { display: flex; flex-direction: column; }
+.detail-fact {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.detail-fact:last-child { border-bottom: 0; padding-bottom: 0; }
+.detail-fact__label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.detail-fact__value {
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 600;
+  line-height: 1.45;
+}
+.detail-fact__none { color: var(--muted); font-style: italic; font-weight: 500; }
+.detail-fact__extra { margin-top: 4px; font-size: 12.5px; color: var(--muted); font-weight: 500; }
+
+/* ---------- Host chip: the bridge back to the org booth ---------- */
+.host-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2);
+  margin: -2px 0 0 calc(var(--space-2) * -1);
+  border-radius: var(--radius);
+  text-align: left;
+  cursor: pointer;
+  transition: background 160ms;
+}
+.host-chip:hover { background: var(--surface-2); }
+.host-chip__logo,
+.host-chip__initials {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  flex: 0 0 auto;
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-family: var(--font-serif);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink-2);
+}
+.host-chip__text { display: flex; flex-direction: column; min-width: 0; }
+.host-chip__name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.host-chip__hint { font-size: 11.5px; color: var(--detail-accent); font-weight: 600; }
+
+/* ---------- Fixture scoreline ---------- */
+.versus {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+.versus--solo {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.versus__side {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.versus__side:last-of-type { flex-direction: row-reverse; text-align: right; }
+.versus__team {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink-2);
+  line-height: 1.25;
+}
+.versus__score {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.versus__side.is-winner .versus__team { color: var(--ink); }
+.versus__side.is-winner .versus__score { color: var(--detail-accent); }
+.versus__sep {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+/* ---------- Where it is being played ---------- */
+.detail__where { margin-top: var(--space-5); }
+.detail__venue-name {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.detail__venue-note {
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.detail__map {
+  margin-top: var(--space-4);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.detail__venue-cta { margin-top: var(--space-4); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+  .detail { padding: var(--space-5) var(--space-4) var(--space-6); }
+  .detail__grid { grid-template-columns: 1fr; }
+  .detail__title { font-size: 24px; }
+  .detail__hero { gap: var(--space-4); padding-right: 44px; }
+  .detail__datetile { width: 66px; }
+  .detail__datetile .date-tile__day { font-size: 26px; }
+}
+@media (max-width: 520px) {
+  .detail__hero { flex-direction: column; }
+  .versus { flex-direction: column; align-items: stretch; gap: var(--space-2); }
+  .versus__side,
+  .versus__side:last-of-type {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+  .versus__sep { display: none; }
+  .versus__score { font-size: 26px; }
+}
