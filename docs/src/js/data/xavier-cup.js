@@ -8,6 +8,7 @@
      2. CUP_MAP     the campus map: landmarks + venue pins
      3. GAMES       every match, with its venue and kickoff time
      4. CUP_NEWS    the News & Updates column
+     5. CUP_EVENTS  the Upcoming Events cards under the news
 
    The tab works out Upcoming / Ongoing / Finished from the clock,
    counts the games at each venue for the map, and powers the
@@ -27,7 +28,7 @@ export const CUP_CONFIG = {
   name: 'The Xavier Cup',
   kicker: 'University-wide · 2026',
   tagline: 'One campus. Every college. One trophy.',
-  lede: 'Every fixture of the season — where it is being played, when it starts, and how it finished. Pick your team to follow its games, tap the map to see what is on at a venue, or search for a match.',
+  lede: 'Every fixture of the season — where it is being played, when it starts, and how it finished. Tap the map to see what is on at a venue, or open Fixtures to follow your team.',
 
   /** The season itself. Drives the countdown on Discover and the
       "Day 3 of 11" line once play has started. Plain dates. */
@@ -49,7 +50,6 @@ export const CUP_CONFIG = {
   showCounters: true,      // the upcoming / ongoing / finished tallies
   showTeams: true,         // the "follow your team" picker
   showFeatured: true,      // one featured match per day, with a day pager
-  showSearch: true,        // the game search box + its results
   showMap: true,           // the consolidated venue map
   showSchedule: true,      // the full fixture list below the map
   showCalendar: true,      // the month calendar of the chosen team's games
@@ -393,6 +393,53 @@ export const CUP_NEWS = {
       title: 'Parade of colleges call time',
       body: 'Contingents assemble at the SBM steps by 2:30 PM on opening day. Bring your college colours — marshals will be at the quad entrances.',
       link: null,
+    },
+  ],
+};
+
+/* ============================================================
+   5. UPCOMING EVENTS
+   ------------------------------------------------------------
+   The cards at the bottom of News & Updates (from the TXC
+   proposal). Cards show in this order.
+
+   team         an id from data/teams.js; the card prints that
+                team's name and crest
+   photo        a file in assets/events/ (keep it under ~200 KB,
+                roughly 900px wide). null = the team crest on navy
+   title / description   the card text
+   ============================================================ */
+export const CUP_EVENTS = {
+  enabled: true,
+  title: 'Upcoming Events',
+  items: [
+    {
+      id: 'wizards-most-wanted',
+      team: 'ccs',
+      title: 'Wizard’s Most Wanted',
+      photo: null,
+      description: 'CCS organization GDGC’s Chief Technology Officer claims that the moon landing was fake.',
+    },
+    {
+      id: 'pythons-vs-warriors',
+      team: 'nsg',
+      title: 'Pythons VS Warriors',
+      photo: 'assets/events/pythons.jpg',
+      description: 'NSG started the kick off and are completely on par with the undefeated ENG’G Warriors.',
+    },
+    {
+      id: 'warriors-iron-wall',
+      team: 'eng',
+      title: 'Warriors Building an Iron Wall',
+      photo: 'assets/events/warriors.jpg',
+      description: 'ENG’G’s volleyball iron wall has been impenetrable so far! How will they do against the fierce Wolves..',
+    },
+    {
+      id: 'eagles-at-the-top',
+      team: 'sbm',
+      title: 'Eagles at the Top',
+      photo: 'assets/events/eagles.jpg',
+      description: 'SBM reigns victorious as the Champions of TXC 2025!',
     },
   ],
 };

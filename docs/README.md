@@ -23,6 +23,7 @@ Everything you are likely to want to change lives in `src/js/data/`:
 | Add or remove an event | `data/events.js` → `EVENTS` |
 | Add a fixture, a venue, or a news post | `data/xavier-cup.js` |
 | Rename a team or swap its sprite | `data/teams.js` |
+| Add an Upcoming Events card (News & Updates) | `data/xavier-cup.js` → `CUP_EVENTS`, photo in `assets/events/` |
 | Change the season dates or turn off the preview clock | `data/xavier-cup.js` → `CUP_CONFIG.season`, `CUP_CONFIG.previewNow` |
 | Turn a whole tab off, rename it, change the contact e-mail | `data/site.js` |
 | Change which design the site opens in | `data/site.js` → `skin.defaultSkin` |
@@ -216,7 +217,8 @@ match the source exactly.
 - `?…&org=<id>` → open the booth modal (independent of screen)
 - `?screen=events` → events; `&event=<id>` opens one; `&status=…&q=…` filter the list
 - `?screen=cup` → the Xavier Cup; `&game=<id>` opens a fixture;
-  `&venue=<id>` selects a venue on the map; `&status=…&sport=…&q=…` filter the list
+  `&venue=<id>` selects a venue on the map; `&status=…&sport=…` filter the list;
+  `&tab=map|fixtures|calendar|news` opens one of its four views
 
 A tab switched off in `data/site.js` is refused by the router — an old link to it
 lands on Discover rather than an empty screen, and its nav entry is removed from the
@@ -286,8 +288,12 @@ section reads. Setup: add a Page access token as the repository secret `FB_PAGE_
 It reads the TXC test page by default; set the repository variable `FB_PAGE_ID` to point
 it at the real CSG page. Until the file has posts, the hand-written `CUP_NEWS.posts` show.
 
-The search box and the map are deliberately independent: searching never moves the
-map, and selecting a venue never clears a search.
+**Layout.** The tab is four views under a sticky tab bar, as in the TXC proposal:
+**Map** (banner, counters, venue map), **Fixtures** (follow your team, featured match,
+the full list with status and sport filters), **Calendar** (team picker and the season
+month) and **News & Updates** (the newest post as a wide tile, the rest in a looping
+carousel with a "See all" grid, then the Upcoming Events cards from `CUP_EVENTS`). The open view is kept in `?tab=map|fixtures|calendar|news`.
+The fixture search box was removed; the sport and status chips cover filtering.
 
 There is a wireframe pack for this tab (`xavier-cup-wireframes.pdf`) covering the
 desktop and mobile layouts, component anatomy, states and URLs.

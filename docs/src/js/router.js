@@ -12,6 +12,7 @@
      ?…&event=<id>            open an event       (events)
      ?…&game=<id>             open a fixture      (cup)
      ?screen=cup&venue=<id>   the map with that venue selected
+     ?screen=cup&tab=<id>     one Xavier Cup view: map | fixtures | calendar | news
      ?…&status=…&sport=…      the list filters, so a filtered view
                               can be linked to and shared
 
@@ -67,6 +68,7 @@ export function currentQuery() {
     venue:  q.get('venue') || '',
     status: q.get('status') || '',
     sport:  q.get('sport') || '',
+    tab:    q.get('tab') || '',
   };
 }
 
@@ -83,6 +85,7 @@ export function navigate(params = {}) {
   if (merged.venue)  q.set('venue', merged.venue);
   if (merged.status) q.set('status', merged.status);
   if (merged.sport)  q.set('sport', merged.sport);
+  if (merged.tab)    q.set('tab', merged.tab);
 
   // location.pathname, not '/': the site is served from a subpath on
   // GitHub Pages, and a bare '/' would navigate off it to the domain root.

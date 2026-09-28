@@ -1,22 +1,24 @@
 /* ============================================================
    screens/cup.js — The Xavier Cup tab.
 
-   Independent pieces, each switchable in data/xavier-cup.js
-   (CUP_CONFIG.show*):
+   Four views under a sticky tab bar, as in the TXC proposal. One
+   is shown at a time and the choice is kept in ?tab=…
 
-     1. HERO + COUNTERS  how many fixtures are upcoming / live / done
-     2. TEAMS            pick the team you follow; its games get a
-                         lime ring everywhere and fill the calendar
-     3. FEATURED MATCH   one game per day under a ‹ day › pager
-     4. SEARCH           its own box and its own result grid. It does
-                         NOT drive the map — searching for a team
-                         should not silently re-centre the campus.
-     5. MAP              every venue as a pin, the number of fixtures
-                         on it, live venues ringed. Selecting a pin
-                         fills the panel beside it.
-     6. SCHEDULE         the full fixture list with status + sport chips
-     7. CALENDAR         the season as a month, with a day's games below
-     8. NEWS             the CSG Facebook page, via data/cup-posts.json
+     MAP        hero + counters (how many fixtures are upcoming /
+                live / done), and every venue as a pin. Selecting a
+                pin fills the panel beside it.
+     FIXTURES   pick the team you follow (its games get a lime ring
+                everywhere), one featured match per day under a
+                ‹ day › pager, and the full list with status + sport
+                chips
+     CALENDAR   the team picker again, and the season as a month with
+                the chosen day's games below
+     NEWS       the CSG Facebook page via data/cup-posts.json: the
+                newest post large, the rest in a looping carousel
+                that "See all" swaps for a grid
+
+   Each piece can still be switched off in data/xavier-cup.js
+   (CUP_CONFIG.show*); a view with nothing left in it loses its tab.
 
    The clock decides Upcoming / Ongoing / Finished (lib/dates.js),
    read through cupNow() so a preview clock can stand in for it,
@@ -25,12 +27,12 @@
    ============================================================ */
 
 import {
-  CUP_CONFIG, CUP_MAP, CUP_NEWS, GAMES, VENUE_BY_ID, sportsInPlay,
+  CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, GAMES, VENUE_BY_ID, sportsInPlay,
   cupNow, isPreviewClock,
 } from '../data/xavier-cup.js';
-import { TEAM_BY_ID } from '../data/teams.js';
+import { TEAM_BY_ID, teamFor } from '../data/teams.js';
 import { byWhen, parseDate, formatDay, formatTime, formatRange } from '../lib/dates.js';
-import { resolveGame, gameMatches } from '../components/game-card.js';
+import { resolveGame } from '../components/game-card.js';
 import { matchCardHtml } from '../components/match-card.js';
 import { gameDetailHtml } from '../components/game-detail.js';
 import { cupMapHtml, cupLegendHtml, venueStats } from '../components/cup-map.js';
@@ -39,7 +41,6 @@ import { mountTeamStrip } from '../components/team-strip.js';
 import { dayKey, gameDays, initialDay, gamesOn, pickFeatured, keyToDate } from '../components/featured-match.js';
 import { calendarHtml, gameMonths } from '../components/cup-calendar.js';
 import { openDetail, closeDetail } from '../components/detail-modal.js';
-import { attachSearchShell, setSearchValue } from '../components/search-shell.js';
 import { currentTeam, onMyTeamChange } from '../lib/my-team.js';
 import { watchReveals } from '../reveal-observer.js';
 import { currentQuery } from '../router.js';
@@ -54,8 +55,18 @@ const STATUS_FILTERS = [
   { id: 'finished', label: 'Finished', color: 'yellow' },
 ];
 
+/* The four views, in tab order, and whether each has anything in it. */
+const TABS = ['map', 'fixtures', 'calendar', 'news'];
+const tabHasContent = {
+  map:      () => CUP_CONFIG.showHero || CUP_CONFIG.showMap,
+  fixtures: () => CUP_CONFIG.showTeams || CUP_CONFIG.showFeatured || CUP_CONFIG.showSchedule,
+  calendar: () => CUP_CONFIG.showCalendar,
+  news:     () => CUP_CONFIG.showNews && CUP_NEWS.enabled,
+};
+const enabledTabs = () => TABS.filter(t => tabHasContent[t]());
+
 const state = {
-  query: '',
+  tab: 'map',
   status: 'all',
   sport: null,
   venue: null,
@@ -73,12 +84,17 @@ export function initCup(root) {
   rootEl = root;
 
   const q = currentQuery();
-  state.query = q.q || '';
   state.status = STATUS_FILTERS.some(f => f.id === q.status)
     ? q.status
     : (CUP_CONFIG.defaultStatus || 'all');
   state.sport = q.sport || null;
   state.venue = (q.venue && VENUE_BY_ID[q.venue]) ? q.venue : null;
+
+  // Which view to open: the one named in the link, or the one a
+  // filter in the link belongs to, or the first one.
+  const tabs = enabledTabs();
+  const implied = state.venue ? 'map' : ((q.status || q.sport) ? 'fixtures' : '');
+  state.tab = [q.tab, implied].find(t => tabs.includes(t)) || tabs[0] || 'map';
 
   // --- Static copy, straight from the config ---
   setText(root, '[data-cup-kicker]', CUP_CONFIG.kicker);
@@ -100,44 +116,28 @@ export function initCup(root) {
   toggle(root, '[data-cup-counters]', CUP_CONFIG.showCounters);
   toggle(root, '[data-cup-teams-section]', CUP_CONFIG.showTeams);
   toggle(root, '[data-cup-featured-section]', CUP_CONFIG.showFeatured);
-  toggle(root, '[data-cup-search-section]', CUP_CONFIG.showSearch);
   toggle(root, '[data-cup-map-section]', CUP_CONFIG.showMap);
   toggle(root, '[data-cup-schedule-section]', CUP_CONFIG.showSchedule);
   toggle(root, '[data-cup-calendar-section]', CUP_CONFIG.showCalendar);
   toggle(root, '[data-cup-news-section]', CUP_CONFIG.showNews && CUP_NEWS.enabled);
-
-  // --- Search ---
-  const shell = root.querySelector('[data-cup-search]');
-  if (shell && !shell.__wired) {
-    shell.__wired = true;
-    setSearchValue(shell, state.query);
-    attachSearchShell(shell, (query) => {
-      state.query = query;
-      render();
-    });
-  } else if (shell) {
-    setSearchValue(shell, state.query);
-  }
+  root.querySelectorAll('[data-cup-tab]').forEach(btn => {
+    btn.hidden = !tabs.includes(btn.dataset.cupTab);
+  });
 
   // --- One-time wiring for the whole screen ---
   if (!root.__wired) {
     root.__wired = true;
 
     if (CUP_CONFIG.showTeams) {
-      mountTeamStrip(root.querySelector('[data-cup-teams]'));
+      root.querySelectorAll('[data-cup-teams]').forEach(el => mountTeamStrip(el));
     }
     onMyTeamChange(() => {
       if (currentQuery().screen === 'cup') render();
     });
 
-    root.addEventListener('click', (e) => {
-      const jump = e.target.closest('[data-cup-jump]');
-      if (jump) {
-        root.querySelector(`[data-cup-${jump.dataset.cupJump}-section]`)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return;
-      }
+    wireTabs(root);
 
+    root.addEventListener('click', (e) => {
       const pin = e.target.closest('[data-venue-id]');
       if (pin) { selectVenue(pin.dataset.venueId, { toggle: true }); return; }
 
@@ -172,12 +172,7 @@ export function initCup(root) {
         return;
       }
 
-      if (e.target.closest('[data-cup-clear-venue]')) { selectVenue(null); return; }
-      if (e.target.closest('[data-cup-clear-search]')) {
-        state.query = '';
-        if (shell) setSearchValue(shell, '');
-        render();
-      }
+      if (e.target.closest('[data-cup-clear-venue]')) { selectVenue(null); }
     });
 
     // Map pins are SVG groups, so they need their own key handling
@@ -193,8 +188,91 @@ export function initCup(root) {
     renderNews(root);
   }
 
+  showTab(state.tab, { scroll: false });
   render();
   startClock();
+}
+
+/* ---------- Tabs ---------- */
+
+function wireTabs(root) {
+  const nav = root.querySelector('.cup-tabs__nav');
+  if (!nav) return;
+
+  nav.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-cup-tab]');
+    if (btn) showTab(btn.dataset.cupTab);
+  });
+
+  // Arrow keys move between tabs, as a tablist should.
+  nav.addEventListener('keydown', (e) => {
+    const keys = { ArrowRight: 1, ArrowLeft: -1, Home: 'first', End: 'last' };
+    if (!(e.key in keys)) return;
+    const tabs = [...nav.querySelectorAll('[data-cup-tab]:not([hidden])')];
+    const i = tabs.indexOf(document.activeElement);
+    if (i < 0) return;
+    e.preventDefault();
+    const k = keys[e.key];
+    const next = k === 'first' ? tabs[0]
+      : k === 'last' ? tabs[tabs.length - 1]
+      : tabs[(i + k + tabs.length) % tabs.length];
+    next.focus();
+    showTab(next.dataset.cupTab);
+  });
+
+  window.addEventListener('resize', movePill);
+  document.fonts?.ready?.then(movePill);
+}
+
+/**
+ * showTab(id) — show one view, hide the rest, move the pill.
+ * Scrolls back up to the tab bar when the page is scrolled past it,
+ * so a new view always starts at its top, as in the TXC proposal.
+ */
+function showTab(id, { scroll = true } = {}) {
+  const root = rootEl;
+  if (!root) return;
+  const tabs = enabledTabs();
+  state.tab = tabs.includes(id) ? id : (tabs[0] || 'map');
+
+  root.querySelectorAll('[data-cup-view]').forEach(view => {
+    view.hidden = view.dataset.cupView !== state.tab;
+  });
+  root.querySelectorAll('[data-cup-tab]').forEach(btn => {
+    const on = btn.dataset.cupTab === state.tab;
+    btn.setAttribute('aria-selected', String(on));
+    btn.tabIndex = on ? 0 : -1;
+  });
+  movePill();
+
+  if (scroll) {
+    // Back to where the tab bar sits in the page, just under the
+    // sticky site nav, so nothing of the new view hides behind it.
+    const navH = document.querySelector('.site-nav')?.offsetHeight || 0;
+    const top = Math.max(0, root.getBoundingClientRect().top + window.scrollY - navH);
+    if (window.scrollY > top) window.scrollTo({ top, behavior: 'auto' });
+  }
+
+  // Revealed content in a view that was hidden needs watching again.
+  const view = root.querySelector(`[data-cup-view="${state.tab}"]`);
+  if (view) watchReveals(view);
+  syncUrl();
+}
+
+/** Slide the highlight behind the selected tab. */
+function movePill() {
+  const root = rootEl;
+  const pill = root?.querySelector('[data-cup-tab-pill]');
+  const active = root?.querySelector('[data-cup-tab][aria-selected="true"]');
+  if (!pill || !active || !active.offsetParent) return;
+  pill.style.width = `${active.offsetWidth}px`;
+  pill.style.transform = `translateX(${active.offsetLeft}px)`;
+  // On a narrow phone the bar scrolls sideways; keep the chosen tab
+  // centred in it (horizontally only, so the page never jumps).
+  const nav = active.parentElement;
+  if (nav.scrollWidth > nav.clientWidth) {
+    nav.scrollTo({ left: active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2, behavior: 'smooth' });
+  }
 }
 
 /** A match starting while the page is open should go live on its
@@ -237,7 +315,6 @@ function render() {
   renderCounters(root, games);
   renderTeamNote(root, games, myTeam);
   renderFeatured(root, games, myTeam);
-  renderSearch(root, games, myTeam);
   renderMap(root, games);
   renderSchedule(root, games, myTeam);
   renderCalendar(root, games, myTeam);
@@ -257,15 +334,17 @@ function renderCounters(root, games) {
   for (const [key, value] of Object.entries(counts)) {
     setText(root, `[data-cup-count="${key}"]`, String(value));
   }
+  // A red dot on the Fixtures tab while anything is being played.
+  const live = root.querySelector('[data-cup-tab-live]');
+  if (live) live.hidden = counts.ongoing === 0;
 }
 
 /* --- The line under the team picker --- */
 function renderTeamNote(root, games, myTeam) {
-  const note = root.querySelector('[data-cup-team-note]');
-  if (!note || !CUP_CONFIG.showTeams) return;
+  if (!CUP_CONFIG.showTeams) return;
   const team = TEAM_BY_ID[myTeam];
   if (!team) {
-    note.textContent = 'Pick a team to ring its games in every list and fill the calendar with its schedule.';
+    setText(root, '[data-cup-team-note]', 'Pick a team to ring its games in every list and fill the calendar with its schedule.');
     return;
   }
   const theirs = games.filter(g => g.teamIds.includes(myTeam));
@@ -273,11 +352,11 @@ function renderTeamNote(root, games, myTeam) {
     .filter(g => g.status !== 'finished')
     .sort((a, b) => a.start - b.start)[0];
   const live = theirs.find(g => g.status === 'ongoing');
-  note.textContent = live
+  setText(root, '[data-cup-team-note]', live
     ? `Following ${team.name}. They are playing now: ${live.sport} at ${live.venueName}.`
     : next
       ? `Following ${team.name}. Next up: ${next.sport}, ${formatDay(next.start, { withYear: false })} at ${formatTime(next.start)}.`
-      : `Following ${team.name}. ${theirs.length} game${theirs.length === 1 ? '' : 's'} this season, all played.`;
+      : `Following ${team.name}. ${theirs.length} game${theirs.length === 1 ? '' : 's'} this season, all played.`);
 }
 
 /* --- Featured match with its day pager --- */
@@ -326,34 +405,6 @@ function stepFeatured(dir) {
     state.featuredDay = next;
     render();
   }
-}
-
-/* --- Search results (independent of the map) --- */
-function renderSearch(root, games, myTeam) {
-  const wrap = root.querySelector('[data-cup-results]');
-  if (!wrap) return;
-
-  if (!CUP_CONFIG.showSearch || !state.query) {
-    wrap.hidden = true;
-    wrap.innerHTML = '';
-    return;
-  }
-
-  const hits = games.filter(g => gameMatches(g, state.query));
-  wrap.hidden = false;
-  wrap.innerHTML = `
-    <div class="cup-results__head">
-      <h3 class="cup-results__title">
-        ${hits.length} result${hits.length === 1 ? '' : 's'} for “${escapeHtml(state.query)}”
-      </h3>
-      <button class="btn btn--ghost btn--sm" type="button" data-cup-clear-search>Clear search</button>
-    </div>
-    ${hits.length
-      ? `<div class="match-grid">${hits.map((g, i) => matchCardHtml(g, { i, myTeam })).join('')}</div>`
-      : `<div class="filter-note filter-note--empty">
-           <strong>No fixture matches that.</strong>&nbsp;Try a college, a mascot, a sport, or a venue name.
-         </div>`}`;
-  watchReveals(wrap);
 }
 
 /* --- The consolidated map + its venue panel --- */
@@ -550,6 +601,14 @@ function renderCalendar(root, games, myTeam) {
 // back to plain letters the site's fonts can set.
 const plain = (s) => String(s ?? '').normalize('NFKC');
 
+/** A picture path from the feed: our own assets/… copy, or an https URL. */
+function safeImage(src) {
+  const s = String(src ?? '').trim();
+  if (/^assets\/[\w\-./]+$/.test(s) && !s.includes('..')) return s;
+  if (/^https:\/\//i.test(s)) return s;
+  return null;
+}
+
 /** Accepts both the Action's shape and TXC's older one. */
 function normalisePost(p, i) {
   return {
@@ -559,6 +618,7 @@ function normalisePost(p, i) {
     body: plain(p.body ?? p.snippet ?? ''),
     date: p.date || null,
     link: p.link ?? p.url ?? null,
+    image: safeImage(p.image ?? p.picture),
   };
 }
 
@@ -576,29 +636,118 @@ async function loadPosts() {
   }
 }
 
+/**
+ * renderNews(root) — the News & Updates view, laid out like the
+ * carousels on FIFA's tournament pages.
+ *
+ *   ┌─────────────────────────────────────────────┐
+ *   │  HERO — the 3 newest posts, one at a time:  │
+ *   │  picture, then category, headline, Read more│
+ *   │  ▬▬▬▬▬ ───── ─────   progress bars           │
+ *   └─────────────────────────────────────────────┘
+ *   More updates                  ‹  ›  [See all]
+ *   ┌────┐┌────┐┌────┐┌────┐┌────┐  tall picture cards → loops
+ *
+ * The hero advances by itself (paused on hover, on focus, in a
+ * background tab, and for anyone who asks for reduced motion); the
+ * bars under it are buttons. Everything after the newest post scrolls
+ * in a carousel that loops (TXC's behaviour: the cards are laid out
+ * three times and the scroll position jumps by one set at either
+ * end). "See all" swaps the carousel for a plain grid.
+ *
+ * A post without a picture gets a placeholder graphic in the same
+ * slot, so layouts never jump when real pictures arrive.
+ */
+const HERO_COUNT = 3;
+const HERO_MS = 7000;
+const NEW_FOR_DAYS = 7;
+
+/** A stand-in picture: a pitch graphic in one of four brand colourways. */
+function newsPlaceholder(p, i, { hero = false } = {}) {
+  return `
+    <span class="news-ph news-ph--${i % 4}${hero ? ' news-ph--hero' : ''}" aria-hidden="true">
+      <span class="news-ph__mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h3l5 4V6L7 10H4z"/><path d="M16 9.5a3.5 3.5 0 0 1 0 5M18.5 7a7 7 0 0 1 0 10"/></svg>
+        ${escapeHtml(p.tag || 'News')}
+      </span>
+    </span>`;
+}
+
 async function renderNews(root) {
   const wrap = root.querySelector('[data-cup-news]');
   if (!wrap || !CUP_CONFIG.showNews || !CUP_NEWS.enabled) return;
 
   const page = safeUrl(CUP_NEWS.pageUrl);
   const posts = (await loadPosts()).slice(0, CUP_NEWS.maxPosts || 6);
+  const heroPosts = posts.slice(0, HERO_COUNT);
+  const rest = posts.slice(1);
 
-  const postHtml = (p, lead = false) => {
-    const when = parseDate(p.date);
-    const link = safeUrl(p.link) || page;
+  const when = (p) => (parseDate(p.date) ? formatRange(p.date) : '');
+  const linkFor = (p) => safeUrl(p.link) || page;
+  // "New" follows the real clock, not the Cup's preview clock: it is
+  // about when CSG posted, not where the season is.
+  const isNew = (p) => {
+    const d = parseDate(p.date);
+    return d && (Date.now() - d.getTime()) < NEW_FOR_DAYS * 86400000;
+  };
+
+  // One hero slide. Only the showing slide is reachable by keyboard
+  // and screen reader; the others are hidden until their turn.
+  const slideHtml = (p, i) => {
+    const link = linkFor(p);
+    const media = p.image
+      ? `<img src="${escapeAttr(p.image)}" alt="" decoding="async"${i ? ' loading="lazy"' : ''}>`
+      : newsPlaceholder(p, i, { hero: true });
     return `
-      <article class="news-post${lead ? ' news-post--lead' : ''}">
-        <div class="news-post__head">
-          ${p.tag ? `<span class="news-post__tag">${escapeHtml(p.tag)}</span>` : ''}
-          <span class="news-post__date">${escapeHtml(when ? formatRange(p.date) : '')}</span>
+      <article class="news-hero__slide${i === 0 ? ' is-active' : ''}" data-hero-slide="${i}"
+               aria-roledescription="slide" aria-label="${i + 1} of ${heroPosts.length}"${i ? ' aria-hidden="true"' : ''}>
+        <div class="news-hero__media">${media}</div>
+        <div class="news-hero__panel">
+          <p class="news-hero__kicker">
+            ${p.tag ? `<span>${escapeHtml(p.tag)}</span>` : ''}
+            <span class="news-hero__date">${escapeHtml(when(p))}</span>
+            ${i === 0 ? '<span class="news-hero__flag">Latest</span>' : ''}
+          </p>
+          <h3 class="news-hero__title">${escapeHtml(p.title)}</h3>
+          ${p.body ? `<p class="news-hero__body">${escapeHtml(p.body)}</p>` : ''}
+          ${link ? `<a class="news-hero__cta" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer"${i ? ' tabindex="-1"' : ''}>Read more</a>` : ''}
         </div>
-        <h4 class="news-post__title">${escapeHtml(p.title)}</h4>
-        ${p.body ? `<p class="news-post__body">${escapeHtml(p.body)}</p>` : ''}
-        ${link ? `<a class="news-post__link" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer">View on Facebook →</a>` : ''}
       </article>`;
   };
 
-  const [lead, ...rest] = posts;
+  // A tall picture card, the headline over a dark fade at the bottom.
+  // `clone` marks the carousel's repeat copies: hidden from screen
+  // readers and taken out of the tab order.
+  const cardHtml = (p, i, clone = false) => {
+    const link = linkFor(p);
+    const media = p.image
+      ? `<img src="${escapeAttr(p.image)}" alt="" loading="lazy" decoding="async">`
+      : newsPlaceholder(p, i + 1);
+    const inner = `
+      <span class="news-card__media">${media}</span>
+      ${isNew(p) ? '<span class="news-card__new">New</span>' : ''}
+      <span class="news-card__caption">
+        <span class="news-card__meta">${p.tag ? `${escapeHtml(p.tag)} · ` : ''}${escapeHtml(when(p))}</span>
+        <span class="news-card__title">${escapeHtml(p.title)}</span>
+      </span>`;
+    return link
+      ? `<a class="news-card" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer"
+            ${clone ? 'aria-hidden="true" tabindex="-1"' : `aria-label="${escapeAttr(`${p.title}. Opens on Facebook`)}"`}>${inner}</a>`
+      : `<div class="news-card"${clone ? ' aria-hidden="true"' : ''}>${inner}</div>`;
+  };
+
+  const heroHtml = heroPosts.length ? `
+    <section class="news-hero" data-news-hero aria-roledescription="carousel" aria-label="Latest updates">
+      <div class="news-hero__viewport">${heroPosts.map(slideHtml).join('')}</div>
+      ${heroPosts.length > 1 ? `
+        <div class="news-hero__bars">
+          ${heroPosts.map((p, i) => `
+            <button class="news-hero__bar${i === 0 ? ' is-active' : ''}" type="button" data-hero-go="${i}"
+                    aria-label="Show update ${i + 1}: ${escapeAttr(p.title)}"${i === 0 ? ' aria-current="true"' : ''}>
+              <span class="news-hero__fill"></span>
+            </button>`).join('')}
+        </div>` : ''}
+    </section>` : '';
 
   const embed = (CUP_NEWS.embed?.enabled && page) ? `
     <div class="news-embed">
@@ -614,24 +763,203 @@ async function renderNews(root) {
     <div class="news-head">
       <div>
         <p class="panel__kicker">${escapeHtml(CUP_NEWS.kicker)}</p>
-        <h3 class="news-title">${escapeHtml(CUP_NEWS.title)}</h3>
+        <h2 class="news-title">${escapeHtml(CUP_NEWS.title)}</h2>
         <p class="news-sub">${escapeHtml(CUP_NEWS.pageName)}${CUP_NEWS.pageHandle ? ` · @${escapeHtml(CUP_NEWS.pageHandle)}` : ''}</p>
       </div>
       ${page ? `
-        <a class="btn btn--primary btn--sm" href="${escapeAttr(page)}" target="_blank" rel="noopener noreferrer">
+        <a class="btn btn--ghost btn--sm" href="${escapeAttr(page)}" target="_blank" rel="noopener noreferrer">
           ${escapeHtml(CUP_NEWS.followLabel || 'Open the page')}
           <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M6 3 H3 v10 h10 V10"/><polyline points="10,2 14,2 14,6"/><line x1="14" y1="2" x2="7" y2="9"/>
           </svg>
         </a>` : ''}
     </div>
-    ${lead
-      ? `<div class="news-layout">
-           ${postHtml(lead, true)}
-           ${rest.length ? `<div class="news-posts">${rest.map(p => postHtml(p)).join('')}</div>` : ''}
-         </div>`
-      : `<p class="news-empty">No updates posted yet.</p>`}
+
+    ${heroHtml || `<p class="news-empty">No updates posted yet.</p>`}
+
+    ${rest.length ? `
+      <div class="news-more">
+        <div class="news-more__head">
+          <h3 class="news-more__title">More updates</h3>
+          <div class="news-more__controls">
+            <button class="news-step" type="button" data-news-step="-1" aria-label="Scroll back">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="10,3 5,8 10,13"/></svg>
+            </button>
+            <button class="news-step" type="button" data-news-step="1" aria-label="Scroll forward">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6,3 11,8 6,13"/></svg>
+            </button>
+            <button class="btn btn--primary btn--sm" type="button" data-news-toggle aria-pressed="false">See all</button>
+          </div>
+        </div>
+        <div class="news-carousel" data-news-carousel>
+          <div class="news-track" data-news-track>${rest.map((p, i) => cardHtml(p, i)).join('')}</div>
+        </div>
+        <div class="news-grid" data-news-grid hidden>${rest.map((p, i) => cardHtml(p, i)).join('')}</div>
+      </div>` : ''}
+
+    ${eventsHtml()}
+
     ${embed}`;
+
+  wireHero(wrap.querySelector('[data-news-hero]'));
+
+  if (!rest.length) return;
+
+  const carousel = wrap.querySelector('[data-news-carousel]');
+  const track = wrap.querySelector('[data-news-track]');
+  const grid = wrap.querySelector('[data-news-grid]');
+  const toggleBtn = wrap.querySelector('[data-news-toggle]');
+  const steps = wrap.querySelectorAll('[data-news-step]');
+  const single = rest.map((p, i) => cardHtml(p, i)).join('');
+  const clones = rest.map((p, i) => cardHtml(p, i, true)).join('');
+  let setWidth = 0;
+
+  // Loop only when the cards overflow; a short row just sits still.
+  const setupLoop = () => {
+    track.innerHTML = single;
+    carousel.onscroll = null;
+    const overflowing = track.scrollWidth > carousel.clientWidth + 4;
+    steps.forEach(b => { b.hidden = !overflowing; });
+    if (!overflowing) { setWidth = 0; return; }
+
+    track.innerHTML = clones + single + clones;
+    setWidth = track.scrollWidth / 3;
+    carousel.scrollLeft = setWidth;
+    carousel.onscroll = () => {
+      if (carousel.scrollLeft <= 1) carousel.scrollLeft += setWidth;
+      else if (carousel.scrollLeft >= setWidth * 2) carousel.scrollLeft -= setWidth;
+    };
+  };
+
+  steps.forEach(btn => btn.addEventListener('click', () => {
+    const card = track.querySelector('.news-card');
+    const by = (card?.offsetWidth || 280) + 16;
+    carousel.scrollBy({ left: by * Number(btn.dataset.newsStep), behavior: 'smooth' });
+  }));
+
+  toggleBtn.addEventListener('click', () => {
+    const expanded = toggleBtn.getAttribute('aria-pressed') !== 'true';
+    toggleBtn.setAttribute('aria-pressed', String(expanded));
+    toggleBtn.textContent = expanded ? 'Back to carousel' : 'See all';
+    grid.hidden = !expanded;
+    carousel.hidden = expanded;
+    steps.forEach(b => { b.hidden = expanded || !setWidth; });
+    if (!expanded) requestAnimationFrame(setupLoop);
+  });
+
+  // The view may be hidden when this first runs (it is a tab), so
+  // measure once it is actually on screen, and again on resize.
+  const whenVisible = () => {
+    if (carousel.offsetParent) { setupLoop(); return; }
+    const obs = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) { obs.disconnect(); setupLoop(); }
+    });
+    obs.observe(carousel);
+  };
+  whenVisible();
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { if (!carousel.hidden && carousel.offsetParent) setupLoop(); }, 150);
+  });
+}
+
+/**
+ * wireHero(el) — the hero's autoplay and its progress bars.
+ *
+ * The active bar's fill is a CSS animation lasting HERO_MS; when it
+ * ends, the next slide shows. Pausing is just pausing that animation,
+ * so the bar always shows exactly how long is left.
+ */
+function wireHero(el) {
+  if (!el) return;
+  const slides = [...el.querySelectorAll('[data-hero-slide]')];
+  const bars = [...el.querySelectorAll('[data-hero-go]')];
+  if (slides.length < 2) return;
+
+  el.style.setProperty('--hero-ms', `${HERO_MS}ms`);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    || document.documentElement.getAttribute('data-motion') === 'reduced';
+  el.classList.toggle('is-static', reduced);
+  let index = 0;
+
+  const show = (next) => {
+    index = (next + slides.length) % slides.length;
+    slides.forEach((s, i) => {
+      const on = i === index;
+      s.classList.toggle('is-active', on);
+      s.toggleAttribute('aria-hidden', !on);
+      s.querySelectorAll('a').forEach(a => { a.tabIndex = on ? 0 : -1; });
+    });
+    bars.forEach((b, i) => {
+      b.classList.toggle('is-active', i === index);
+      b.classList.toggle('is-done', i < index);
+      if (i === index) b.setAttribute('aria-current', 'true');
+      else b.removeAttribute('aria-current');
+      // Restart the fill animation on the newly active bar.
+      const fill = b.querySelector('.news-hero__fill');
+      if (fill) { fill.style.animation = 'none'; void fill.offsetWidth; fill.style.animation = ''; }
+    });
+  };
+
+  bars.forEach(b => b.addEventListener('click', () => show(Number(b.dataset.heroGo))));
+  bars.forEach(b => b.querySelector('.news-hero__fill')
+    ?.addEventListener('animationend', () => { if (b.classList.contains('is-active')) show(index + 1); }));
+
+  // Pause while someone is reading or tabbing through it.
+  const pause = (on) => el.classList.toggle('is-paused', on);
+  el.addEventListener('mouseenter', () => pause(true));
+  el.addEventListener('mouseleave', () => pause(el.contains(document.activeElement)));
+  el.addEventListener('focusin', () => pause(true));
+  el.addEventListener('focusout', (e) => { if (!el.contains(e.relatedTarget)) pause(false); });
+
+  // Swipe on phones.
+  let startX = null;
+  el.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener('touchend', (e) => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 40) show(index + (dx < 0 ? 1 : -1));
+    startX = null;
+  });
+}
+
+/**
+ * eventsHtml() — the Upcoming Events cards under the news
+ * (data/xavier-cup.js → CUP_EVENTS). A card without a photo shows
+ * its team's crest on navy instead.
+ */
+function eventsHtml() {
+  const items = CUP_EVENTS?.enabled ? (CUP_EVENTS.items || []) : [];
+  if (!items.length) return '';
+
+  const card = (ev) => {
+    const team = teamFor(ev.team);
+    const photo = ev.photo
+      ? `<img class="cup-event__img" src="${escapeAttr(ev.photo)}" alt="${escapeAttr(ev.title)}" loading="lazy" decoding="async">`
+      : (team?.logo
+          ? `<img class="cup-event__crest" src="${escapeAttr(team.logo)}" alt="" loading="lazy" decoding="async">`
+          : '');
+    return `
+      <article class="cup-event">
+        <div class="cup-event__photo${ev.photo ? '' : ' cup-event__photo--crest'}">${photo}</div>
+        <div class="cup-event__body">
+          ${team ? `
+            <span class="cup-event__team">
+              ${team.logo ? `<img src="${escapeAttr(team.logo)}" alt="" loading="lazy">` : ''}
+              ${escapeHtml(team.name)}
+            </span>` : ''}
+          <h4 class="cup-event__title">${escapeHtml(ev.title)}</h4>
+          ${ev.description ? `<p class="cup-event__desc">${escapeHtml(ev.description)}</p>` : ''}
+        </div>
+      </article>`;
+  };
+
+  return `
+    <section class="cup-events" aria-labelledby="cup-events-title">
+      <h3 class="news-more__title" id="cup-events-title">${escapeHtml(CUP_EVENTS.title || 'Upcoming Events')}</h3>
+      <div class="cup-events__grid">${items.map(card).join('')}</div>
+    </section>`;
 }
 
 /* ---------- Selection + navigation ---------- */
@@ -651,6 +979,7 @@ function selectVenue(id, { toggle: toggleSame = false } = {}) {
 
 /** Exported so a match's detail view can jump to its venue. */
 export function showVenue(id) {
+  showTab('map', { scroll: false });
   selectVenue(id);
   rootEl?.querySelector('[data-cup-map-section]')
     ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -668,10 +997,12 @@ function syncUrl() {
   if (currentQuery().screen !== 'cup') return;
   const q = new URLSearchParams();
   q.set('screen', 'cup');
+  // Always written, so a leftover ?status= can't pull a reload onto
+  // the Fixtures view when the visitor was on another one.
+  q.set('tab', state.tab);
   if (state.status !== 'all') q.set('status', state.status);
   if (state.sport) q.set('sport', state.sport);
   if (state.venue) q.set('venue', state.venue);
-  if (state.query) q.set('q', state.query);
   const open = new URLSearchParams(location.search).get('game');
   if (open) q.set('game', open);
   history.replaceState(null, '', `?${q.toString()}`);

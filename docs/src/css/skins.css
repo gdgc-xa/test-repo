@@ -494,6 +494,10 @@
   background: var(--tx-accent);
   color: var(--tx-on-accent);
 }
+/* Facebook blue is hard to read on the night navy; the design's own
+   link colour (navy by day, lime after dark) reads in both. */
+:root[data-skin="txc"] .news-post__link { color: var(--ocean); }
+:root[data-skin="txc"] .news-post__link:hover { color: var(--ocean-deep); text-decoration: underline; }
 
 /* ---------- Footer: a navy band, like the tiles ----------
    Re-pointing the tokens locally re-dresses every child rule in

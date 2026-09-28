@@ -42,7 +42,14 @@ export function initBentoHero(root) {
 
   hero.addEventListener('click', (e) => {
     const game = e.target.closest('[data-bento-game]');
-    if (game) { e.preventDefault(); navigate({ screen: 'cup', game: game.dataset.bentoGame }); }
+    if (game) { e.preventDefault(); navigate({ screen: 'cup', game: game.dataset.bentoGame }); return; }
+
+    // Links into one view of the Cup tab (and optionally a filter).
+    const tab = e.target.closest('[data-bento-tab]');
+    if (tab) {
+      e.preventDefault();
+      navigate({ screen: 'cup', tab: tab.dataset.bentoTab, status: tab.dataset.bentoStatus || '' });
+    }
   });
 
   const paint = () => {
@@ -87,7 +94,7 @@ function paintSeason(el, now, games) {
       <p class="bento__season-note">${today.length
         ? `${today.length} game${today.length === 1 ? '' : 's'} today · ${live} live · ${left} still to start`
         : 'No games today. Rest day.'}</p>
-      <a class="bento__season-link" href="?screen=cup" data-nav="cup">Today’s fixtures →</a>`;
+      <a class="bento__season-link" href="?screen=cup&amp;tab=fixtures" data-bento-tab="fixtures">Today’s fixtures →</a>`;
     return;
   }
 
@@ -95,7 +102,8 @@ function paintSeason(el, now, games) {
     <p class="bento__eyebrow">Season complete</p>
     <p class="bento__season-date">${escapeHtml(formatDay(s.end, { withYear: false, weekday: false }))}</p>
     <p class="bento__season-note">Every result from all ${s.totalDays} days is on the Xavier Cup tab.</p>
-    <a class="bento__season-link" href="?screen=cup&amp;status=finished" data-nav="cup">See the results →</a>`;
+    <a class="bento__season-link" href="?screen=cup&amp;tab=fixtures&amp;status=finished"
+       data-bento-tab="fixtures" data-bento-status="finished">See the results →</a>`;
 }
 
 /* ---------- The live strip ---------- */
