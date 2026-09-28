@@ -1,34 +1,46 @@
 /* ============================================================
    screens/cup.js — The Xavier Cup tab.
 
-   Five independent pieces, each switchable in data/xavier-cup.js
+   Independent pieces, each switchable in data/xavier-cup.js
    (CUP_CONFIG.show*):
 
      1. HERO + COUNTERS  how many fixtures are upcoming / live / done
-     2. SEARCH           its own box and its own result grid. It does
+     2. TEAMS            pick the team you follow; its games get a
+                         lime ring everywhere and fill the calendar
+     3. FEATURED MATCH   one game per day under a ‹ day › pager
+     4. SEARCH           its own box and its own result grid. It does
                          NOT drive the map — searching for a team
                          should not silently re-centre the campus.
-     3. MAP              every venue as a pin, the number of fixtures
+     5. MAP              every venue as a pin, the number of fixtures
                          on it, live venues ringed. Selecting a pin
                          fills the panel beside it.
-     4. SCHEDULE         the full fixture list with status + sport chips
-     5. NEWS             whatever the Facebook page has posted
+     6. SCHEDULE         the full fixture list with status + sport chips
+     7. CALENDAR         the season as a month, with a day's games below
+     8. NEWS             the CSG Facebook page, via data/cup-posts.json
 
    The clock decides Upcoming / Ongoing / Finished (lib/dates.js),
-   and the tab re-checks it on a timer so a match flips to live
-   while the page is open rather than on the next reload.
+   read through cupNow() so a preview clock can stand in for it,
+   and the tab re-checks on a timer so a match flips to live while
+   the page is open rather than on the next reload.
    ============================================================ */
 
 import {
   CUP_CONFIG, CUP_MAP, CUP_NEWS, GAMES, VENUE_BY_ID, sportsInPlay,
+  cupNow, isPreviewClock,
 } from '../data/xavier-cup.js';
+import { TEAM_BY_ID } from '../data/teams.js';
 import { byWhen, parseDate, formatDay, formatTime, formatRange } from '../lib/dates.js';
-import { resolveGame, gameCardHtml, gameMatches } from '../components/game-card.js';
+import { resolveGame, gameMatches } from '../components/game-card.js';
+import { matchCardHtml } from '../components/match-card.js';
 import { gameDetailHtml } from '../components/game-detail.js';
 import { cupMapHtml, cupLegendHtml, venueStats } from '../components/cup-map.js';
 import { statusPillHtml, GAME_STATUS_LABEL } from '../components/status.js';
+import { mountTeamStrip } from '../components/team-strip.js';
+import { dayKey, gameDays, initialDay, gamesOn, pickFeatured, keyToDate } from '../components/featured-match.js';
+import { calendarHtml, gameMonths } from '../components/cup-calendar.js';
 import { openDetail, closeDetail } from '../components/detail-modal.js';
 import { attachSearchShell, setSearchValue } from '../components/search-shell.js';
+import { currentTeam, onMyTeamChange } from '../lib/my-team.js';
 import { watchReveals } from '../reveal-observer.js';
 import { currentQuery } from '../router.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
@@ -38,7 +50,7 @@ const STATUS_ORDER = { ongoing: 0, upcoming: 1, finished: 2 };
 const STATUS_FILTERS = [
   { id: 'all',      label: 'All',      color: 'blue'   },
   { id: 'upcoming', label: 'Upcoming', color: 'green'  },
-  { id: 'ongoing',  label: 'Ongoing',  color: 'red'    },
+  { id: 'ongoing',  label: 'Live',     color: 'red'    },
   { id: 'finished', label: 'Finished', color: 'yellow' },
 ];
 
@@ -47,6 +59,9 @@ const state = {
   status: 'all',
   sport: null,
   venue: null,
+  featuredDay: '',
+  calMonth: null,
+  calDay: '',
 };
 
 let rootEl = null;
@@ -71,12 +86,24 @@ export function initCup(root) {
   setText(root, '[data-cup-tagline]', CUP_CONFIG.tagline);
   setText(root, '[data-cup-lede]', CUP_CONFIG.lede);
 
+  const preview = root.querySelector('[data-cup-preview]');
+  if (preview) {
+    preview.hidden = !isPreviewClock();
+    if (isPreviewClock()) {
+      const now = cupNow();
+      preview.textContent = `Preview · showing the season as of ${formatDay(now, { withYear: false })}, ${formatTime(now)}`;
+    }
+  }
+
   // --- Section visibility ---
   toggle(root, '[data-cup-hero]', CUP_CONFIG.showHero);
   toggle(root, '[data-cup-counters]', CUP_CONFIG.showCounters);
+  toggle(root, '[data-cup-teams-section]', CUP_CONFIG.showTeams);
+  toggle(root, '[data-cup-featured-section]', CUP_CONFIG.showFeatured);
   toggle(root, '[data-cup-search-section]', CUP_CONFIG.showSearch);
   toggle(root, '[data-cup-map-section]', CUP_CONFIG.showMap);
   toggle(root, '[data-cup-schedule-section]', CUP_CONFIG.showSchedule);
+  toggle(root, '[data-cup-calendar-section]', CUP_CONFIG.showCalendar);
   toggle(root, '[data-cup-news-section]', CUP_CONFIG.showNews && CUP_NEWS.enabled);
 
   // --- Search ---
@@ -92,11 +119,25 @@ export function initCup(root) {
     setSearchValue(shell, state.query);
   }
 
-  // --- One delegated click handler for the whole screen ---
+  // --- One-time wiring for the whole screen ---
   if (!root.__wired) {
     root.__wired = true;
 
+    if (CUP_CONFIG.showTeams) {
+      mountTeamStrip(root.querySelector('[data-cup-teams]'));
+    }
+    onMyTeamChange(() => {
+      if (currentQuery().screen === 'cup') render();
+    });
+
     root.addEventListener('click', (e) => {
+      const jump = e.target.closest('[data-cup-jump]');
+      if (jump) {
+        root.querySelector(`[data-cup-${jump.dataset.cupJump}-section]`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+
       const pin = e.target.closest('[data-venue-id]');
       if (pin) { selectVenue(pin.dataset.venueId, { toggle: true }); return; }
 
@@ -110,6 +151,23 @@ export function initCup(root) {
       if (sportChip) {
         const id = sportChip.dataset.sportId;
         state.sport = (state.sport === id || id === 'all') ? null : id;
+        render();
+        return;
+      }
+
+      const step = e.target.closest('[data-featured-step]');
+      if (step) { stepFeatured(Number(step.dataset.featuredStep)); return; }
+
+      const calDay = e.target.closest('[data-cal-day]');
+      if (calDay) { state.calDay = calDay.dataset.calDay; render(); return; }
+
+      const calMonth = e.target.closest('[data-cal-month]');
+      if (calMonth) { state.calMonth = keyToDate(calMonth.dataset.calMonth); render(); return; }
+
+      if (e.target.closest('[data-cal-today]')) {
+        const now = cupNow();
+        state.calDay = dayKey(now);
+        state.calMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         render();
         return;
       }
@@ -131,9 +189,10 @@ export function initCup(root) {
       e.preventDefault();
       selectVenue(pin.dataset.venueId, { toggle: true });
     });
+
+    renderNews(root);
   }
 
-  renderNews(root);
   render();
   startClock();
 }
@@ -151,7 +210,7 @@ function startClock() {
 
 /* ---------- Data ---------- */
 
-export function allGames(now = new Date()) {
+export function allGames(now = cupNow()) {
   return GAMES
     .map(g => resolveGame(g, now))
     .sort((a, b) => {
@@ -173,11 +232,15 @@ function render() {
   if (!root) return;
 
   const games = allGames();
+  const myTeam = currentTeam();
 
   renderCounters(root, games);
-  renderSearch(root, games);
+  renderTeamNote(root, games, myTeam);
+  renderFeatured(root, games, myTeam);
+  renderSearch(root, games, myTeam);
   renderMap(root, games);
-  renderSchedule(root, games);
+  renderSchedule(root, games, myTeam);
+  renderCalendar(root, games, myTeam);
 
   syncUrl();
 }
@@ -196,8 +259,77 @@ function renderCounters(root, games) {
   }
 }
 
+/* --- The line under the team picker --- */
+function renderTeamNote(root, games, myTeam) {
+  const note = root.querySelector('[data-cup-team-note]');
+  if (!note || !CUP_CONFIG.showTeams) return;
+  const team = TEAM_BY_ID[myTeam];
+  if (!team) {
+    note.textContent = 'Pick a team to ring its games in every list and fill the calendar with its schedule.';
+    return;
+  }
+  const theirs = games.filter(g => g.teamIds.includes(myTeam));
+  const next = theirs
+    .filter(g => g.status !== 'finished')
+    .sort((a, b) => a.start - b.start)[0];
+  const live = theirs.find(g => g.status === 'ongoing');
+  note.textContent = live
+    ? `Following ${team.name}. They are playing now: ${live.sport} at ${live.venueName}.`
+    : next
+      ? `Following ${team.name}. Next up: ${next.sport}, ${formatDay(next.start, { withYear: false })} at ${formatTime(next.start)}.`
+      : `Following ${team.name}. ${theirs.length} game${theirs.length === 1 ? '' : 's'} this season, all played.`;
+}
+
+/* --- Featured match with its day pager --- */
+function renderFeatured(root, games, myTeam) {
+  if (!CUP_CONFIG.showFeatured) return;
+  const slot = root.querySelector('[data-featured-slot]');
+  const label = root.querySelector('[data-featured-day]');
+  const more = root.querySelector('[data-featured-more]');
+  if (!slot || !label) return;
+
+  const days = gameDays(games);
+  if (!days.length) {
+    slot.innerHTML = '<p class="filter-note filter-note--empty"><strong>No fixtures yet.</strong></p>';
+    return;
+  }
+  if (!days.includes(state.featuredDay)) state.featuredDay = initialDay(days, cupNow());
+
+  const i = days.indexOf(state.featuredDay);
+  const date = keyToDate(state.featuredDay);
+  const today = dayKey(cupNow());
+  label.innerHTML = `
+    <span class="featured-match__count">Day ${i + 1} of ${days.length}${state.featuredDay === today ? ' · Today' : ''}</span>
+    <strong>${escapeHtml(formatDay(date, { withYear: false }))}</strong>`;
+
+  root.querySelector('[data-featured-step="-1"]')?.toggleAttribute('disabled', i <= 0);
+  root.querySelector('[data-featured-step="1"]')?.toggleAttribute('disabled', i >= days.length - 1);
+
+  const dayGames = gamesOn(games, state.featuredDay);
+  const pick = pickFeatured(dayGames, myTeam);
+  slot.innerHTML = pick ? matchCardHtml(pick, { myTeam, featured: true }) : '';
+  watchReveals(slot);
+
+  if (more) {
+    const rest = dayGames.length - 1;
+    more.textContent = rest > 0
+      ? `${rest} more game${rest === 1 ? '' : 's'} this day. They are in the fixture list and the calendar below.`
+      : 'The only game this day.';
+  }
+}
+
+function stepFeatured(dir) {
+  const days = gameDays(allGames());
+  const i = days.indexOf(state.featuredDay);
+  const next = days[Math.min(days.length - 1, Math.max(0, i + dir))];
+  if (next && next !== state.featuredDay) {
+    state.featuredDay = next;
+    render();
+  }
+}
+
 /* --- Search results (independent of the map) --- */
-function renderSearch(root, games) {
+function renderSearch(root, games, myTeam) {
   const wrap = root.querySelector('[data-cup-results]');
   if (!wrap) return;
 
@@ -217,9 +349,9 @@ function renderSearch(root, games) {
       <button class="btn btn--ghost btn--sm" type="button" data-cup-clear-search>Clear search</button>
     </div>
     ${hits.length
-      ? `<div class="card-grid cup-results__grid">${hits.map((g, i) => gameCardHtml(g, i)).join('')}</div>`
+      ? `<div class="match-grid">${hits.map((g, i) => matchCardHtml(g, { i, myTeam })).join('')}</div>`
       : `<div class="filter-note filter-note--empty">
-           <strong>No fixture matches that.</strong>&nbsp;Try a college, a sport, or a venue name.
+           <strong>No fixture matches that.</strong>&nbsp;Try a college, a mascot, a sport, or a venue name.
          </div>`}`;
   watchReveals(wrap);
 }
@@ -293,7 +425,7 @@ function renderMap(root, games) {
       </button>
     </div>
     ${here.length ? `
-      ${section('ongoing', 'Ongoing')}
+      ${section('ongoing', 'Live')}
       ${section('upcoming', 'Upcoming')}
       ${section('finished', 'Finished')}
     ` : `
@@ -313,7 +445,7 @@ function miniGameHtml(g) {
 }
 
 /* --- The full fixture list --- */
-function renderSchedule(root, games) {
+function renderSchedule(root, games, myTeam) {
   if (!CUP_CONFIG.showSchedule) return;
 
   const statusRow = root.querySelector('[data-cup-status-chips]');
@@ -364,34 +496,109 @@ function renderSchedule(root, games) {
   const grid = root.querySelector('[data-cup-grid]');
   if (!grid) return;
   grid.innerHTML = list.length
-    ? list.map((g, i) => gameCardHtml(g, i)).join('')
+    ? list.map((g, i) => matchCardHtml(g, { i, myTeam })).join('')
     : `<div class="filter-note filter-note--empty" style="grid-column: 1 / -1;">
          <strong>Nothing here yet.</strong>&nbsp;Try another status or sport.
        </div>`;
   watchReveals(grid);
 }
 
+/* --- The season calendar --- */
+function renderCalendar(root, games, myTeam) {
+  if (!CUP_CONFIG.showCalendar) return;
+  const cal = root.querySelector('[data-cup-calendar]');
+  const dayWrap = root.querySelector('[data-cup-calendar-day]');
+  const title = root.querySelector('[data-cup-calendar-title]');
+  if (!cal) return;
+
+  const team = TEAM_BY_ID[myTeam];
+  const shown = team ? games.filter(g => g.teamIds.includes(myTeam)) : games;
+  const months = gameMonths(games);
+  const now = cupNow();
+
+  if (!state.calDay) state.calDay = initialDay(gameDays(shown.length ? shown : games), now);
+  if (!state.calMonth) {
+    const d = keyToDate(state.calDay) || now;
+    state.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+  }
+
+  if (title) title.textContent = team ? `${team.name} schedule` : 'Season calendar';
+
+  cal.innerHTML = calendarHtml({
+    games: shown,
+    month: state.calMonth,
+    selected: state.calDay,
+    today: dayKey(now),
+    months,
+  });
+
+  if (!dayWrap) return;
+  const dayGames = gamesOn(shown, state.calDay);
+  const date = keyToDate(state.calDay);
+  const heading = date ? formatDay(date) : '';
+  dayWrap.innerHTML = `
+    <h3 class="cal-day__title">${escapeHtml(heading)}</h3>
+    ${dayGames.length
+      ? `<div class="match-grid">${dayGames.map((g, i) => matchCardHtml(g, { i, myTeam })).join('')}</div>`
+      : `<p class="filter-note filter-note--empty"><strong>No games${team ? ` for ${escapeHtml(team.name)}` : ''} this day.</strong>&nbsp;Pick a day with a game on it.</p>`}`;
+  watchReveals(dayWrap);
+}
+
 /* --- News & Updates --- */
-function renderNews(root) {
+
+// Facebook posts use "styled" Unicode letters (𝐁𝐎𝐋𝐃); NFKC folds them
+// back to plain letters the site's fonts can set.
+const plain = (s) => String(s ?? '').normalize('NFKC');
+
+/** Accepts both the Action's shape and TXC's older one. */
+function normalisePost(p, i) {
+  return {
+    id: p.id || `post-${i}`,
+    tag: plain(p.tag || p.source || ''),
+    title: plain(p.title),
+    body: plain(p.body ?? p.snippet ?? ''),
+    date: p.date || null,
+    link: p.link ?? p.url ?? null,
+  };
+}
+
+async function loadPosts() {
+  const fallback = (CUP_NEWS.posts || []).map(normalisePost);
+  if (!CUP_NEWS.feed) return fallback;
+  try {
+    const url = new URL(`../data/${CUP_NEWS.feed}`, import.meta.url);
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    return Array.isArray(data) && data.length ? data.map(normalisePost) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+async function renderNews(root) {
   const wrap = root.querySelector('[data-cup-news]');
   if (!wrap || !CUP_CONFIG.showNews || !CUP_NEWS.enabled) return;
 
   const page = safeUrl(CUP_NEWS.pageUrl);
+  const posts = (await loadPosts()).slice(0, CUP_NEWS.maxPosts || 6);
 
-  const posts = (CUP_NEWS.posts || []).map(p => {
+  const postHtml = (p, lead = false) => {
     const when = parseDate(p.date);
     const link = safeUrl(p.link) || page;
     return `
-      <article class="news-post">
+      <article class="news-post${lead ? ' news-post--lead' : ''}">
         <div class="news-post__head">
           ${p.tag ? `<span class="news-post__tag">${escapeHtml(p.tag)}</span>` : ''}
           <span class="news-post__date">${escapeHtml(when ? formatRange(p.date) : '')}</span>
         </div>
         <h4 class="news-post__title">${escapeHtml(p.title)}</h4>
-        <p class="news-post__body">${escapeHtml(p.body)}</p>
-        ${link ? `<a class="news-post__link" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer">Read on Facebook →</a>` : ''}
+        ${p.body ? `<p class="news-post__body">${escapeHtml(p.body)}</p>` : ''}
+        ${link ? `<a class="news-post__link" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer">View on Facebook →</a>` : ''}
       </article>`;
-  }).join('');
+  };
+
+  const [lead, ...rest] = posts;
 
   const embed = (CUP_NEWS.embed?.enabled && page) ? `
     <div class="news-embed">
@@ -418,7 +625,12 @@ function renderNews(root) {
           </svg>
         </a>` : ''}
     </div>
-    ${posts ? `<div class="news-posts">${posts}</div>` : `<p class="news-empty">No updates posted yet.</p>`}
+    ${lead
+      ? `<div class="news-layout">
+           ${postHtml(lead, true)}
+           ${rest.length ? `<div class="news-posts">${rest.map(p => postHtml(p)).join('')}</div>` : ''}
+         </div>`
+      : `<p class="news-empty">No updates posted yet.</p>`}
     ${embed}`;
 }
 

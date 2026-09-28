@@ -1,0 +1,44 @@
+# Refreshes docs/src/js/data/cup-posts.json from the CSG Facebook Page.
+# Setup: add a Page access token as the repository secret FB_PAGE_TOKEN
+# (Settings > Secrets and variables > Actions > New repository secret).
+# Optional: set the repository variable FB_PAGE_ID to read a different Page.
+name: Update Facebook news
+
+on:
+  schedule:
+    - cron: "0 * * * *" # every hour
+  workflow_dispatch: # adds a "Run workflow" button on the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: facebook-news
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch latest posts
+        run: node scripts/fetch-facebook-posts.mjs
+        env:
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          FB_PAGE_ID: ${{ vars.FB_PAGE_ID }}
+
+      - name: Commit if anything changed
+        run: |
+          git add docs/src/js/data/cup-posts.json
+          if git diff --cached --quiet; then
+            echo "No new posts."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update CSG news from Facebook"
+          git push

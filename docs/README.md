@@ -4,8 +4,9 @@
 > organization, plus the campus events calendar and **The Xavier Cup** season.
 > Created by **GDG on Campus – Xavier Ateneo**.
 >
-> The site ships in the **World Cup** design. The original **Sands of Time** beach design
-> is still here in full and can be switched back to from the gear icon in the nav.
+> The site ships in the **Xavier Cup 2026** design: navy, lime and cream tiles, merged in
+> from the TXC proposal. The **World Cup** pitch and the original **Sands of Time** beach
+> are still here in full and can be switched to from the gear icon in the nav.
 
 Static HTML / CSS / vanilla JS. No frameworks, no build step, no npm dependencies.
 
@@ -21,6 +22,8 @@ Everything you are likely to want to change lives in `src/js/data/`:
 |---|---|
 | Add or remove an event | `data/events.js` → `EVENTS` |
 | Add a fixture, a venue, or a news post | `data/xavier-cup.js` |
+| Rename a team or swap its sprite | `data/teams.js` |
+| Change the season dates or turn off the preview clock | `data/xavier-cup.js` → `CUP_CONFIG.season`, `CUP_CONFIG.previewNow` |
 | Turn a whole tab off, rename it, change the contact e-mail | `data/site.js` |
 | Change which design the site opens in | `data/site.js` → `skin.defaultSkin` |
 | Feature an org on Discover/Browse | `data/featured.js` |
@@ -64,7 +67,7 @@ campus-compass/
 │   │   ├── layout.css               # page-level layout: max-widths, section grid, responsive breakpoints
 │   │   ├── animations.css           # every @keyframes block (drift, wave, sand, reveal, modal…)
 │   │   │
-│   │   ├── skins.css                # World Cup ⇄ Sands of Time: which scene is painted
+│   │   ├── skins.css                # Xavier Cup 2026 ⇄ World Cup ⇄ Sands of Time: which scene is painted
 │   │   │
 │   │   ├── components/              # one file, one component. Never reach into a sibling.
 │   │   │   ├── nav.css              # top navigation bar
@@ -72,6 +75,10 @@ campus-compass/
 │   │   │   ├── detail.css           # inside of the shared event/fixture modal
 │   │   │   ├── cup-map.css          # Xavier Cup venue map, pins, venue panel
 │   │   │   ├── settings.css         # the gear panel and its segmented controls
+│   │   │   ├── bento-hero.css       # Discover tiles (Xavier Cup 2026 design)
+│   │   │   ├── team-strip.css       # the eight team tiles
+│   │   │   ├── match-card.css       # fixture card + featured match frame
+│   │   │   ├── cup-calendar.css     # season calendar
 │   │   │   ├── nav-sheet.css        # mobile hamburger sheet (<=820px)
 │   │   │   ├── venue-map.css        # org-fair map panel in the booth
 │   │   │   ├── button.css           # .btn base + --primary, --sun, --ghost, --back
@@ -101,6 +108,7 @@ campus-compass/
 │   │   ├── settings.js              # the gear panel
 │   │   ├── lib/dates.js             # every date the site prints + the status logic
 │   │   ├── lib/html.js              # escaping + link safety for the newer templates
+│   │   ├── lib/my-team.js           # the team a visitor follows (saved per device)
 │   │   ├── reveal-observer.js       # shared IntersectionObserver + watchReveals()
 │   │   │
 │   │   ├── footprints.js            # delight #1 — footprints in the sand footer
@@ -114,7 +122,9 @@ campus-compass/
 │   │   │   ├── site.js              # THE SWITCHBOARD — tabs, contact, default skin, season words
 │   │   │   ├── categories.js        # CATEGORIES[], SHORT_LABEL, FULL_LABEL, COLOR_OF, THEME_OF
 │   │   │   ├── events.js            # EVENTS[] + the Events tab's own switches
-│   │   │   ├── xavier-cup.js        # CUP_CONFIG, CUP_MAP, GAMES[], CUP_NEWS
+│   │   │   ├── xavier-cup.js        # CUP_CONFIG (season, preview clock), CUP_MAP, GAMES[], CUP_NEWS
+│   │   │   ├── teams.js             # the eight Xavier Cup teams + sprites
+│   │   │   ├── cup-posts.json       # CSG Facebook posts, written by the GitHub Action
 │   │   │   └── organizations.js     # ORGS[] and fetchOrgFromFacebook(handle) STUB
 │   │   │
 │   │   ├── components/
@@ -129,6 +139,11 @@ campus-compass/
 │   │   │   ├── game-card.js         # one fixture as a card, sport glyphs, scoreline
 │   │   │   ├── game-detail.js       # the fixture modal's contents
 │   │   │   ├── cup-map.js           # the consolidated venue map + pins
+│   │   │   ├── match-card.js        # one fixture as a match card
+│   │   │   ├── team-strip.js        # team picker
+│   │   │   ├── featured-match.js    # which game to feature on a day
+│   │   │   ├── cup-calendar.js      # the season as a month
+│   │   │   ├── bento-hero.js        # live parts of the Discover tiles
 │   │   │   ├── detail-modal.js      # the shell events and fixtures share
 │   │   │   └── modal.js             # openModal / closeModal + focus trap + Esc
 │   │   │
@@ -212,7 +227,13 @@ DOM entirely rather than hidden.
 Two axes, both saved per device and both switchable from the **gear icon** in the nav:
 
 **Design (`data-skin`)**
-- `worldcup` — the current season. Floodlit stadium hero, pitch stripes, trophy in the
+- `txc` — **Xavier Cup 2026**, the default. No painted scene: Discover opens on a grid of
+  tiles (a navy headline tile with the org search, a lime season tile, a live-match
+  strip, the eight team sprites, the cluster tags). Archivo set expanded for display,
+  Figtree for reading, both from Google Fonts. Palette and contrast rules are at the
+  bottom of `tokens.css`; the structural rules are at the bottom of `skins.css`; the tiles
+  are `components/bento-hero.css` + `.js`.
+- `worldcup` — Floodlit stadium hero, pitch stripes, trophy in the
   lockup, bunting in the corners, green-and-gold palette.
 - `sands` — the original **Sands of Time** beach, untouched: sea, surf, hourglass,
   palms, the closing tide scene.
@@ -245,6 +266,25 @@ appear at all), `CUP_MAP` (the campus map — landmarks and venues in viewBox un
 Upcoming / Ongoing / Finished is worked out from the clock in `lib/dates.js`, and the
 tab re-checks every 60 seconds so a match goes live while the page is open. A manual
 `status` on a fixture beats the clock — that is how a postponement is expressed.
+
+**Teams.** Fixtures name their sides by id (`teams: ['ccs', 'eng']`); names, colleges and
+sprites come from `data/teams.js`. Anything that is not a team id prints as written, so
+`['All colleges']` still works for an all-in event.
+
+**Preview clock.** `CUP_CONFIG.previewNow` pins "now" to a moment in the season
+(currently Mon, Oct 12, 3:30 PM) so the tab can be reviewed with games live and finished
+before Oct 10. The banner says so while it is on. **Set it to `null` for launch.**
+
+**From the TXC proposal:** follow your team (saved per device, shared with Discover —
+`lib/my-team.js`), a featured match per day with a day pager, the season calendar, and
+match cards with the score or kickoff time boxed between the two teams
+(`components/match-card.js`).
+
+**News from Facebook.** `.github/workflows/facebook-news.yml` runs every hour, reads the
+CSG page through the Graph API, and writes `src/js/data/cup-posts.json`, which the News
+section reads. Setup: add a Page access token as the repository secret `FB_PAGE_TOKEN`.
+It reads the TXC test page by default; set the repository variable `FB_PAGE_ID` to point
+it at the real CSG page. Until the file has posts, the hand-written `CUP_NEWS.posts` show.
 
 The search box and the map are deliberately independent: searching never moves the
 map, and selecting a venue never clears a search.

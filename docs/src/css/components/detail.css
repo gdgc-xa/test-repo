@@ -179,6 +179,17 @@
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
+/* Team crests and college names (added with the TXC teams) */
+.versus__side:has(.versus__crest) { align-items: center; }
+.versus__crest {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+.versus__who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.versus__college { font-size: 12px; line-height: 1.3; color: var(--muted); }
+
 .versus__side.is-winner .versus__team { color: var(--ink); }
 .versus__side.is-winner .versus__score { color: var(--detail-accent); }
 .versus__sep {

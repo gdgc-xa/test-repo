@@ -241,6 +241,30 @@
   --scene-star-dk:      #B96A1A;
   --scene-crab:         #EA4335;
   --scene-crab-dk:      #B21E10;
+
+  /* ============================================================
+     MATCH ROLES — used by the team picker, match cards, featured
+     match and calendar, which all three designs share. They point
+     at each design's own accents, so World Cup and Sands of Time
+     pick them up with no extra rules. The Xavier Cup 2026 design
+     sets them directly (bottom of this file).
+     ============================================================ */
+  --tx-tile:          var(--ocean-deep);
+  --tx-tile-ink:      #FFFFFF;
+  --tx-tile-muted:    rgba(255, 255, 255, 0.78);
+  --tx-tile-line:     rgba(255, 255, 255, 0.18);
+  --tx-tile-wash:     rgba(255, 255, 255, 0.08);
+  --tx-accent:        var(--sun);
+  --tx-on-accent:     var(--ink);
+  --tx-primary:       var(--ocean);
+  --tx-on-primary:    #FFFFFF;
+  --tx-on-primary-hi: #FFFFFF;
+  --tx-live:          var(--red-ink);
+  --tx-on-live:       #FFFFFF;
+  --tx-final:         var(--yellow);
+  --tx-on-final:      var(--ink);
+  --tx-scorebox:      var(--surface-2);
+  --tx-glow:          transparent;
 }
 
 /* ============================================================
@@ -339,6 +363,12 @@
   --shadow-modal: 0 30px 80px rgba(0,0,0,0.65);
 
   --focus-ring: 0 0 0 3px rgba(79,167,186,0.55);
+
+  /* Match roles after dark: keep white-on-red legible, and put dark
+     ink on the (now bright) accent fill. */
+  --tx-live:       #B21E10;
+  --tx-on-accent:  #1A140D;
+  --tx-on-final:   #1A140D;
 
   /* ============================================================
      NIGHT BEACH — the landing scene after dark.
@@ -548,4 +578,172 @@
   --scene-chip-ink:     #E9F5EC;
   --scene-search-btn:   #1E9A58;
   --scene-card-cream:   #16261D;
+}
+
+/* ============================================================
+   XAVIER CUP 2026 SKIN — data-skin="txc" on <html>. The default.
+
+   Navy, lime and cream, sampled from the TXC reference. Like the
+   World Cup skin, only the palette changes here; skins.css swaps
+   the landing scene for the tile layout and sets the type.
+
+   Rules the palette depends on (contrast):
+     navy on white 14.0:1 · navy on cream 11.1:1 · lime on navy 9.8:1
+     lime on white 1.4:1 and gold on white 2.3:1 FAIL — so lime and
+     gold are only ever fills, with navy text on them.
+   The four cluster hues stay untouched: they are the org taxonomy.
+   ============================================================ */
+:root[data-skin="txc"] {
+  /* ---------- Brand constants (same in both themes) ---------- */
+  --tx-navy:        #0E2B55;
+  --tx-navy-deep:   #092040;
+  --tx-lime:        #B0EA00;
+  --tx-cream:       #E8E4DB;
+  --tx-gold:        #CDA54E;
+  --tx-red:         #A00B23;
+
+  /* ---------- Roles ---------- */
+  --tx-tile:          #0E2B55;   /* the big headline tiles */
+  --tx-tile-ink:      #FFFFFF;
+  --tx-tile-muted:    #C3CDE0;
+  --tx-tile-line:     rgba(255, 255, 255, 0.16);
+  --tx-tile-wash:     rgba(255, 255, 255, 0.06);
+  --tx-accent:        #B0EA00;   /* lime fill */
+  --tx-on-accent:     #0E2B55;
+  --tx-primary:       #0E2B55;   /* buttons, active nav, selected chips */
+  --tx-on-primary:    #FFFFFF;
+  --tx-on-primary-hi: #B0EA00;   /* the active nav item: lime on navy */
+  --tx-live:          #A00B23;
+  --tx-on-live:       #FFFFFF;
+  --tx-final:         #CDA54E;
+  --tx-on-final:      #0E2B55;
+  --tx-scorebox:      #E8E4DB;
+  --tx-glow:          rgba(176, 234, 0, 0.17);
+
+  /* ---------- Ground / neutrals — paper and cream ---------- */
+  --ground:        #F4F1EC;
+  --ground-2:      #ECE7DE;
+  --surface:       #FFFFFF;
+  --surface-2:     #E8E4DB;
+  --ink:           #0E2B55;
+  --ink-2:         #3F5275;
+  --muted:         #66748C;
+  --border:        #DDD7CB;
+  --border-strong: #C2BAA9;
+
+  /* ---------- Accents mapped onto the shared names ---------- */
+  --ocean:         #0E2B55;   /* primary interactive */
+  --ocean-deep:    #071B3A;
+  --ocean-soft:    #E1E7F0;
+  --sun:           #B0EA00;   /* warm accent becomes lime */
+  --sun-deep:      #4F6A00;   /* lime dark enough to be text */
+  --sun-soft:      #EEF8CC;
+
+  --startup-soft:  #F6EBD0;
+  --startup-ink:   #6E5210;
+  --startup-edge:  #CDA54E;
+
+  --compass-face:  #0E2B55;
+  --compass-tick:  #C2BAA9;
+
+  --focus-ring: 0 0 0 2px #FFFFFF, 0 0 0 4px #0E2B55;
+
+  --shadow-sm: 0 1px 2px rgba(14, 43, 85, 0.06), 0 2px 8px rgba(14, 43, 85, 0.05);
+  --shadow-md: 0 8px 22px rgba(14, 43, 85, 0.10);
+  --shadow-lg: 0 16px 40px rgba(14, 43, 85, 0.14);
+  --shadow-modal: 0 30px 80px rgba(7, 20, 41, 0.40);
+
+  /* ---------- The Cup's own tokens, re-pointed ---------- */
+  --cup-green:      #0E2B55;   /* map pins */
+  --cup-green-dk:   #092040;
+  --cup-green-lt:   #1D4A85;
+  --cup-green-soft: #E3EAD2;   /* the quad and the field, a pale lime-grey */
+  --cup-gold:       #B0EA00;
+  --cup-gold-dk:    #B0EA00;   /* selected pin — lime, navy text (skins.css) */
+  --cup-gold-lt:    #B0EA00;   /* highlight text on the navy banner */
+  --cup-gold-soft:  #EEF8CC;
+  --cup-navy:       #0E2B55;
+  --cup-line:       rgba(255, 255, 255, 0.85);
+
+  /* ---------- Type ----------
+     Archivo for display (set expanded in skins.css), Figtree for
+     reading. Both from Google Fonts, linked in index.html; the
+     system stacks behind them are the old ones, so a failed font
+     load degrades to the original look rather than to Times. */
+  --font-serif:  "Archivo", "Arial Black", "Segoe UI", -apple-system, sans-serif;
+  --font-script: "Archivo", "Arial Black", "Segoe UI", -apple-system, sans-serif;
+  --font-body:   "Figtree", "Segoe UI Variable Display", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Landing hero chips + search when they sit on a tile */
+  --scene-chip-bg:      #FFFFFF;
+  --scene-chip-ink:     #0E2B55;
+  --scene-search-btn:   #0E2B55;
+  --scene-card-cream:   #FFFFFF;
+}
+
+/* Night: the ground goes to deep navy, the tiles stay navy but lift
+   off it, and lime takes over as the primary fill. */
+:root[data-skin="txc"][data-theme="dark"] {
+  --tx-tile:          #12305C;
+  --tx-tile-ink:      #FFFFFF;
+  --tx-tile-muted:    #BCC8DD;
+  --tx-tile-line:     rgba(255, 255, 255, 0.14);
+  --tx-tile-wash:     rgba(255, 255, 255, 0.05);
+  --tx-accent:        #B0EA00;
+  --tx-on-accent:     #0E2B55;
+  --tx-primary:       #B0EA00;
+  --tx-on-primary:    #0E2B55;
+  --tx-on-primary-hi: #0E2B55;
+  --tx-live:          #C8102E;
+  --tx-on-live:       #FFFFFF;
+  --tx-final:         #CDA54E;
+  --tx-on-final:      #0E2B55;
+  --tx-scorebox:      #1A3868;
+  --tx-glow:          rgba(176, 234, 0, 0.12);
+
+  --ground:        #071429;
+  --ground-2:      #0A1A33;
+  --surface:       #0E2340;
+  --surface-2:     #15305A;
+  --ink:           #EEEBE3;
+  --ink-2:         #BAC5D8;
+  --muted:         #8C9AB3;
+  --border:        #1F3A63;
+  --border-strong: #2E4E7E;
+
+  --ocean:         #B0EA00;
+  --ocean-deep:    #C9F53D;
+  --ocean-soft:    #1B3A1F;
+  --sun:           #B0EA00;
+  --sun-deep:      #C9F53D;
+  --sun-soft:      #1E3A24;
+
+  --startup-soft:  #33280C;
+  --startup-ink:   #E8C46E;
+  --startup-edge:  #CDA54E;
+
+  --compass-face:  #B0EA00;
+  --compass-tick:  #2E4E7E;
+
+  --focus-ring: 0 0 0 2px #071429, 0 0 0 4px #B0EA00;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.42);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 30px 80px rgba(0, 0, 0, 0.7);
+
+  --cup-green:      #3B6AB0;
+  --cup-green-dk:   #2A5596;
+  --cup-green-lt:   #5582C4;
+  --cup-green-soft: #16341F;
+  --cup-gold:       #B0EA00;
+  --cup-gold-dk:    #B0EA00;
+  --cup-gold-lt:    #B0EA00;
+  --cup-gold-soft:  #1E3A24;
+  --cup-navy:       #0A1D3B;
+
+  --scene-chip-bg:      #15305A;
+  --scene-chip-ink:     #EEEBE3;
+  --scene-search-btn:   #B0EA00;
+  --scene-card-cream:   #0E2340;
 }

@@ -298,6 +298,82 @@
 .news-embed__note { margin-top: var(--space-2); font-size: 12px; color: var(--muted); font-style: italic; }
 
 /* ============================================================
+   ADDED WITH THE TXC MERGE
+   ============================================================ */
+
+/* The banner's inner tile is invisible to layout in the older two
+   designs (its children join .cup-hero__wrap's flex row as before);
+   skins.css turns it into the navy tile for Xavier Cup 2026. */
+.cup-hero__tile { display: contents; }
+
+/* Jump links under the lede */
+.cup-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+.cup-jump button {
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 160ms, border-color 160ms;
+}
+.cup-jump button:hover { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.4); }
+
+/* Shown only while CUP_CONFIG.previewNow pins the clock */
+.cup-hero__preview {
+  display: inline-block;
+  margin-top: var(--space-4);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+.cup-hero__preview[hidden] { display: none; }
+
+/* Sections land below the sticky nav when jumped to */
+.cup-section { scroll-margin-top: calc(var(--nav-h) + var(--space-3)); }
+
+/* News: the newest post leads, the rest sit beside it */
+.news-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+  align-items: start;
+}
+.news-layout .news-posts { margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.news-post--lead {
+  padding: var(--space-5);
+  border: 0;
+  background: var(--tx-tile);
+  color: var(--tx-tile-ink);
+}
+.news-post--lead .news-post__title { color: var(--tx-tile-ink); font-size: 21px; line-height: 1.2; }
+.news-post--lead .news-post__body { color: var(--tx-tile-muted); font-size: 14.5px; }
+.news-post--lead .news-post__date { color: var(--tx-tile-muted); }
+.news-post--lead .news-post__link {
+  display: inline-flex;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--tx-accent);
+  color: var(--tx-on-accent);
+}
+.news-post__title,
+.news-post__body { overflow-wrap: anywhere; }
+
+@media (max-width: 900px) {
+  .news-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ============================================================
    Responsive
    ============================================================ */
 @media (max-width: 1000px) {
