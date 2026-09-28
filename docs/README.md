@@ -24,7 +24,7 @@ Everything you are likely to want to change lives in `src/js/data/`:
 | Add a fixture, a venue, or a news post | `data/xavier-cup.js` |
 | Rename a team or swap its sprite | `data/teams.js` |
 | Add an Upcoming Events card (News & Updates) | `data/xavier-cup.js` → `CUP_EVENTS`, photo in `assets/events/` |
-| Change the season dates or turn off the preview clock | `data/xavier-cup.js` → `CUP_CONFIG.season`, `CUP_CONFIG.previewNow` |
+| Change the season dates or preview the season on a set date | `data/xavier-cup.js` → `CUP_CONFIG.season`, `CUP_CONFIG.previewNow` |
 | Turn a whole tab off, rename it, change the contact e-mail | `data/site.js` |
 | Change which design the site opens in | `data/site.js` → `skin.defaultSkin` |
 | Feature an org on Discover/Browse | `data/featured.js` |
@@ -273,9 +273,9 @@ tab re-checks every 60 seconds so a match goes live while the page is open. A ma
 sprites come from `data/teams.js`. Anything that is not a team id prints as written, so
 `['All colleges']` still works for an all-in event.
 
-**Preview clock.** `CUP_CONFIG.previewNow` pins "now" to a moment in the season
-(currently Mon, Oct 12, 3:30 PM) so the tab can be reviewed with games live and finished
-before Oct 10. The banner says so while it is on. **Set it to `null` for launch.**
+**Preview clock.** `CUP_CONFIG.previewNow` can pin "now" to a moment in the season
+(e.g. `'2026-10-12T15:30'`) so the tab can be reviewed with games live and finished
+before Oct 10; the banner says so while it is on. It is `null` (the real clock) on `main`.
 
 **From the TXC proposal:** follow your team (saved per device, shared with Discover —
 `lib/my-team.js`), a featured match per day with a day pager, the season calendar, and

@@ -42,8 +42,9 @@ export const CUP_CONFIG = {
       this moment: statuses, the live strip, the featured match and
       the calendar all read it instead of the real clock. It exists
       so the tab can be reviewed with games live and finished before
-      the season starts. Set it to null for launch.               */
-  previewNow: '2026-10-12T15:30',
+      the season starts. null = the real clock (what the live site
+      uses). To review, set a moment such as '2026-10-12T15:30'.  */
+  previewNow: null,
 
   /* --- Sections. Each one is independent. --- */
   showHero: true,          // the trophy banner at the top
