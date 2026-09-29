@@ -691,12 +691,28 @@ async function renderNews(root) {
     return d && (Date.now() - d.getTime()) < NEW_FOR_DAYS * 86400000;
   };
 
+  // The post's picture, shown whole. CSG posts are mostly posters with
+  // text on them, so cropping to fill the frame would cut words off:
+  // the picture is fitted inside the frame and a blurred copy of it
+  // fills the rest. If it fails to load (a Facebook link that has
+  // expired), the frame falls back to the placeholder graphic.
+  const pictureHtml = (p, { lazy = true } = {}) => {
+    const src = escapeAttr(p.image);
+    const load = lazy ? ' loading="lazy"' : '';
+    return `
+      <span class="news-pic">
+        <img class="news-pic__backdrop" src="${src}" alt="" aria-hidden="true" decoding="async"${load}>
+        <img class="news-pic__img" src="${src}" alt="${escapeAttr(`Picture from the post: ${p.title}`)}" decoding="async"${load}
+             onerror="this.closest('.news-pic').classList.add('is-broken')">
+      </span>`;
+  };
+
   // One hero slide. Only the showing slide is reachable by keyboard
   // and screen reader; the others are hidden until their turn.
   const slideHtml = (p, i) => {
     const link = linkFor(p);
     const media = p.image
-      ? `<img src="${escapeAttr(p.image)}" alt="" decoding="async"${i ? ' loading="lazy"' : ''}>`
+      ? pictureHtml(p, { lazy: i > 0 })
       : newsPlaceholder(p, i, { hero: true });
     return `
       <article class="news-hero__slide${i === 0 ? ' is-active' : ''}" data-hero-slide="${i}"
@@ -715,14 +731,13 @@ async function renderNews(root) {
       </article>`;
   };
 
-  // A tall picture card, the headline over a dark fade at the bottom.
+  // A card: the post's picture (whole, never cropped) with the date and
+  // headline underneath, so nothing covers the picture.
   // `clone` marks the carousel's repeat copies: hidden from screen
   // readers and taken out of the tab order.
   const cardHtml = (p, i, clone = false) => {
     const link = linkFor(p);
-    const media = p.image
-      ? `<img src="${escapeAttr(p.image)}" alt="" loading="lazy" decoding="async">`
-      : newsPlaceholder(p, i + 1);
+    const media = p.image ? pictureHtml(p) : newsPlaceholder(p, i + 1);
     const inner = `
       <span class="news-card__media">${media}</span>
       ${isNew(p) ? '<span class="news-card__new">New</span>' : ''}

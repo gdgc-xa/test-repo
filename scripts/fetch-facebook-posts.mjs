@@ -63,14 +63,28 @@ const isoDate = (createdTime) => createdTime.replace(/([+-]\d{2})(\d{2})$/, '$1:
 const fileStem = (postId) => String(postId).split('_').pop().replace(/[^A-Za-z0-9-]/g, '');
 
 /**
+ * The best picture a post has. The attachment's own image is full size;
+ * full_picture is Facebook's ~720px copy, used when there is no
+ * attachment (or for albums, whose first photo is under subattachments).
+ */
+function pictureUrl(post) {
+  const att = post.attachments?.data?.[0];
+  return att?.media?.image?.src
+    || att?.subattachments?.data?.[0]?.media?.image?.src
+    || post.full_picture
+    || null;
+}
+
+/**
  * Download a post's picture into assets/news/. Returns the site-relative
  * path, or null when the post has no picture or the download fails —
  * a missing picture must never stop the news from updating.
  */
 async function savePicture(post) {
-  if (!post.full_picture) return null;
+  const src = pictureUrl(post);
+  if (!src) return null;
   try {
-    const res = await fetch(post.full_picture);
+    const res = await fetch(src);
     const type = (res.headers.get('content-type') || '').split(';')[0].trim();
     const ext = EXT_BY_TYPE[type];
     if (!res.ok || !ext) return null;
@@ -95,13 +109,17 @@ async function toPost(post) {
     body: truncate(lines.slice(1).join(' '), 180),
     date: isoDate(post.created_time),
     link: post.permalink_url,
-    image: await savePicture(post),
+    // Our saved copy when the download worked; otherwise Facebook's own
+    // link, which still shows the picture until it expires (the next
+    // run replaces it with a fresh one).
+    image: (await savePicture(post)) || pictureUrl(post),
   };
 }
 
 const url = new URL(`https://graph.facebook.com/${GRAPH_VERSION}/${PAGE_ID}/posts`);
 url.search = new URLSearchParams({
-  fields: 'id,message,story,created_time,permalink_url,full_picture',
+  fields: 'id,message,story,created_time,permalink_url,full_picture,'
+        + 'attachments{media,subattachments{media}}',
   limit: String(POST_COUNT),
   access_token: token,
 });
@@ -125,11 +143,13 @@ const items = [];
 for (const post of latest) items.push(await toPost(post));
 
 // Keep the folder to the pictures the JSON actually uses.
-const keep = new Set(items.map(p => p.image?.slice(IMAGE_URL_PREFIX.length)).filter(Boolean));
+const keep = new Set(items
+  .filter(p => p.image?.startsWith(IMAGE_URL_PREFIX))
+  .map(p => p.image.slice(IMAGE_URL_PREFIX.length)));
 for (const file of await readdir(IMAGE_DIR)) {
   if (!keep.has(file) && file !== '.gitkeep') await rm(new URL(file, IMAGE_DIR));
 }
 
 await writeFile(OUT_FILE, JSON.stringify(items, null, 2) + '\n');
-const withPictures = items.filter(p => p.image).length;
+const withPictures = items.filter(p => p.image?.startsWith(IMAGE_URL_PREFIX)).length;
 console.log(`Saved ${items.length} post(s), ${withPictures} with a picture, to docs/src/js/data/cup-posts.json`);

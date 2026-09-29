@@ -282,11 +282,26 @@ before Oct 10; the banner says so while it is on. It is `null` (the real clock) 
 match cards with the score or kickoff time boxed between the two teams
 (`components/match-card.js`).
 
-**News from Facebook.** `.github/workflows/facebook-news.yml` runs every hour, reads the
-CSG page through the Graph API, and writes `src/js/data/cup-posts.json`, which the News
-section reads. Setup: add a Page access token as the repository secret `FB_PAGE_TOKEN`.
-It reads the TXC test page by default; set the repository variable `FB_PAGE_ID` to point
-it at the real CSG page. Until the file has posts, the hand-written `CUP_NEWS.posts` show.
+**News from Facebook — fully automatic, no server, no database.**
+`.github/workflows/facebook-news.yml` runs every 30 minutes on GitHub's own machines:
+
+1. It reads the page's latest posts through the Graph API (`scripts/fetch-facebook-posts.mjs`).
+2. It downloads each post's picture, full size, into `assets/news/`. Facebook's own image
+   links expire after a few days, so the site keeps its own copy; pictures of posts that
+   drop off the list are deleted.
+3. It writes the posts to `src/js/data/cup-posts.json` and commits both, only when
+   something changed. GitHub Pages republishes the site on that commit.
+
+The browser only ever reads that JSON and those pictures, so the page token never leaves
+GitHub. Pictures are shown whole (fitted, with a blurred fill), so poster text is never
+cropped; a picture that fails to load falls back to the placeholder graphic.
+
+Setup, once: add a Page access token as the repository secret `FB_PAGE_TOKEN`
+(Settings → Secrets and variables → Actions). It reads the TXC test page by default; set the
+repository variable `FB_PAGE_ID` to point it at the real CSG page. Scheduled workflows only
+run from the default branch, so this starts once it is merged into `main`; to run it
+straight away, Actions → Update Facebook news → Run workflow. Until the file has posts,
+the hand-written `CUP_NEWS.posts` show.
 
 **Layout.** The tab is four views under a sticky tab bar, as in the TXC proposal:
 **Map** (banner, counters, venue map), **Fixtures** (follow your team, featured match,

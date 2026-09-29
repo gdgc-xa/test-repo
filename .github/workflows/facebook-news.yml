@@ -7,7 +7,7 @@ name: Update Facebook news
 
 on:
   schedule:
-    - cron: "0 * * * *" # every hour
+    - cron: "*/30 * * * *" # every 30 minutes (GitHub may run it a few minutes late)
   workflow_dispatch: # adds a "Run workflow" button on the Actions tab
 
 permissions:
