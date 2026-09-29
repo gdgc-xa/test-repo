@@ -31,6 +31,7 @@ import {
   cupNow, isPreviewClock,
 } from '../data/xavier-cup.js';
 import { TEAM_BY_ID, teamFor } from '../data/teams.js';
+import { FEATURED_NEWS } from '../data/news-featured.js';
 import { byWhen, parseDate, formatDay, formatTime, formatRange } from '../lib/dates.js';
 import { resolveGame } from '../components/game-card.js';
 import { matchCardHtml } from '../components/match-card.js';
@@ -601,7 +602,7 @@ function renderCalendar(root, games, myTeam) {
 // back to plain letters the site's fonts can set.
 const plain = (s) => String(s ?? '').normalize('NFKC');
 
-/** A picture path from the feed: our own assets/… copy, or an https URL. */
+/** A picture path: our own assets/… copy, or an https URL. */
 function safeImage(src) {
   const s = String(src ?? '').trim();
   if (/^assets\/[\w\-./]+$/.test(s) && !s.includes('..')) return s;
@@ -609,31 +610,79 @@ function safeImage(src) {
   return null;
 }
 
-/** Accepts both the Action's shape and TXC's older one. */
-function normalisePost(p, i) {
+/** One post, whichever shape it arrives in (the Action's, TXC's older one, or hand-written). */
+function normalisePost(p, i = 0) {
   return {
     id: p.id || `post-${i}`,
-    tag: plain(p.tag || p.source || ''),
+    key: p.key || null,
     title: plain(p.title),
     body: plain(p.body ?? p.snippet ?? ''),
     date: p.date || null,
     link: p.link ?? p.url ?? null,
     image: safeImage(p.image ?? p.picture),
+    shared: Boolean(p.shared),
   };
 }
 
-async function loadPosts() {
-  const fallback = (CUP_NEWS.posts || []).map(normalisePost);
+/**
+ * loadFeed() — what the GitHub Action last wrote to cup-posts.json:
+ *   { page: {name, link}, posts: [...], featured: [...] }
+ * (an older file that is just an array of posts still works).
+ */
+async function loadFeed() {
+  const empty = { page: null, posts: [], featured: [] };
+  const fallback = { ...empty, posts: (CUP_NEWS.posts || []).map(normalisePost) };
   if (!CUP_NEWS.feed) return fallback;
   try {
     const url = new URL(`../data/${CUP_NEWS.feed}`, import.meta.url);
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) return fallback;
     const data = await res.json();
-    return Array.isArray(data) && data.length ? data.map(normalisePost) : fallback;
+    if (Array.isArray(data)) return { ...empty, posts: data.map(normalisePost) };
+    return {
+      page: data.page || null,
+      posts: (data.posts || []).map(normalisePost),
+      featured: (data.featured || []).map(normalisePost),
+    };
   } catch {
     return fallback;
   }
+}
+
+/** The numeric post id in a Facebook link or id (same rule as the Action). */
+function linkToPostNumber(value) {
+  const s = String(value ?? '').trim();
+  const m = s.match(/\/posts\/(\d+)/) || s.match(/[?&](?:story_fbid|fbid)=(\d+)/)
+    || s.match(/\/permalink\/(\d+)/) || s.match(/^(?:\d+_)?(\d+)$/);
+  return m ? m[1] : null;
+}
+const postNumber = (id) => String(id ?? '').split('_').pop();
+
+/**
+ * The featured slot, in the order written in data/news-featured.js.
+ * A Facebook post is looked up in what the Action fetched for the
+ * featured list, then among the recent posts; a hand-written item is
+ * used as written. Anything that can't be found yet is skipped.
+ */
+function resolveFeatured(feed) {
+  if (FEATURED_NEWS.enabled === false) return [];
+  const out = [];
+  for (const item of FEATURED_NEWS.items || []) {
+    if (item?.post) {
+      const num = linkToPostNumber(item.post);
+      const hit = num && (feed.featured.find(p => p.key === `post:${num}`)
+        || feed.posts.find(p => postNumber(p.id) === num));
+      if (hit) out.push(hit);
+    } else if (item?.match) {
+      const needle = String(item.match).toLowerCase().trim();
+      const hit = feed.featured.find(p => p.key === `match:${needle}`)
+        || feed.posts.find(p => `${p.title} ${p.body}`.toLowerCase().includes(needle));
+      if (hit) out.push(hit);
+    } else if (item?.title) {
+      out.push(normalisePost({ ...item, id: `featured-${out.length}` }));
+    }
+  }
+  return out;
 }
 
 /**
@@ -641,62 +690,61 @@ async function loadPosts() {
  * carousels on FIFA's tournament pages.
  *
  *   ┌─────────────────────────────────────────────┐
- *   │  HERO — the 3 newest posts, one at a time:  │
- *   │  picture, then category, headline, Read more│
- *   │  ▬▬▬▬▬ ───── ─────   progress bars           │
+ *   │  FEATURED — chosen by hand in               │
+ *   │  data/news-featured.js, one at a time       │  (hidden when
+ *   │  ▬▬▬▬▬ ───── ─────   progress bars           │   none chosen)
  *   └─────────────────────────────────────────────┘
  *   More updates                  ‹  ›  [See all]
- *   ┌────┐┌────┐┌────┐┌────┐┌────┐  tall picture cards → loops
+ *   ┌────┐┌────┐┌────┐┌────┐┌────┐  every post and share, newest
+ *                                   first, picture + text → loops
  *
- * The hero advances by itself (paused on hover, on focus, in a
- * background tab, and for anyone who asks for reduced motion); the
- * bars under it are buttons. Everything after the newest post scrolls
- * in a carousel that loops (TXC's behaviour: the cards are laid out
- * three times and the scroll position jumps by one set at either
- * end). "See all" swaps the carousel for a plain grid.
+ * Everything the Facebook page posts or shares lands in "More
+ * updates" by itself (the GitHub Action refreshes the feed every 30
+ * minutes). Each card shows the post's own picture, whole; a post
+ * with no picture shows its words as the card, the way Facebook
+ * shows a text post. No stand-in pictures.
  *
- * A post without a picture gets a placeholder graphic in the same
- * slot, so layouts never jump when real pictures arrive.
+ * The featured slot advances by itself (paused on hover, on focus,
+ * and for anyone who asks for reduced motion); the bars under it are
+ * buttons. The carousel loops (TXC's behaviour); "See all" swaps it
+ * for a plain grid.
  */
-const HERO_COUNT = 3;
-const HERO_MS = 7000;
+const HERO_MS = Math.max(3, Number(FEATURED_NEWS.secondsPerPost) || 7) * 1000;
 const NEW_FOR_DAYS = 7;
-
-/** A stand-in picture: a pitch graphic in one of four brand colourways. */
-function newsPlaceholder(p, i, { hero = false } = {}) {
-  return `
-    <span class="news-ph news-ph--${i % 4}${hero ? ' news-ph--hero' : ''}" aria-hidden="true">
-      <span class="news-ph__mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h3l5 4V6L7 10H4z"/><path d="M16 9.5a3.5 3.5 0 0 1 0 5M18.5 7a7 7 0 0 1 0 10"/></svg>
-        ${escapeHtml(p.tag || 'News')}
-      </span>
-    </span>`;
-}
 
 async function renderNews(root) {
   const wrap = root.querySelector('[data-cup-news]');
   if (!wrap || !CUP_CONFIG.showNews || !CUP_NEWS.enabled) return;
 
-  const page = safeUrl(CUP_NEWS.pageUrl);
-  const posts = (await loadPosts()).slice(0, CUP_NEWS.maxPosts || 6);
-  const heroPosts = posts.slice(0, HERO_COUNT);
-  const rest = posts.slice(1);
+  const feed = await loadFeed();
+  const pageUrl = safeUrl(feed.page?.link) || safeUrl(CUP_NEWS.pageUrl);
+  const pageName = feed.page?.name || CUP_NEWS.pageName;
+  const heroPosts = resolveFeatured(feed);
+  const rest = feed.posts.slice(0, CUP_NEWS.maxPosts || 12);
 
   const when = (p) => (parseDate(p.date) ? formatRange(p.date) : '');
-  const linkFor = (p) => safeUrl(p.link) || page;
+  const linkFor = (p) => safeUrl(p.link) || pageUrl;
   // "New" follows the real clock, not the Cup's preview clock: it is
-  // about when CSG posted, not where the season is.
+  // about when the page posted, not where the season is.
   const isNew = (p) => {
     const d = parseDate(p.date);
     return d && (Date.now() - d.getTime()) < NEW_FOR_DAYS * 86400000;
   };
 
-  // The post's picture, shown whole. CSG posts are mostly posters with
-  // text on them, so cropping to fill the frame would cut words off:
-  // the picture is fitted inside the frame and a blurred copy of it
-  // fills the rest. If it fails to load (a Facebook link that has
-  // expired), the frame falls back to the placeholder graphic.
+  // A post with no picture: its own words, set large on navy, the way
+  // Facebook shows a text-only post. Also what a picture falls back to
+  // if it ever fails to load.
+  const wordsHtml = (p) => `
+    <span class="news-words" aria-hidden="true">
+      <span class="news-words__mark">“</span>
+      <span class="news-words__text">${escapeHtml(p.title)}</span>
+    </span>`;
+
+  // The post's picture, shown whole. Posts are often posters with text
+  // on them, so cropping to fill the frame would cut words off: the
+  // picture is fitted inside the frame and a blurred copy fills the rest.
   const pictureHtml = (p, { lazy = true } = {}) => {
+    if (!p.image) return wordsHtml(p);
     const src = escapeAttr(p.image);
     const load = lazy ? ' loading="lazy"' : '';
     return `
@@ -704,25 +752,27 @@ async function renderNews(root) {
         <img class="news-pic__backdrop" src="${src}" alt="" aria-hidden="true" decoding="async"${load}>
         <img class="news-pic__img" src="${src}" alt="${escapeAttr(`Picture from the post: ${p.title}`)}" decoding="async"${load}
              onerror="this.closest('.news-pic').classList.add('is-broken')">
+        ${wordsHtml(p)}
       </span>`;
   };
 
-  // One hero slide. Only the showing slide is reachable by keyboard
+  const metaHtml = (p) => `
+    <span>${escapeHtml(pageName || '')}</span>
+    ${p.date ? `<span class="news-meta__date">${escapeHtml(when(p))}</span>` : ''}
+    ${p.shared ? '<span class="news-meta__shared">Shared</span>' : ''}`;
+
+  // One featured slide. Only the showing slide is reachable by keyboard
   // and screen reader; the others are hidden until their turn.
   const slideHtml = (p, i) => {
     const link = linkFor(p);
-    const media = p.image
-      ? pictureHtml(p, { lazy: i > 0 })
-      : newsPlaceholder(p, i, { hero: true });
     return `
       <article class="news-hero__slide${i === 0 ? ' is-active' : ''}" data-hero-slide="${i}"
                aria-roledescription="slide" aria-label="${i + 1} of ${heroPosts.length}"${i ? ' aria-hidden="true"' : ''}>
-        <div class="news-hero__media">${media}</div>
+        <div class="news-hero__media">${pictureHtml(p, { lazy: i > 0 })}</div>
         <div class="news-hero__panel">
           <p class="news-hero__kicker">
-            ${p.tag ? `<span>${escapeHtml(p.tag)}</span>` : ''}
-            <span class="news-hero__date">${escapeHtml(when(p))}</span>
-            ${i === 0 ? '<span class="news-hero__flag">Latest</span>' : ''}
+            <span class="news-hero__flag">Featured</span>
+            ${metaHtml(p)}
           </p>
           <h3 class="news-hero__title">${escapeHtml(p.title)}</h3>
           ${p.body ? `<p class="news-hero__body">${escapeHtml(p.body)}</p>` : ''}
@@ -731,19 +781,19 @@ async function renderNews(root) {
       </article>`;
   };
 
-  // A card: the post's picture (whole, never cropped) with the date and
-  // headline underneath, so nothing covers the picture.
+  // A card: the post's picture on top (whole, never cropped), then the
+  // page, date and the post's own words underneath.
   // `clone` marks the carousel's repeat copies: hidden from screen
   // readers and taken out of the tab order.
   const cardHtml = (p, i, clone = false) => {
     const link = linkFor(p);
-    const media = p.image ? pictureHtml(p) : newsPlaceholder(p, i + 1);
     const inner = `
-      <span class="news-card__media">${media}</span>
+      <span class="news-card__media${p.image ? '' : ' news-card__media--words'}">${pictureHtml(p)}</span>
       ${isNew(p) ? '<span class="news-card__new">New</span>' : ''}
       <span class="news-card__caption">
-        <span class="news-card__meta">${p.tag ? `${escapeHtml(p.tag)} · ` : ''}${escapeHtml(when(p))}</span>
+        <span class="news-card__meta">${metaHtml(p)}</span>
         <span class="news-card__title">${escapeHtml(p.title)}</span>
+        ${p.body ? `<span class="news-card__body">${escapeHtml(p.body)}</span>` : ''}
       </span>`;
     return link
       ? `<a class="news-card" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer"
@@ -752,22 +802,22 @@ async function renderNews(root) {
   };
 
   const heroHtml = heroPosts.length ? `
-    <section class="news-hero" data-news-hero aria-roledescription="carousel" aria-label="Latest updates">
+    <section class="news-hero" data-news-hero aria-roledescription="carousel" aria-label="Featured updates">
       <div class="news-hero__viewport">${heroPosts.map(slideHtml).join('')}</div>
       ${heroPosts.length > 1 ? `
         <div class="news-hero__bars">
           ${heroPosts.map((p, i) => `
             <button class="news-hero__bar${i === 0 ? ' is-active' : ''}" type="button" data-hero-go="${i}"
-                    aria-label="Show update ${i + 1}: ${escapeAttr(p.title)}"${i === 0 ? ' aria-current="true"' : ''}>
+                    aria-label="Show featured post ${i + 1}: ${escapeAttr(p.title)}"${i === 0 ? ' aria-current="true"' : ''}>
               <span class="news-hero__fill"></span>
             </button>`).join('')}
         </div>` : ''}
     </section>` : '';
 
-  const embed = (CUP_NEWS.embed?.enabled && page) ? `
+  const embed = (CUP_NEWS.embed?.enabled && pageUrl) ? `
     <div class="news-embed">
-      <iframe title="${escapeAttr(CUP_NEWS.pageName)} on Facebook"
-              src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(page)}&tabs=${CUP_NEWS.embed.showTimeline ? 'timeline' : ''}&width=380&height=${CUP_NEWS.embed.height}&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false"
+      <iframe title="${escapeAttr(pageName)} on Facebook"
+              src="https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(pageUrl)}&tabs=${CUP_NEWS.embed.showTimeline ? 'timeline' : ''}&width=380&height=${CUP_NEWS.embed.height}&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false"
               height="${Number(CUP_NEWS.embed.height) || 500}"
               style="border:none;overflow:hidden" scrolling="no" frameborder="0"
               allow="encrypted-media" loading="lazy"></iframe>
@@ -779,10 +829,10 @@ async function renderNews(root) {
       <div>
         <p class="panel__kicker">${escapeHtml(CUP_NEWS.kicker)}</p>
         <h2 class="news-title">${escapeHtml(CUP_NEWS.title)}</h2>
-        <p class="news-sub">${escapeHtml(CUP_NEWS.pageName)}${CUP_NEWS.pageHandle ? ` · @${escapeHtml(CUP_NEWS.pageHandle)}` : ''}</p>
+        <p class="news-sub">${escapeHtml(pageName || '')}${pageName ? ' · ' : ''}updates itself from Facebook</p>
       </div>
-      ${page ? `
-        <a class="btn btn--ghost btn--sm" href="${escapeAttr(page)}" target="_blank" rel="noopener noreferrer">
+      ${pageUrl ? `
+        <a class="btn btn--ghost btn--sm" href="${escapeAttr(pageUrl)}" target="_blank" rel="noopener noreferrer">
           ${escapeHtml(CUP_NEWS.followLabel || 'Open the page')}
           <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M6 3 H3 v10 h10 V10"/><polyline points="10,2 14,2 14,6"/><line x1="14" y1="2" x2="7" y2="9"/>
@@ -790,12 +840,12 @@ async function renderNews(root) {
         </a>` : ''}
     </div>
 
-    ${heroHtml || `<p class="news-empty">No updates posted yet.</p>`}
+    ${heroHtml}
 
     ${rest.length ? `
-      <div class="news-more">
+      <div class="news-more${heroHtml ? '' : ' news-more--first'}">
         <div class="news-more__head">
-          <h3 class="news-more__title">More updates</h3>
+          <h3 class="news-more__title">${heroHtml ? 'More updates' : 'Latest from the page'}</h3>
           <div class="news-more__controls">
             <button class="news-step" type="button" data-news-step="-1" aria-label="Scroll back">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="10,3 5,8 10,13"/></svg>
@@ -810,7 +860,7 @@ async function renderNews(root) {
           <div class="news-track" data-news-track>${rest.map((p, i) => cardHtml(p, i)).join('')}</div>
         </div>
         <div class="news-grid" data-news-grid hidden>${rest.map((p, i) => cardHtml(p, i)).join('')}</div>
-      </div>` : ''}
+      </div>` : (heroHtml ? '' : `<p class="news-empty">No posts on the page yet.</p>`)}
 
     ${eventsHtml()}
 

@@ -23,6 +23,7 @@ Everything you are likely to want to change lives in `src/js/data/`:
 | Add or remove an event | `data/events.js` → `EVENTS` |
 | Add a fixture, a venue, or a news post | `data/xavier-cup.js` |
 | Rename a team or swap its sprite | `data/teams.js` |
+| Feature a Facebook post at the top of News & Updates | `data/news-featured.js` (paste its link or a few words) |
 | Add an Upcoming Events card (News & Updates) | `data/xavier-cup.js` → `CUP_EVENTS`, photo in `assets/events/` |
 | Change the season dates or preview the season on a set date | `data/xavier-cup.js` → `CUP_CONFIG.season`, `CUP_CONFIG.previewNow` |
 | Turn a whole tab off, rename it, change the contact e-mail | `data/site.js` |
@@ -283,31 +284,46 @@ match cards with the score or kickoff time boxed between the two teams
 (`components/match-card.js`).
 
 **News from Facebook — fully automatic, no server, no database.**
+Whatever the page ([Campuss Compass TEST](https://www.facebook.com/profile.php?id=61595123270779))
+posts or shares appears on the site by itself, with the post's own words and picture.
 `.github/workflows/facebook-news.yml` runs every 30 minutes on GitHub's own machines:
 
-1. It reads the page's latest posts through the Graph API (`scripts/fetch-facebook-posts.mjs`).
+1. It reads the page's 12 newest posts, shares included, through the Graph API
+   (`scripts/fetch-facebook-posts.mjs`). A share with no caption of its own takes the
+   shared post's words and picture.
 2. It downloads each post's picture, full size, into `assets/news/`. Facebook's own image
    links expire after a few days, so the site keeps its own copy; pictures of posts that
    drop off the list are deleted.
-3. It writes the posts to `src/js/data/cup-posts.json` and commits both, only when
-   something changed. GitHub Pages republishes the site on that commit.
+3. It writes the page's name, the posts and any featured posts to
+   `src/js/data/cup-posts.json` and commits, only when something changed. GitHub Pages
+   republishes the site on that commit.
+
+**Where posts appear.** Every post goes in the **More updates** carousel, newest first.
+The big **featured** slot above it is chosen by hand in `src/js/data/news-featured.js`:
+paste a post's link, or a few words from it (the file explains both). Push the change and
+the workflow runs straight away, fetching the post's picture even if it is older than the
+12 newest. With nothing listed, the featured slot is not shown.
+
+**Pictures.** Always the post's own. They are shown whole (fitted, with a blurred fill), so
+poster text is never cropped. A post with no picture shows its own words as the card, the
+way Facebook shows a text post; there are no stand-in pictures.
 
 The browser only ever reads that JSON and those pictures, so the page token never leaves
-GitHub. Pictures are shown whole (fitted, with a blurred fill), so poster text is never
-cropped; a picture that fails to load falls back to the placeholder graphic.
+GitHub.
 
 Setup, once: add a Page access token as the repository secret `FB_PAGE_TOKEN`
-(Settings → Secrets and variables → Actions). It reads the TXC test page by default; set the
-repository variable `FB_PAGE_ID` to point it at the real CSG page. Scheduled workflows only
-run from the default branch, so this starts once it is merged into `main`; to run it
-straight away, Actions → Update Facebook news → Run workflow. Until the file has posts,
-the hand-written `CUP_NEWS.posts` show.
+(Settings → Secrets and variables → Actions). The page is set in the script
+(`PAGE_ID`, the Graph API id `1301081723094199`); the repository variable `FB_PAGE_ID`
+overrides it. Scheduled workflows only run from the default branch, so this starts once
+it is merged into `main`; to run it straight away, Actions → Update Facebook news →
+Run workflow.
 
 **Layout.** The tab is four views under a sticky tab bar, as in the TXC proposal:
 **Map** (banner, counters, venue map), **Fixtures** (follow your team, featured match,
 the full list with status and sport filters), **Calendar** (team picker and the season
-month) and **News & Updates** (the newest post as a wide tile, the rest in a looping
-carousel with a "See all" grid, then the Upcoming Events cards from `CUP_EVENTS`). The open view is kept in `?tab=map|fixtures|calendar|news`.
+month) and **News & Updates** (hand-picked featured posts from `news-featured.js` in a
+FIFA-style slider, every Facebook post in a looping carousel with a "See all" grid, then
+the Upcoming Events cards from `CUP_EVENTS`). The open view is kept in `?tab=map|fixtures|calendar|news`.
 The fixture search box was removed; the sport and status chips cover filtering.
 
 There is a wireframe pack for this tab (`xavier-cup-wireframes.pdf`) covering the

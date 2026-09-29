@@ -1,5 +1,11 @@
-# Refreshes docs/src/js/data/cup-posts.json from the CSG Facebook Page,
-# and saves each post's picture into docs/assets/news/.
+# Keeps News & Updates in step with the Facebook page.
+#
+# Every 30 minutes (and whenever someone changes the featured list), this
+# reads the page's latest posts and shares through the Graph API, saves
+# each post's picture into docs/assets/news/, and writes
+# docs/src/js/data/cup-posts.json. It commits only when something
+# changed; GitHub Pages then republishes the site. No server, no database.
+#
 # Setup: add a Page access token as the repository secret FB_PAGE_TOKEN
 # (Settings > Secrets and variables > Actions > New repository secret).
 # Optional: set the repository variable FB_PAGE_ID to read a different Page.
@@ -9,6 +15,10 @@ on:
   schedule:
     - cron: "*/30 * * * *" # every 30 minutes (GitHub may run it a few minutes late)
   workflow_dispatch: # adds a "Run workflow" button on the Actions tab
+  push:
+    branches: [main]
+    paths:
+      - docs/src/js/data/news-featured.js # a newly featured post shows within minutes
 
 permissions:
   contents: write
@@ -26,7 +36,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Fetch latest posts
+      - name: Fetch latest posts and pictures
         run: node scripts/fetch-facebook-posts.mjs
         env:
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
@@ -42,5 +52,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Update CSG news from Facebook"
+          git commit -m "Update news from Facebook"
+          git pull --rebase --quiet
           git push

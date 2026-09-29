@@ -329,17 +329,20 @@ export const GAMES = [
 /* ============================================================
    4. NEWS & UPDATES
    ------------------------------------------------------------
-   The newest posts from the CSG Facebook page.
+   Everything the Facebook page posts or shares, with its own text
+   and picture. Nobody uploads anything:
 
-   They arrive through `feed`: a GitHub Action
-   (.github/workflows/facebook-news.yml) runs every hour, reads the
-   page through the Graph API with a token kept in the repository's
-   secrets, and writes the latest posts to data/cup-posts.json.
-   The browser only ever reads that file, so no token ships with
-   the site.
+   a GitHub Action (.github/workflows/facebook-news.yml) runs every
+   30 minutes, reads the page through the Graph API with a token kept
+   in the repository's secrets, saves each post's picture into
+   assets/news/ and writes data/cup-posts.json. The browser only ever
+   reads those files, so no token ships with the site.
 
-   Until the Action has run, or if the file is empty or missing,
-   the hand-written `posts` below show instead.
+   All posts go in the "More updates" carousel. Which ones ALSO get
+   the big featured slot is chosen by hand in data/news-featured.js.
+
+   The page's name and link come from Facebook too; pageName and
+   pageUrl below are only used until the Action has run once.
 
    If you want Facebook's own page widget as well, set
    embed.enabled = true. It needs no token, but it will not render
@@ -348,18 +351,16 @@ export const GAMES = [
 export const CUP_NEWS = {
   enabled: true,
   title: 'News & Updates',
-  kicker: 'From the CSG page',
-  pageName: 'Central Student Government',
-  pageUrl: 'https://www.facebook.com/XUCSG',
-  pageHandle: 'XUCSG',
+  kicker: 'From Facebook',
+  pageName: 'Campuss Compass TEST',
+  pageUrl: 'https://www.facebook.com/profile.php?id=61595123270779',
   followLabel: 'Open the Facebook page',
 
-  /** The file the Action writes, relative to this data folder.
-      null = use the hand-written posts only. */
+  /** The file the Action writes, relative to this data folder. */
   feed: 'cup-posts.json',
 
-  /** How many posts to show. The first one is featured. */
-  maxPosts: 6,
+  /** How many recent posts the carousel shows. */
+  maxPosts: 12,
 
   /** Facebook's own page plugin. Off by default — see the note above. */
   embed: {
@@ -368,34 +369,9 @@ export const CUP_NEWS = {
     showTimeline: true,
   },
 
-  /** Fallback posts, newest first. `date` accepts the same forms
-      as a game's start. */
-  posts: [
-    {
-      id: 'post-bracket',
-      date: '2026-10-11T19:40',
-      tag: 'Bracket',
-      title: 'Semifinal pairings are out',
-      body: 'Both basketball semifinals are set after tonight’s results. Full bracket on the page; the finals schedule follows tomorrow morning.',
-      link: null,
-    },
-    {
-      id: 'post-venue',
-      date: '2026-10-10T12:05',
-      tag: 'Venue',
-      title: 'Badminton moved to the Engineering Court',
-      body: 'All mixed doubles fixtures move from the Loyola Gym to the Engineering Court for the rest of the week. Times are unchanged.',
-      link: null,
-    },
-    {
-      id: 'post-opening',
-      date: '2026-10-08T08:30',
-      tag: 'Announcement',
-      title: 'Parade of colleges call time',
-      body: 'Contingents assemble at the SBM steps by 2:30 PM on opening day. Bring your college colours — marshals will be at the quad entrances.',
-      link: null,
-    },
-  ],
+  /** Shown only if cup-posts.json can't be read at all. Left empty on
+      purpose: the tab shows real posts from the page, or nothing. */
+  posts: [],
 };
 
 /* ============================================================
