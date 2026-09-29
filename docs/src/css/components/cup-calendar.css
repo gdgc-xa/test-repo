@@ -1,0 +1,140 @@
+/* ============================================================
+   cup-calendar.css — the season calendar on the Xavier Cup tab.
+   Markup: components/cup-calendar.js.
+
+   A navy panel, like the headline tiles. Days with games are
+   buttons; the pills inside them turn into dots on a phone, where
+   a seventh of the screen is too narrow for words.
+   ============================================================ */
+
+.cal {
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--tx-tile);
+  color: var(--tx-tile-ink);
+}
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 16px 20px 12px;
+}
+.cal-title {
+  font-family: var(--font-serif);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--tx-accent);
+}
+.cal-nav { display: flex; align-items: center; gap: var(--space-2); }
+.cal-nav .btn--ghost {
+  color: var(--tx-tile-ink);
+  border-color: var(--tx-tile-line);
+}
+.cal-nav .btn--ghost:hover { background: var(--tx-tile-wash); border-color: var(--tx-tile-line); }
+.cal-step {
+  display: grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--tx-tile-wash);
+  color: var(--tx-tile-ink);
+  font-size: 18px;
+}
+.cal-step:disabled { opacity: 0.3; cursor: default; }
+
+/* minmax(0, 1fr): a plain 1fr column grows to fit its longest
+   nowrap pill and pushes the grid past the panel on phones. */
+.cal-weekdays,
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.cal-weekdays {
+  padding-block: 6px;
+  border-top: 1px solid var(--tx-tile-line);
+}
+.cal-weekdays span {
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tx-tile-muted);
+}
+
+.cal-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 7px 6px 8px;
+  border-top: 1px solid var(--tx-tile-line);
+  border-left: 1px solid var(--tx-tile-line);
+  color: var(--tx-tile-ink);
+  text-align: left;
+}
+.cal-grid > :nth-child(7n + 1) { border-left: 0; }
+.cal-cell.is-outside { background: transparent; }
+button.cal-cell { transition: background 140ms; }
+button.cal-cell:hover { background: var(--tx-tile-wash); }
+.cal-cell.is-selected { background: color-mix(in srgb, var(--tx-accent) 14%, transparent); }
+.cal-cell.is-selected:hover { background: color-mix(in srgb, var(--tx-accent) 18%, transparent); }
+
+.cal-cell__num {
+  font-family: var(--font-serif);
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--tx-tile-muted);
+}
+.cal-cell.has-games .cal-cell__num { color: var(--tx-accent); }
+.cal-cell.is-today .cal-cell__num {
+  display: inline-grid;
+  place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--tx-accent);
+  color: var(--tx-on-accent);
+}
+
+.cal-pills { display: flex; flex-direction: column; gap: 3px; }
+.cal-pill {
+  display: block;
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.cal-pill__text {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-pill--finished { background: var(--tx-tile-wash); color: var(--tx-tile-muted); }
+.cal-pill--ongoing  { background: var(--tx-live); color: var(--tx-on-live); }
+.cal-pill--upcoming { border: 1px solid color-mix(in srgb, var(--tx-accent) 60%, transparent); color: var(--tx-tile-ink); }
+.cal-more { font-size: 10px; font-weight: 600; color: var(--tx-tile-muted); }
+
+/* ---------- The chosen day's games ---------- */
+.cal-day { margin-top: var(--space-5); }
+.cal-day__title {
+  margin-bottom: var(--space-3);
+  font-size: 17px;
+  color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .cal-head { padding: 14px 14px 10px; }
+  .cal-cell { min-height: 58px; padding: 6px 2px; align-items: center; text-align: center; }
+  .cal-pills { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 3px; }
+  .cal-pill { width: 7px; height: 7px; padding: 0; border-radius: 50%; }
+  .cal-pill__text, .cal-more { display: none; }
+  .cal-pill--finished { background: var(--tx-tile-muted); }
+  .cal-pill--upcoming { background: transparent; }
+}

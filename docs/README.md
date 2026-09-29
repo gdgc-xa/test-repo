@@ -4,8 +4,9 @@
 > organization, plus the campus events calendar and **The Xavier Cup** season.
 > Created by **GDG on Campus – Xavier Ateneo**.
 >
-> The site ships in the **World Cup** design. The original **Sands of Time** beach design
-> is still here in full and can be switched back to from the gear icon in the nav.
+> The site ships in the **Xavier Cup 2026** design: navy, lime and cream tiles, merged in
+> from the TXC proposal. The **World Cup** pitch and the original **Sands of Time** beach
+> are still here in full and can be switched to from the gear icon in the nav.
 
 Static HTML / CSS / vanilla JS. No frameworks, no build step, no npm dependencies.
 
@@ -21,6 +22,10 @@ Everything you are likely to want to change lives in `src/js/data/`:
 |---|---|
 | Add or remove an event | `data/events.js` → `EVENTS` |
 | Add a fixture, a venue, or a news post | `data/xavier-cup.js` |
+| Rename a team or swap its sprite | `data/teams.js` |
+| Feature a Facebook post at the top of News & Updates | `data/news-featured.js` (paste its link or a few words) |
+| Add an Upcoming Events card (News & Updates) | `data/xavier-cup.js` → `CUP_EVENTS`, photo in `assets/events/` |
+| Change the season dates or preview the season on a set date | `data/xavier-cup.js` → `CUP_CONFIG.season`, `CUP_CONFIG.previewNow` |
 | Turn a whole tab off, rename it, change the contact e-mail | `data/site.js` |
 | Change which design the site opens in | `data/site.js` → `skin.defaultSkin` |
 | Feature an org on Discover/Browse | `data/featured.js` |
@@ -64,7 +69,7 @@ campus-compass/
 │   │   ├── layout.css               # page-level layout: max-widths, section grid, responsive breakpoints
 │   │   ├── animations.css           # every @keyframes block (drift, wave, sand, reveal, modal…)
 │   │   │
-│   │   ├── skins.css                # World Cup ⇄ Sands of Time: which scene is painted
+│   │   ├── skins.css                # Xavier Cup 2026 ⇄ World Cup ⇄ Sands of Time: which scene is painted
 │   │   │
 │   │   ├── components/              # one file, one component. Never reach into a sibling.
 │   │   │   ├── nav.css              # top navigation bar
@@ -72,6 +77,10 @@ campus-compass/
 │   │   │   ├── detail.css           # inside of the shared event/fixture modal
 │   │   │   ├── cup-map.css          # Xavier Cup venue map, pins, venue panel
 │   │   │   ├── settings.css         # the gear panel and its segmented controls
+│   │   │   ├── bento-hero.css       # Discover tiles (Xavier Cup 2026 design)
+│   │   │   ├── team-strip.css       # the eight team tiles
+│   │   │   ├── match-card.css       # fixture card + featured match frame
+│   │   │   ├── cup-calendar.css     # season calendar
 │   │   │   ├── nav-sheet.css        # mobile hamburger sheet (<=820px)
 │   │   │   ├── venue-map.css        # org-fair map panel in the booth
 │   │   │   ├── button.css           # .btn base + --primary, --sun, --ghost, --back
@@ -101,6 +110,7 @@ campus-compass/
 │   │   ├── settings.js              # the gear panel
 │   │   ├── lib/dates.js             # every date the site prints + the status logic
 │   │   ├── lib/html.js              # escaping + link safety for the newer templates
+│   │   ├── lib/my-team.js           # the team a visitor follows (saved per device)
 │   │   ├── reveal-observer.js       # shared IntersectionObserver + watchReveals()
 │   │   │
 │   │   ├── footprints.js            # delight #1 — footprints in the sand footer
@@ -114,7 +124,9 @@ campus-compass/
 │   │   │   ├── site.js              # THE SWITCHBOARD — tabs, contact, default skin, season words
 │   │   │   ├── categories.js        # CATEGORIES[], SHORT_LABEL, FULL_LABEL, COLOR_OF, THEME_OF
 │   │   │   ├── events.js            # EVENTS[] + the Events tab's own switches
-│   │   │   ├── xavier-cup.js        # CUP_CONFIG, CUP_MAP, GAMES[], CUP_NEWS
+│   │   │   ├── xavier-cup.js        # CUP_CONFIG (season, preview clock), CUP_MAP, GAMES[], CUP_NEWS
+│   │   │   ├── teams.js             # the eight Xavier Cup teams + sprites
+│   │   │   ├── cup-posts.json       # CSG Facebook posts, written by the GitHub Action
 │   │   │   └── organizations.js     # ORGS[] and fetchOrgFromFacebook(handle) STUB
 │   │   │
 │   │   ├── components/
@@ -129,6 +141,11 @@ campus-compass/
 │   │   │   ├── game-card.js         # one fixture as a card, sport glyphs, scoreline
 │   │   │   ├── game-detail.js       # the fixture modal's contents
 │   │   │   ├── cup-map.js           # the consolidated venue map + pins
+│   │   │   ├── match-card.js        # one fixture as a match card
+│   │   │   ├── team-strip.js        # team picker
+│   │   │   ├── featured-match.js    # which game to feature on a day
+│   │   │   ├── cup-calendar.js      # the season as a month
+│   │   │   ├── bento-hero.js        # live parts of the Discover tiles
 │   │   │   ├── detail-modal.js      # the shell events and fixtures share
 │   │   │   └── modal.js             # openModal / closeModal + focus trap + Esc
 │   │   │
@@ -201,7 +218,8 @@ match the source exactly.
 - `?…&org=<id>` → open the booth modal (independent of screen)
 - `?screen=events` → events; `&event=<id>` opens one; `&status=…&q=…` filter the list
 - `?screen=cup` → the Xavier Cup; `&game=<id>` opens a fixture;
-  `&venue=<id>` selects a venue on the map; `&status=…&sport=…&q=…` filter the list
+  `&venue=<id>` selects a venue on the map; `&status=…&sport=…` filter the list;
+  `&tab=map|fixtures|calendar|news` opens one of its four views
 
 A tab switched off in `data/site.js` is refused by the router — an old link to it
 lands on Discover rather than an empty screen, and its nav entry is removed from the
@@ -212,7 +230,13 @@ DOM entirely rather than hidden.
 Two axes, both saved per device and both switchable from the **gear icon** in the nav:
 
 **Design (`data-skin`)**
-- `worldcup` — the current season. Floodlit stadium hero, pitch stripes, trophy in the
+- `txc` — **Xavier Cup 2026**, the default. No painted scene: Discover opens on a grid of
+  tiles (a navy headline tile with the org search, a lime season tile, a live-match
+  strip, the eight team sprites, the cluster tags). Archivo set expanded for display,
+  Figtree for reading, both from Google Fonts. Palette and contrast rules are at the
+  bottom of `tokens.css`; the structural rules are at the bottom of `skins.css`; the tiles
+  are `components/bento-hero.css` + `.js`.
+- `worldcup` — Floodlit stadium hero, pitch stripes, trophy in the
   lockup, bunting in the corners, green-and-gold palette.
 - `sands` — the original **Sands of Time** beach, untouched: sea, surf, hourglass,
   palms, the closing tide scene.
@@ -246,8 +270,61 @@ Upcoming / Ongoing / Finished is worked out from the clock in `lib/dates.js`, an
 tab re-checks every 60 seconds so a match goes live while the page is open. A manual
 `status` on a fixture beats the clock — that is how a postponement is expressed.
 
-The search box and the map are deliberately independent: searching never moves the
-map, and selecting a venue never clears a search.
+**Teams.** Fixtures name their sides by id (`teams: ['ccs', 'eng']`); names, colleges and
+sprites come from `data/teams.js`. Anything that is not a team id prints as written, so
+`['All colleges']` still works for an all-in event.
+
+**Preview clock.** `CUP_CONFIG.previewNow` can pin "now" to a moment in the season
+(e.g. `'2026-10-12T15:30'`) so the tab can be reviewed with games live and finished
+before Oct 10; the banner says so while it is on. It is `null` (the real clock) on `main`.
+
+**From the TXC proposal:** follow your team (saved per device, shared with Discover —
+`lib/my-team.js`), a featured match per day with a day pager, the season calendar, and
+match cards with the score or kickoff time boxed between the two teams
+(`components/match-card.js`).
+
+**News from Facebook — fully automatic, no server, no database.**
+Whatever the page ([Campuss Compass TEST](https://www.facebook.com/profile.php?id=61595123270779))
+posts or shares appears on the site by itself, with the post's own words and picture.
+`.github/workflows/facebook-news.yml` runs every 30 minutes on GitHub's own machines:
+
+1. It reads the page's 12 newest posts, shares included, through the Graph API
+   (`scripts/fetch-facebook-posts.mjs`). A share with no caption of its own takes the
+   shared post's words and picture.
+2. It downloads each post's picture, full size, into `assets/news/`. Facebook's own image
+   links expire after a few days, so the site keeps its own copy; pictures of posts that
+   drop off the list are deleted.
+3. It writes the page's name, the posts and any featured posts to
+   `src/js/data/cup-posts.json` and commits, only when something changed. GitHub Pages
+   republishes the site on that commit.
+
+**Where posts appear.** Every post goes in the **More updates** carousel, newest first.
+The big **featured** slot above it is chosen by hand in `src/js/data/news-featured.js`:
+paste a post's link, or a few words from it (the file explains both). Push the change and
+the workflow runs straight away, fetching the post's picture even if it is older than the
+12 newest. With nothing listed, the featured slot is not shown.
+
+**Pictures.** Always the post's own. They are shown whole (fitted, with a blurred fill), so
+poster text is never cropped. A post with no picture shows its own words as the card, the
+way Facebook shows a text post; there are no stand-in pictures.
+
+The browser only ever reads that JSON and those pictures, so the page token never leaves
+GitHub.
+
+Setup, once: add a Page access token as the repository secret `FB_PAGE_TOKEN`
+(Settings → Secrets and variables → Actions). The page is set in the script
+(`PAGE_ID`, the Graph API id `1301081723094199`); the repository variable `FB_PAGE_ID`
+overrides it. Scheduled workflows only run from the default branch, so this starts once
+it is merged into `main`; to run it straight away, Actions → Update Facebook news →
+Run workflow.
+
+**Layout.** The tab is four views under a sticky tab bar, as in the TXC proposal:
+**Map** (banner, counters, venue map), **Fixtures** (follow your team, featured match,
+the full list with status and sport filters), **Calendar** (team picker and the season
+month) and **News & Updates** (hand-picked featured posts from `news-featured.js` in a
+FIFA-style slider, every Facebook post in a looping carousel with a "See all" grid, then
+the Upcoming Events cards from `CUP_EVENTS`). The open view is kept in `?tab=map|fixtures|calendar|news`.
+The fixture search box was removed; the sport and status chips cover filtering.
 
 There is a wireframe pack for this tab (`xavier-cup-wireframes.pdf`) covering the
 desktop and mobile layouts, component anatomy, states and URLs.

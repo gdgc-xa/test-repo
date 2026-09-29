@@ -1,0 +1,342 @@
+/* ============================================================
+   bento-hero.css — the Discover tiles (Xavier Cup 2026 design).
+
+     ┌──────────────────────────┬──────────────┐
+     │  LEAD (navy)             │ SEASON (lime)│
+     │  headline, search, stats ├──────────────┤
+     │                          │ ORGS (cream) │
+     ├──────────────────────────┴──────────────┤
+     │  LIVE STRIP                             │
+     ├─────────────────────────────────────────┤
+     │  FOLLOW YOUR TEAM  (eight tiles)        │
+     ├─────────────────────────────────────────┤
+     │  BROWSE BY CLUSTER (tag cloud)          │
+     └─────────────────────────────────────────┘
+
+   Shown only under data-skin="txc" (skins.css). Every colour is a
+   token; the navy / lime / cream roles come from tokens.css.
+   ============================================================ */
+
+.bento-hero {
+  --bento-r: 24px;
+  position: relative;
+  z-index: 7;
+  padding-block: var(--space-5) var(--space-6);
+}
+
+.bento {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  grid-template-areas:
+    "lead     season"
+    "lead     orgs"
+    "live     live"
+    "teams    teams"
+    "clusters clusters";
+  gap: var(--space-3);
+}
+
+.bento__tile {
+  border-radius: var(--bento-r);
+  padding: clamp(22px, 3vw, 32px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.bento__eyebrow {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* ---------- Lead tile ---------- */
+.bento__lead {
+  grid-area: lead;
+  gap: var(--space-4);
+  padding: clamp(26px, 4vw, 44px);
+  color: var(--tx-tile-ink);
+  background:
+    radial-gradient(circle at 88% 10%, var(--tx-glow), transparent 42%),
+    var(--tx-tile);
+}
+.bento__lead .bento__eyebrow { color: var(--tx-accent); }
+
+.bento__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: clamp(34px, 5.4vw, 62px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  color: var(--tx-tile-ink);
+  text-wrap: balance;
+}
+.bento__title em { font-style: normal; color: var(--tx-accent); }
+
+.bento__lede {
+  max-width: 46ch;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--tx-tile-muted);
+}
+
+/* Two selectors to beat landing.css .hero-search (loaded after this
+   file) and its dark-mode shadow. */
+.bento .bento__search,
+:root[data-theme="dark"] .bento .bento__search {
+  margin: 0;
+  max-width: 560px;
+  box-shadow: none;
+}
+.bento .bento__search .search-shell__input { color: var(--scene-chip-ink); }
+.bento .bento__search .search-shell__input::placeholder { color: var(--muted); }
+
+.bento__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+.bento__stats span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 16px;
+  border: 1px solid var(--tx-tile-line);
+  background: var(--tx-tile-wash);
+  border-radius: 12px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tx-tile-muted);
+}
+.bento__stats b {
+  font-family: var(--font-serif);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: var(--tx-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Season tile (lime) ---------- */
+.bento__season {
+  grid-area: season;
+  background: var(--tx-accent);
+  color: var(--tx-on-accent);
+  gap: var(--space-2);
+}
+.bento__season .bento__eyebrow { color: color-mix(in srgb, var(--tx-on-accent) 72%, transparent); }
+.bento__season-date {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: clamp(30px, 3.6vw, 44px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.bento__season-note {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+.bento__count {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.bento__count span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 62px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--tx-on-accent);
+  color: color-mix(in srgb, var(--tx-accent) 80%, transparent);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.bento__count b {
+  font-family: var(--font-serif);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: var(--tx-accent);
+  font-variant-numeric: tabular-nums;
+}
+.bento__season-link {
+  margin-top: auto;
+  align-self: flex-start;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tx-on-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bento__season-link:hover { color: var(--tx-on-accent); text-decoration-thickness: 2px; }
+
+/* ---------- Orgs tile (cream) ---------- */
+.bento__orgs {
+  grid-area: orgs;
+  background: var(--surface-2);
+  color: var(--ink);
+  gap: var(--space-2);
+  text-decoration: none;
+  transition: transform 180ms, box-shadow 180ms;
+}
+.bento__orgs:hover { color: var(--ink); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.bento__orgs .bento__eyebrow { color: var(--muted); }
+.bento__orgs-line {
+  font-family: var(--font-serif);
+  font-stretch: 112%;
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1.2;
+}
+.bento__dots { display: flex; gap: 6px; }
+.bento__dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--dot); }
+.bento__orgs-cta {
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--tx-primary);
+  color: var(--tx-on-primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ---------- Live strip ---------- */
+.bento__live { grid-area: live; }
+.bento__live-link {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  padding: 14px 20px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 160ms, box-shadow 160ms;
+}
+.bento__live-link:hover { color: var(--ink); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+
+.bento__live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.bento__live-tag--live { background: var(--tx-live); color: var(--tx-on-live); }
+.bento__live-tag--live::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+.bento__live-tag--next { background: var(--tx-primary); color: var(--tx-on-primary-hi); }
+
+.bento__live-sport {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.bento__live-match {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px var(--space-3);
+  font-weight: 600;
+}
+.bento__live-score {
+  font-family: var(--font-serif);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.bento__live-where { margin-left: auto; font-size: 13px; color: var(--muted); }
+.bento__live-more { font-size: 12px; font-weight: 700; color: var(--ink-2); }
+
+/* ---------- Rows under the tiles ---------- */
+.bento__teams    { grid-area: teams; margin-top: var(--space-3); }
+.bento__clusters { grid-area: clusters; margin-top: var(--space-3); }
+
+.bento__row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+.bento__row-title {
+  font-family: var(--font-serif);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.bento__row-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bento__row-link:hover { color: var(--ink); text-decoration-thickness: 2px; }
+
+.bento .bento__tags { justify-content: flex-start; max-width: none; margin: 0; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .bento {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "lead     lead"
+      "season   orgs"
+      "live     live"
+      "teams    teams"
+      "clusters clusters";
+  }
+}
+@media (max-width: 600px) {
+  .bento-hero { --bento-r: 20px; padding-top: var(--space-4); }
+  .bento {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "lead" "season" "orgs" "live" "teams" "clusters";
+  }
+  .bento__live-where { margin-left: 0; flex-basis: 100%; }
+  .bento__count span { min-width: 0; flex: 1; }
+}
+@media (max-width: 480px) {
+  /* layout.css turns every tag cloud into a centred 2-column grid
+     here; the cluster row keeps it but drops the 380px cap. */
+  .bento__tags { max-width: none; }
+}

@@ -8,31 +8,14 @@
      2. CUP_MAP     the campus map: landmarks + venue pins
      3. GAMES       every match, with its venue and kickoff time
      4. CUP_NEWS    the News & Updates column
+     5. CUP_EVENTS  the Upcoming Events cards under the news
 
    The tab works out Upcoming / Ongoing / Finished from the clock,
    counts the games at each venue for the map, and powers the
    search box — none of that needs touching when you add a match.
    ============================================================ */
 
-/* Sample-data helper. Real fixtures should use plain strings,
-   e.g. start: '2026-10-02T15:00'. See lib/dates.js for the forms. */
-function inDays(days, hhmm = '09:00') {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${hhmm}`;
-}
-
-
-/* Same idea, but anchored to the hour rather than the day, so the
-   sample data always has something genuinely in progress to look at.
-   Real entries do not need this either. */
-function hoursFromNow(hours) {
-  const d = new Date(Date.now() + hours * 3600000);
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-       + `T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
+import { parseDate } from '../lib/dates.js';
 
 /* ============================================================
    1. CONFIGURATION
@@ -43,16 +26,34 @@ export const CUP_CONFIG = {
   enabled: true,
 
   name: 'The Xavier Cup',
-  kicker: 'University-wide',
-  tagline: 'One campus, every college, one trophy.',
-  lede: 'Every fixture of the season — where it is being played, when it kicks off, and how it finished. Tap the map to see what is happening at a venue, or search for a team.',
+  kicker: 'University-wide · 2026',
+  tagline: 'One campus. Every college. One trophy.',
+  lede: 'Every fixture of the season — where it is being played, when it starts, and how it finished. Tap the map to see what is on at a venue, or open Fixtures to follow your team.',
+
+  /** The season itself. Drives the countdown on Discover and the
+      "Day 3 of 11" line once play has started. Plain dates. */
+  season: {
+    start: '2026-10-10',
+    end: '2026-10-20',
+    openingNote: 'Parade of colleges at the SBM steps, 2:30 PM',
+  },
+
+  /** PREVIEW CLOCK. While this is set, the Cup behaves as if it is
+      this moment: statuses, the live strip, the featured match and
+      the calendar all read it instead of the real clock. It exists
+      so the tab can be reviewed with games live and finished before
+      the season starts. null = the real clock (what the live site
+      uses). To review, set a moment such as '2026-10-12T15:30'.  */
+  previewNow: null,
 
   /* --- Sections. Each one is independent. --- */
   showHero: true,          // the trophy banner at the top
   showCounters: true,      // the upcoming / ongoing / finished tallies
-  showSearch: true,        // the game search box + its results
+  showTeams: true,         // the "follow your team" picker
+  showFeatured: true,      // one featured match per day, with a day pager
   showMap: true,           // the consolidated venue map
   showSchedule: true,      // the full fixture list below the map
+  showCalendar: true,      // the month calendar of the chosen team's games
   showNews: true,          // News & Updates from the Facebook page
   showLegend: true,        // the colour key under the map
 
@@ -182,159 +183,184 @@ export const CUP_MAP = {
    sport     free text — the sport chips are built from these
    division  optional ('Men', 'Women', 'Mixed', 'Open')
    round     optional ('Elimination', 'Semifinal', 'Final')
-   teams     [home, away]; use one entry for a solo/heat event
+   teams     [home, away] as ids from data/teams.js ('ccs', 'eng').
+             Anything that is not a team id prints as written, so
+             ['All colleges'] works for a solo or all-in event.
    venue     an id from CUP_MAP.venues
    start     kickoff. See lib/dates.js for the accepted forms.
    end       optional; without it the match runs defaultDurationMins
    status    'auto' (default) | 'upcoming' | 'ongoing' | 'finished'
              A manual value beats the clock — use it for a
              postponement or a walkover.
-   score     { home: 0, away: 0 } — shown on finished cards
+   score     { home: 0, away: 0 } — shown once a match has started,
+             so update it during play for a live score
    description  a short paragraph for the detail view
    link      optional external link (livestream, bracket, recap)
    note      short badge on the card ('Championship')
    featured  true → pinned to the top of the fixture list
    ------------------------------------------------------------
-   Everything below is sample content. Replace it wholesale.
+   Everything below is sample content for the Oct 10–20 season.
+   Replace it wholesale once the official schedule is out.
    ============================================================ */
 export const GAMES = [
-  {
-    id: 'bb-m-final',
-    sport: 'Basketball',
-    division: 'Men',
-    round: 'Championship',
-    teams: ['College of Engineering', 'School of Business and Management'],
-    venue: 'covered-court',
-    start: inDays(4, '16:00'),
-    end: inDays(4, '18:00'),
-    featured: true,
-    note: 'Championship',
-    description:
-      'The men’s basketball final. Engineering come in unbeaten from the eliminations; SBM take the other side of the bracket after a one-point semifinal.',
-    link: null,
-  },
-  {
-    id: 'vb-w-semi-1',
-    sport: 'Volleyball',
-    division: 'Women',
-    round: 'Semifinal',
-    teams: ['College of Nursing', 'College of Arts and Sciences'],
-    venue: 'loyola-gym',
-    start: inDays(2, '14:00'),
-    end: inDays(2, '16:00'),
-    description:
-      'First women’s volleyball semifinal. Winner takes the Saturday final slot at the Covered Court.',
-  },
-  {
-    id: 'fb-open-elim-3',
-    sport: 'Football',
-    division: 'Open',
-    round: 'Elimination',
-    teams: ['College of Agriculture', 'School of Education'],
-    venue: 'football-field',
-    start: hoursFromNow(-1),        // demonstrates the "Ongoing" state
-    end: hoursFromNow(1),
-    description:
-      'Third elimination fixture of the football bracket. A draw sends both sides into the play-off on the final weekend.',
-  },
-  {
-    id: 'chess-open-r4',
-    sport: 'Chess',
-    division: 'Open',
-    round: 'Round 4',
-    teams: ['College of Computer Studies', 'College of Engineering'],
-    venue: 'sbm-av',
-    start: inDays(1, '09:00'),
-    end: inDays(1, '12:00'),
-    description:
-      'Board one of the fourth round, played under a 25+10 rapid time control. Boards two to six run at the same time in the same room.',
-  },
-  {
-    id: 'badminton-mixed-qf',
-    sport: 'Badminton',
-    division: 'Mixed',
-    round: 'Quarterfinal',
-    teams: ['School of Business and Management', 'College of Nursing'],
-    venue: 'eng-court',
-    start: inDays(1, '15:00'),
-    end: inDays(1, '17:00'),
-    description: 'Mixed doubles quarterfinal, best of three sets.',
-  },
-  {
-    id: 'athletics-100m',
-    sport: 'Athletics',
-    division: 'Open',
-    round: 'Finals',
-    teams: ['All colleges'],
-    venue: 'oval',
-    start: inDays(6, '07:00'),
-    end: inDays(6, '11:00'),
-    description:
-      'Track finals morning — 100m, 400m and the 4×100m relay, running back to back from seven in the morning.',
-    note: 'All colleges',
-  },
-  {
-    id: 'bb-w-semi-2',
-    sport: 'Basketball',
-    division: 'Women',
-    round: 'Semifinal',
-    teams: ['College of Arts and Sciences', 'College of Computer Studies'],
-    venue: 'covered-court',
-    start: inDays(-1, '16:00'),
-    end: inDays(-1, '18:00'),
-    score: { home: 58, away: 61 },
-    description:
-      'Women’s basketball semifinal. Computer Studies took it on a three with eleven seconds left.',
-  },
-  {
-    id: 'vb-m-elim-2',
-    sport: 'Volleyball',
-    division: 'Men',
-    round: 'Elimination',
-    teams: ['College of Engineering', 'College of Agriculture'],
-    venue: 'loyola-gym',
-    start: inDays(-3, '14:00'),
-    end: inDays(-3, '16:00'),
+  /* ---- Day 1 · Sat, Oct 10 ---- */
+  { id: 'd1-bb-m-ccs-eng', sport: 'Basketball', division: 'Men', round: 'Elimination',
+    teams: ['ccs', 'eng'], venue: 'covered-court', start: '2026-10-10T09:00', end: '2026-10-10T10:30',
+    score: { home: 64, away: 71 },
+    description: 'Opening game of the men’s bracket. The Warriors pulled away in the fourth quarter.' },
+  { id: 'd1-vb-w-nsg-med', sport: 'Volleyball', division: 'Women', round: 'Elimination',
+    teams: ['nsg', 'med'], venue: 'loyola-gym', start: '2026-10-10T10:30', end: '2026-10-10T12:00',
     score: { home: 3, away: 1 },
-    description: 'Men’s volleyball elimination, taken in four sets.',
-  },
-  {
-    id: 'esports-ml-r1',
-    sport: 'Esports',
-    division: 'Open',
-    round: 'Round 1',
-    teams: ['College of Computer Studies', 'School of Business and Management'],
-    venue: 'sbm-av',
-    start: inDays(-5, '13:00'),
-    end: inDays(-5, '17:00'),
+    description: 'Women’s volleyball elimination, taken in four sets.' },
+  { id: 'd1-fb-sbm-cas', sport: 'Football', division: 'Open', round: 'Elimination',
+    teams: ['sbm', 'cas'], venue: 'football-field', start: '2026-10-10T16:30', end: '2026-10-10T18:00',
+    score: { home: 2, away: 2 },
+    description: 'First football fixture after the opening parade. A late equaliser split the points.' },
+
+  /* ---- Day 2 · Sun, Oct 11 ---- */
+  { id: 'd2-bd-mx-law-agsoe', sport: 'Badminton', division: 'Mixed', round: 'Elimination',
+    teams: ['law', 'agsoe'], venue: 'eng-court', start: '2026-10-11T09:00', end: '2026-10-11T10:30',
+    score: { home: 2, away: 1 },
+    description: 'Mixed doubles, best of three sets.' },
+  { id: 'd2-es-ml-ccs-sbm', sport: 'Esports', division: 'Open', round: 'Round 1',
+    teams: ['ccs', 'sbm'], venue: 'sbm-av', start: '2026-10-11T13:00', end: '2026-10-11T16:00',
     score: { home: 2, away: 0 },
-    description: 'Opening round of the esports bracket, best of three.',
-  },
+    description: 'Opening round of the esports bracket, best of three.' },
+  { id: 'd2-bb-w-cas-nsg', sport: 'Basketball', division: 'Women', round: 'Elimination',
+    teams: ['cas', 'nsg'], venue: 'covered-court', start: '2026-10-11T16:00', end: '2026-10-11T17:30',
+    score: { home: 48, away: 52 },
+    description: 'Women’s basketball elimination. The Pythons closed it out at the line.' },
+
+  /* ---- Day 3 · Mon, Oct 12 ---- */
+  { id: 'd3-vb-m-eng-agsoe', sport: 'Volleyball', division: 'Men', round: 'Elimination',
+    teams: ['eng', 'agsoe'], venue: 'loyola-gym', start: '2026-10-12T09:30', end: '2026-10-12T11:00',
+    score: { home: 3, away: 1 },
+    description: 'Men’s volleyball elimination. The Warriors’ block held all morning.' },
+  { id: 'd3-bd-mx-sbm-med', sport: 'Badminton', division: 'Mixed', round: 'Elimination',
+    teams: ['sbm', 'med'], venue: 'eng-court', start: '2026-10-12T11:00', end: '2026-10-12T12:30',
+    score: { home: 0, away: 2 },
+    description: 'Mixed doubles, best of three sets.' },
+  { id: 'd3-bb-m-law-cas', sport: 'Basketball', division: 'Men', round: 'Elimination',
+    teams: ['law', 'cas'], venue: 'covered-court', start: '2026-10-12T14:30', end: '2026-10-12T16:00',
+    score: { home: 41, away: 38 },
+    description: 'Men’s basketball elimination. Winner stays in the race for a semifinal slot.' },
+  { id: 'd3-fb-nsg-ccs', sport: 'Football', division: 'Open', round: 'Elimination',
+    teams: ['nsg', 'ccs'], venue: 'football-field', start: '2026-10-12T15:00', end: '2026-10-12T16:30',
+    score: { home: 1, away: 0 },
+    description: 'Football elimination. A draw sends both sides into the play-off on the final weekend.' },
+  { id: 'd3-es-ml-eng-med', sport: 'Esports', division: 'Open', round: 'Round 1',
+    teams: ['eng', 'med'], venue: 'sbm-av', start: '2026-10-12T15:30', end: '2026-10-12T18:00',
+    score: { home: 0, away: 0 },
+    description: 'Esports round one, best of three.' },
+  { id: 'd3-vb-w-sbm-law', sport: 'Volleyball', division: 'Women', round: 'Elimination',
+    teams: ['sbm', 'law'], venue: 'loyola-gym', start: '2026-10-12T17:00', end: '2026-10-12T18:30',
+    description: 'Women’s volleyball elimination under the lights.' },
+
+  /* ---- Day 4 · Tue, Oct 13 ---- */
+  { id: 'd4-bd-mx-nsg-cas', sport: 'Badminton', division: 'Mixed', round: 'Elimination',
+    teams: ['nsg', 'cas'], venue: 'eng-court', start: '2026-10-13T15:00', end: '2026-10-13T16:30',
+    description: 'Mixed doubles, best of three sets.' },
+  { id: 'd4-bb-w-ccs-med', sport: 'Basketball', division: 'Women', round: 'Elimination',
+    teams: ['ccs', 'med'], venue: 'covered-court', start: '2026-10-13T16:00', end: '2026-10-13T17:30',
+    description: 'Women’s basketball elimination.' },
+
+  /* ---- Day 5 · Wed, Oct 14 ---- */
+  { id: 'd5-vb-m-ccs-sbm', sport: 'Volleyball', division: 'Men', round: 'Elimination',
+    teams: ['ccs', 'sbm'], venue: 'loyola-gym', start: '2026-10-14T16:00', end: '2026-10-14T17:30',
+    description: 'Men’s volleyball elimination.' },
+  { id: 'd5-fb-eng-law', sport: 'Football', division: 'Open', round: 'Elimination',
+    teams: ['eng', 'law'], venue: 'football-field', start: '2026-10-14T16:00', end: '2026-10-14T17:30',
+    description: 'Last round of football eliminations.' },
+
+  /* ---- Day 6 · Thu, Oct 15 ---- */
+  { id: 'd6-es-ml-nsg-agsoe', sport: 'Esports', division: 'Open', round: 'Round 1',
+    teams: ['nsg', 'agsoe'], venue: 'sbm-av', start: '2026-10-15T13:00', end: '2026-10-15T16:00',
+    description: 'Esports round one, best of three.' },
+  { id: 'd6-bb-m-sbm-agsoe', sport: 'Basketball', division: 'Men', round: 'Elimination',
+    teams: ['sbm', 'agsoe'], venue: 'covered-court', start: '2026-10-15T17:00', end: '2026-10-15T18:30',
+    description: 'Men’s basketball elimination.' },
+
+  /* ---- Day 7 · Fri, Oct 16 ---- */
+  { id: 'd7-cheerdance', sport: 'Cheerdance', division: 'Open', round: 'Competition',
+    teams: ['All colleges'], venue: 'covered-court', start: '2026-10-16T18:00', end: '2026-10-16T21:00',
+    note: 'All colleges',
+    description: 'Every college takes the floor in one night. Doors open at 5:00 PM; bring your college colours.' },
+
+  /* ---- Day 8 · Sat, Oct 17 ---- */
+  { id: 'd8-vb-w-semi-1', sport: 'Volleyball', division: 'Women', round: 'Semifinal',
+    teams: ['nsg', 'law'], venue: 'loyola-gym', start: '2026-10-17T14:00', end: '2026-10-17T16:00',
+    description: 'First women’s volleyball semifinal.' },
+  { id: 'd8-bb-m-semi-1', sport: 'Basketball', division: 'Men', round: 'Semifinal',
+    teams: ['eng', 'cas'], venue: 'covered-court', start: '2026-10-17T16:00', end: '2026-10-17T17:30',
+    description: 'First men’s basketball semifinal.' },
+
+  /* ---- Day 9 · Sun, Oct 18 ---- */
+  { id: 'd9-bd-mx-final', sport: 'Badminton', division: 'Mixed', round: 'Final',
+    teams: ['med', 'agsoe'], venue: 'eng-court', start: '2026-10-18T10:00', end: '2026-10-18T11:30',
+    note: 'Championship',
+    description: 'Mixed doubles final, best of three sets.' },
+  { id: 'd9-fb-semi', sport: 'Football', division: 'Open', round: 'Semifinal',
+    teams: ['sbm', 'nsg'], venue: 'football-field', start: '2026-10-18T15:00', end: '2026-10-18T16:30',
+    description: 'Football semifinal. Extra time and penalties if level.' },
+
+  /* ---- Day 10 · Mon, Oct 19 ---- */
+  { id: 'd10-es-final', sport: 'Esports', division: 'Open', round: 'Final',
+    teams: ['ccs', 'eng'], venue: 'sbm-av', start: '2026-10-19T13:00', end: '2026-10-19T17:00',
+    note: 'Championship',
+    description: 'Esports final, best of five.' },
+  { id: 'd10-vb-m-final', sport: 'Volleyball', division: 'Men', round: 'Final',
+    teams: ['eng', 'ccs'], venue: 'loyola-gym', start: '2026-10-19T16:00', end: '2026-10-19T18:00',
+    note: 'Championship',
+    description: 'Men’s volleyball final.' },
+
+  /* ---- Day 11 · Tue, Oct 20 ---- */
+  { id: 'd11-fb-final', sport: 'Football', division: 'Open', round: 'Final',
+    teams: ['sbm', 'cas'], venue: 'football-field', start: '2026-10-20T14:00', end: '2026-10-20T15:30',
+    note: 'Championship',
+    description: 'Football final.' },
+  { id: 'd11-bb-m-final', sport: 'Basketball', division: 'Men', round: 'Final',
+    teams: ['eng', 'sbm'], venue: 'covered-court', start: '2026-10-20T16:00', end: '2026-10-20T18:00',
+    note: 'Championship', featured: true,
+    description: 'The men’s basketball final closes the season. The trophy is presented on court straight after.' },
+
   // Add fixtures above this line.
 ];
 
 /* ============================================================
    4. NEWS & UPDATES
    ------------------------------------------------------------
-   A place for whatever the Xavier Cup Facebook page has posted.
-   Posts are written by hand here for now — the page's public feed
-   is not readable from a static site without a Graph API token,
-   so this is the honest version of it rather than a fake embed.
+   Everything the Facebook page posts or shares, with its own text
+   and picture. Nobody uploads anything:
 
-   If you DO want the real page widget, set embed.enabled = true
-   and put the page URL in `pageUrl`. That renders Facebook's own
-   page plugin in an iframe. It needs no token, but it will not
-   render at all if the reader blocks third-party frames — which
-   is exactly why the hand-written posts stay as the default.
+   a GitHub Action (.github/workflows/facebook-news.yml) runs every
+   30 minutes, reads the page through the Graph API with a token kept
+   in the repository's secrets, saves each post's picture into
+   assets/news/ and writes data/cup-posts.json. The browser only ever
+   reads those files, so no token ships with the site.
+
+   All posts go in the "More updates" carousel. Which ones ALSO get
+   the big featured slot is chosen by hand in data/news-featured.js.
+
+   The page's name and link come from Facebook too; pageName and
+   pageUrl below are only used until the Action has run once.
+
+   If you want Facebook's own page widget as well, set
+   embed.enabled = true. It needs no token, but it will not render
+   at all for readers who block third-party frames.
    ============================================================ */
 export const CUP_NEWS = {
   enabled: true,
   title: 'News & Updates',
-  kicker: 'From the page',
-  pageName: 'The Xavier Cup',
-  pageUrl: 'https://www.facebook.com/XUCSG',
-  pageHandle: 'XUCSG',
+  kicker: 'From Facebook',
+  pageName: 'Campuss Compass TEST',
+  pageUrl: 'https://www.facebook.com/profile.php?id=61595123270779',
   followLabel: 'Open the Facebook page',
+
+  /** The file the Action writes, relative to this data folder. */
+  feed: 'cup-posts.json',
+
+  /** How many recent posts the carousel shows. */
+  maxPosts: 12,
 
   /** Facebook's own page plugin. Off by default — see the note above. */
   embed: {
@@ -343,31 +369,54 @@ export const CUP_NEWS = {
     showTimeline: true,
   },
 
-  /** Newest first. `date` accepts the same forms as a game's start. */
-  posts: [
+  /** Shown only if cup-posts.json can't be read at all. Left empty on
+      purpose: the tab shows real posts from the page, or nothing. */
+  posts: [],
+};
+
+/* ============================================================
+   5. UPCOMING EVENTS
+   ------------------------------------------------------------
+   The cards at the bottom of News & Updates (from the TXC
+   proposal). Cards show in this order.
+
+   team         an id from data/teams.js; the card prints that
+                team's name and crest
+   photo        a file in assets/events/ (keep it under ~200 KB,
+                roughly 900px wide). null = the team crest on navy
+   title / description   the card text
+   ============================================================ */
+export const CUP_EVENTS = {
+  enabled: true,
+  title: 'Upcoming Events',
+  items: [
     {
-      id: 'post-bracket',
-      date: inDays(-1, '19:40'),
-      tag: 'Bracket',
-      title: 'Semifinal pairings are out',
-      body: 'Both basketball semifinals are set after tonight’s results. Full bracket on the page; the finals schedule follows tomorrow morning.',
-      link: null,
+      id: 'wizards-most-wanted',
+      team: 'ccs',
+      title: 'Wizard’s Most Wanted',
+      photo: null,
+      description: 'CCS organization GDGC’s Chief Technology Officer claims that the moon landing was fake.',
     },
     {
-      id: 'post-venue',
-      date: inDays(-2, '12:05'),
-      tag: 'Venue',
-      title: 'Badminton moved to the Engineering Court',
-      body: 'All mixed doubles fixtures move from the Loyola Gym to the Engineering Court for the rest of the week. Times are unchanged.',
-      link: null,
+      id: 'pythons-vs-warriors',
+      team: 'nsg',
+      title: 'Pythons VS Warriors',
+      photo: 'assets/events/pythons.jpg',
+      description: 'NSG started the kick off and are completely on par with the undefeated ENG’G Warriors.',
     },
     {
-      id: 'post-opening',
-      date: inDays(-4, '08:30'),
-      tag: 'Announcement',
-      title: 'Parade of colleges call time',
-      body: 'Contingents assemble at the SBM steps by 2:30 PM on opening day. Bring your college colours — marshals will be at the quad entrances.',
-      link: null,
+      id: 'warriors-iron-wall',
+      team: 'eng',
+      title: 'Warriors Building an Iron Wall',
+      photo: 'assets/events/warriors.jpg',
+      description: 'ENG’G’s volleyball iron wall has been impenetrable so far! How will they do against the fierce Wolves..',
+    },
+    {
+      id: 'eagles-at-the-top',
+      team: 'sbm',
+      title: 'Eagles at the Top',
+      photo: 'assets/events/eagles.jpg',
+      description: 'SBM reigns victorious as the Champions of TXC 2025!',
     },
   ],
 };
@@ -383,4 +432,41 @@ export function sportsInPlay() {
     if (g.sport && !seen.includes(g.sport)) seen.push(g.sport);
   }
   return seen;
+}
+
+/**
+ * cupNow() — the moment the Cup reads as "now".
+ * The real clock, unless CUP_CONFIG.previewNow pins it for review.
+ */
+export function cupNow() {
+  const pinned = CUP_CONFIG.previewNow ? parseDate(CUP_CONFIG.previewNow) : null;
+  return pinned || new Date();
+}
+
+/** True while the preview clock is in charge. */
+export function isPreviewClock() {
+  return Boolean(CUP_CONFIG.previewNow && parseDate(CUP_CONFIG.previewNow));
+}
+
+/**
+ * seasonState(now) — where the season stands.
+ *   { phase: 'before', daysToGo, start, end }
+ *   { phase: 'during', day, totalDays, start, end }
+ *   { phase: 'after', start, end }
+ */
+export function seasonState(now = cupNow()) {
+  const start = parseDate(CUP_CONFIG.season?.start);
+  const end = parseDate(CUP_CONFIG.season?.end);
+  if (!start || !end) return null;
+
+  const DAY = 86400000;
+  const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const today = midnight(now);
+  const totalDays = Math.round((midnight(end) - midnight(start)) / DAY) + 1;
+
+  if (today < start) {
+    return { phase: 'before', daysToGo: Math.round((start - today) / DAY), start, end, totalDays };
+  }
+  if (today > end) return { phase: 'after', start, end, totalDays };
+  return { phase: 'during', day: Math.round((today - start) / DAY) + 1, totalDays, start, end };
 }

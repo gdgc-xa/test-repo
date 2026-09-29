@@ -1,11 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" data-skin="worldcup" data-motion="full">
+<html lang="en" data-theme="light" data-skin="txc" data-motion="full">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Campus Compass — a directory of every student organization at Xavier University – Ateneo de Cagayan."/>
   <title>Campus Compass · Xavier Ateneo</title>
   <link rel="icon" type="image/svg+xml" href="assets/illustrations/compass-rose.svg"/>
+
+  <!-- Xavier Cup 2026 design: Archivo (display, set expanded) and
+       Figtree (reading). The only external request the site makes;
+       every font token keeps the old system stack behind it. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&amp;family=Figtree:wght@400;500;600;700&amp;display=swap"/>
 
   <!-- CSS load order:
        tokens → base → layout → components/* → screens/* → animations
@@ -36,6 +43,10 @@
   <link rel="stylesheet" href="src/css/components/detail.css"/>
   <link rel="stylesheet" href="src/css/components/cup-map.css"/>
   <link rel="stylesheet" href="src/css/components/settings.css"/>
+  <link rel="stylesheet" href="src/css/components/bento-hero.css"/>
+  <link rel="stylesheet" href="src/css/components/team-strip.css"/>
+  <link rel="stylesheet" href="src/css/components/match-card.css"/>
+  <link rel="stylesheet" href="src/css/components/cup-calendar.css"/>
 
   <link rel="stylesheet" href="src/css/screens/landing.css"/>
   <link rel="stylesheet" href="src/css/components/featured.css"/>
@@ -50,6 +61,10 @@
   <link rel="stylesheet" href="src/css/skins.css"/>
 
   <link rel="stylesheet" href="src/css/animations.css"/>
+
+  <!-- Phone pass: media-query rules only, loaded last so it can adjust
+       every screen without editing the files above. -->
+  <link rel="stylesheet" href="src/css/mobile.css"/>
 
   <!-- Saved appearance, applied before the first paint.
        appearance.js owns these three values; this tiny copy exists
@@ -66,7 +81,7 @@
           theme === 'dark' || theme === 'light'
             ? theme
             : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-        if (skin === 'worldcup' || skin === 'sands') d.setAttribute('data-skin', skin);
+        if (skin === 'txc' || skin === 'worldcup' || skin === 'sands') d.setAttribute('data-skin', skin);
         if (motion === 'full' || motion === 'reduced') d.setAttribute('data-motion', motion);
         else if (matchMedia('(prefers-reduced-motion: reduce)').matches) d.setAttribute('data-motion', 'reduced');
       } catch (e) { /* private mode — defaults in the markup stand */ }
@@ -175,6 +190,68 @@
        LANDING — bright cel-shaded beach hero, "Sands of Time"
        ============================================================ -->
   <main id="screen-landing" class="screen screen--landing" data-screen="landing">
+
+    <!-- ============================================================
+         XAVIER CUP 2026 TILES — painted only when data-skin="txc".
+         Static copy lives here; the counts, the season tile, the
+         live strip and the team picker are filled by
+         components/bento-hero.js.
+         ============================================================ -->
+    <section class="bento-hero" data-bento-hero aria-labelledby="bento-title">
+      <div class="wrap">
+        <div class="bento">
+          <div class="bento__tile bento__lead">
+            <p class="bento__eyebrow">Campus Compass · Xavier Ateneo</p>
+            <h1 class="bento__title" id="bento-title">One campus.<br/>Every college.<br/><em>One trophy.</em></h1>
+            <p class="bento__lede">Find any student organization at Xavier University – Ateneo de Cagayan, then follow your college through The Xavier Cup.</p>
+
+            <form class="search-shell hero-search bento__search" data-hero-search onsubmit="return false;" role="search">
+              <svg class="search-shell__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="9" cy="9" r="6"/><line x1="17" y1="17" x2="13.5" y2="13.5"/>
+              </svg>
+              <input class="search-shell__input" type="search" id="bento-search"
+                     placeholder="Search orgs — try 'debate', 'coders', 'farm'…"
+                     aria-label="Search organizations"/>
+              <button class="btn hero-search__submit search-shell__submit" type="submit">Search</button>
+            </form>
+
+            <div class="bento__stats">
+              <span><b data-bento-count="orgs">75</b>Orgs</span>
+              <span><b data-bento-count="clusters">11</b>Clusters</span>
+              <span><b data-bento-count="teams">8</b>Teams</span>
+            </div>
+          </div>
+
+          <div class="bento__tile bento__season" data-bento-season aria-live="polite"></div>
+
+          <a class="bento__tile bento__orgs" href="?screen=browse" data-nav="browse">
+            <span class="bento__eyebrow">Organizations</span>
+            <span class="bento__orgs-line">Every org, in <span data-bento-count="clusters">11</span> clusters</span>
+            <span class="bento__dots" aria-hidden="true">
+              <i style="--dot: var(--blue);"></i><i style="--dot: var(--green);"></i><i style="--dot: var(--yellow);"></i><i style="--dot: var(--red);"></i>
+            </span>
+            <span class="bento__orgs-cta">Browse all orgs →</span>
+          </a>
+
+          <div class="bento__live" data-bento-live hidden></div>
+
+          <div class="bento__teams">
+            <div class="bento__row-head">
+              <h2 class="bento__row-title">Follow your team</h2>
+              <a class="bento__row-link" href="?screen=cup" data-nav="cup">The Xavier Cup →</a>
+            </div>
+            <div data-bento-teams aria-label="Pick the team you follow"></div>
+          </div>
+
+          <div class="bento__clusters">
+            <div class="bento__row-head">
+              <h2 class="bento__row-title">Browse by cluster</h2>
+            </div>
+            <div class="tag-cloud bento__tags" data-tag-cloud></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- ==== HERO SCENE — layered beach backdrop ====
          Bands top→bottom: sky · sea · surf · sand.
@@ -691,115 +768,201 @@
        THE XAVIER CUP — the university-wide season.
        Content comes from src/js/data/xavier-cup.js; screens/cup.js
        fills every [data-cup-*] slot below.
+
+       Four views under one sticky tab bar, as in the TXC proposal:
+         Map · Fixtures · Calendar · News & Updates
+       Exactly one view is shown; the choice is kept in ?tab=… so a
+       view can be linked to and survives a reload.
        ============================================================ -->
   <main id="screen-cup" class="screen screen--cup" hidden data-screen="cup">
 
-    <!-- Banner. This is the one place the World Cup theme is loud
-         whichever skin is on, which is the point of a season tab. -->
-    <section class="cup-hero" data-cup-hero>
-      <div class="cup-hero__scene" aria-hidden="true">
-        <span class="cup-hero__stripes"></span>
-        <svg class="cup-hero__lines" viewBox="0 0 1200 260" preserveAspectRatio="none">
-          <g fill="none" stroke="var(--cup-line)" stroke-width="2.5" vector-effect="non-scaling-stroke" opacity="0.7">
-            <ellipse cx="600" cy="258" rx="190" ry="66"/>
-            <line x1="0" y1="258" x2="1200" y2="258"/>
-            <rect x="60" y="150" width="200" height="140"/>
-            <rect x="940" y="150" width="200" height="140"/>
-          </g>
-        </svg>
-      </div>
-
-      <div class="wrap cup-hero__wrap">
-        <div class="cup-hero__text">
-          <p class="cup-hero__kicker" data-cup-kicker>University-wide</p>
-          <h1 class="cup-hero__title" data-cup-name>The Xavier Cup</h1>
-          <p class="cup-hero__tagline" data-cup-tagline></p>
-          <p class="cup-hero__lede" data-cup-lede></p>
+    <!-- STICKY TAB BAR — sits under the site nav while you scroll. -->
+    <div class="cup-tabs" data-cup-tabs>
+      <div class="wrap cup-tabs__wrap">
+        <div class="cup-tabs__nav" role="tablist" aria-label="The Xavier Cup">
+          <span class="cup-tabs__pill" data-cup-tab-pill aria-hidden="true"></span>
+          <button class="cup-tabs__tab" type="button" role="tab" id="cup-tab-map"
+                  data-cup-tab="map" aria-controls="cup-view-map" aria-selected="true">Map</button>
+          <button class="cup-tabs__tab" type="button" role="tab" id="cup-tab-fixtures"
+                  data-cup-tab="fixtures" aria-controls="cup-view-fixtures" aria-selected="false" tabindex="-1">
+            Fixtures<span class="cup-tabs__live" data-cup-tab-live hidden aria-label="games live now"></span>
+          </button>
+          <button class="cup-tabs__tab" type="button" role="tab" id="cup-tab-calendar"
+                  data-cup-tab="calendar" aria-controls="cup-view-calendar" aria-selected="false" tabindex="-1">Calendar</button>
+          <button class="cup-tabs__tab" type="button" role="tab" id="cup-tab-news"
+                  data-cup-tab="news" aria-controls="cup-view-news" aria-selected="false" tabindex="-1">
+            News<span class="cup-tabs__long">&amp; Updates</span>
+          </button>
         </div>
-        <img class="cup-hero__trophy" src="assets/illustrations/hero-trophy.svg" alt="" aria-hidden="true"/>
       </div>
+    </div>
+
+    <!-- ==================== MAP ==================== -->
+    <div class="cup-view" id="cup-view-map" role="tabpanel" aria-labelledby="cup-tab-map" data-cup-view="map">
+
+      <!-- Banner. Loud in every design, which is the point of a
+           season tab. -->
+      <section class="cup-hero" data-cup-hero>
+        <div class="cup-hero__scene" aria-hidden="true">
+          <span class="cup-hero__stripes"></span>
+          <svg class="cup-hero__lines" viewBox="0 0 1200 260" preserveAspectRatio="none">
+            <g fill="none" stroke="var(--cup-line)" stroke-width="2.5" vector-effect="non-scaling-stroke" opacity="0.7">
+              <ellipse cx="600" cy="258" rx="190" ry="66"/>
+              <line x1="0" y1="258" x2="1200" y2="258"/>
+              <rect x="60" y="150" width="200" height="140"/>
+              <rect x="940" y="150" width="200" height="140"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="wrap cup-hero__wrap">
+          <!-- .cup-hero__tile is display:contents in the older designs,
+               so their layout is unchanged; the Xavier Cup 2026 design
+               turns it into the navy tile. -->
+          <div class="cup-hero__tile">
+            <div class="cup-hero__text">
+              <p class="cup-hero__kicker" data-cup-kicker>University-wide</p>
+              <h1 class="cup-hero__title" data-cup-name>The Xavier Cup</h1>
+              <p class="cup-hero__tagline" data-cup-tagline></p>
+              <p class="cup-hero__lede" data-cup-lede></p>
+              <p class="cup-hero__preview" data-cup-preview hidden></p>
+            </div>
+            <img class="cup-hero__trophy" src="assets/illustrations/hero-trophy.svg" alt="" aria-hidden="true"/>
+          </div>
+        </div>
+
+        <div class="wrap">
+          <div class="cup-counters" data-cup-counters>
+            <div class="cup-counter cup-counter--ongoing">
+              <span class="cup-counter__value" data-cup-count="ongoing">0</span>
+              <span class="cup-counter__label">Being played now</span>
+            </div>
+            <div class="cup-counter">
+              <span class="cup-counter__value" data-cup-count="upcoming">0</span>
+              <span class="cup-counter__label">Upcoming</span>
+            </div>
+            <div class="cup-counter">
+              <span class="cup-counter__value" data-cup-count="finished">0</span>
+              <span class="cup-counter__label">Finished</span>
+            </div>
+            <div class="cup-counter">
+              <span class="cup-counter__value" data-cup-count="venues">0</span>
+              <span class="cup-counter__label">Venues in play</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div class="wrap">
-        <div class="cup-counters" data-cup-counters>
-          <div class="cup-counter cup-counter--ongoing">
-            <span class="cup-counter__value" data-cup-count="ongoing">0</span>
-            <span class="cup-counter__label">Being played now</span>
+        <!-- CONSOLIDATED MAP -->
+        <section class="cup-section" data-cup-map-section>
+          <div class="cup-section__head">
+            <div>
+              <h2 class="cup-section__title">Where the games are</h2>
+              <p class="cup-section__hint">Every venue in play this season, on one map. Select a pin to see what is upcoming, live and finished there.</p>
+            </div>
           </div>
-          <div class="cup-counter">
-            <span class="cup-counter__value" data-cup-count="upcoming">0</span>
-            <span class="cup-counter__label">Upcoming</span>
+
+          <div class="cup-map-grid">
+            <div class="cup-map-panel">
+              <div class="cup-map-panel__inner" data-cup-map></div>
+              <div class="cup-map-panel__legend" data-cup-legend></div>
+            </div>
+            <aside class="venue-panel" data-cup-venue-panel aria-live="polite"></aside>
           </div>
-          <div class="cup-counter">
-            <span class="cup-counter__value" data-cup-count="finished">0</span>
-            <span class="cup-counter__label">Finished</span>
-          </div>
-          <div class="cup-counter">
-            <span class="cup-counter__value" data-cup-count="venues">0</span>
-            <span class="cup-counter__label">Venues in play</span>
-          </div>
-        </div>
+        </section>
       </div>
-    </section>
+    </div>
 
-    <div class="wrap">
-
-      <!-- SEARCH — deliberately its own thing. Searching never moves
-           the map; the two are separate ways into the same fixtures. -->
-      <section class="cup-section" data-cup-search-section>
-        <div class="cup-section__head">
-          <div>
-            <h2 class="cup-section__title">Find a game</h2>
-            <p class="cup-section__hint">Search by college, sport, round or venue. Open any result for the full description and where it is being played.</p>
+    <!-- ==================== FIXTURES ==================== -->
+    <div class="cup-view" id="cup-view-fixtures" role="tabpanel" aria-labelledby="cup-tab-fixtures" data-cup-view="fixtures" hidden>
+      <div class="wrap">
+        <!-- FOLLOW YOUR TEAM — the pick is saved on this device and
+             shared with Discover and the Calendar (lib/my-team.js). -->
+        <section class="cup-section" data-cup-teams-section>
+          <div class="cup-section__head">
+            <div>
+              <h2 class="cup-section__title">Follow your team</h2>
+              <p class="cup-section__hint" data-cup-team-note>Pick a team to ring its games in every list and fill the calendar with its schedule.</p>
+            </div>
           </div>
-        </div>
-        <form class="search-shell search-shell--compact" data-cup-search onsubmit="return false;">
-          <svg class="search-shell__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="9" cy="9" r="6"/><line x1="17" y1="17" x2="13.5" y2="13.5"/>
-          </svg>
-          <input class="search-shell__input" type="search"
-                 placeholder="Search fixtures &mdash; try 'basketball', 'engineering', 'gym'&hellip;"
-                 aria-label="Search fixtures"/>
-          <button class="btn btn--primary search-shell__submit" type="submit">Search</button>
-        </form>
-        <div class="cup-results" data-cup-results hidden></div>
-      </section>
+          <div data-cup-teams aria-label="Pick the team you follow"></div>
+        </section>
 
-      <!-- CONSOLIDATED MAP -->
-      <section class="cup-section" data-cup-map-section>
-        <div class="cup-section__head">
-          <div>
-            <h2 class="cup-section__title">Where the games are</h2>
-            <p class="cup-section__hint">Every venue in play this season, on one map. Select a pin to see what is upcoming, ongoing and finished there.</p>
+        <!-- FEATURED MATCH — one game per day, with a day pager. -->
+        <section class="cup-section" data-cup-featured-section>
+          <div class="cup-section__head">
+            <div>
+              <h2 class="cup-section__title">Featured match</h2>
+              <p class="cup-section__hint">One game a day: your team’s if it plays, otherwise the live one or the next to start.</p>
+            </div>
           </div>
-        </div>
-
-        <div class="cup-map-grid">
-          <div class="cup-map-panel">
-            <div class="cup-map-panel__inner" data-cup-map></div>
-            <div class="cup-map-panel__legend" data-cup-legend></div>
+          <div class="featured-match">
+            <div class="featured-match__bar">
+              <button class="featured-match__step" type="button" data-featured-step="-1" aria-label="Previous day">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="10,3 5,8 10,13"/></svg>
+              </button>
+              <div class="featured-match__day" data-featured-day aria-live="polite"></div>
+              <button class="featured-match__step" type="button" data-featured-step="1" aria-label="Next day">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6,3 11,8 6,13"/></svg>
+              </button>
+            </div>
+            <div class="featured-match__slot" data-featured-slot></div>
+            <p class="featured-match__more" data-featured-more></p>
           </div>
-          <aside class="venue-panel" data-cup-venue-panel aria-live="polite"></aside>
-        </div>
-      </section>
+        </section>
 
-      <!-- FULL FIXTURE LIST -->
-      <section class="cup-section" data-cup-schedule-section>
-        <div class="cup-section__head">
-          <div>
-            <h2 class="cup-section__title">Fixtures</h2>
-            <p class="cup-section__hint">Live first, then what is next, then results.</p>
+        <!-- FULL FIXTURE LIST -->
+        <section class="cup-section" data-cup-schedule-section>
+          <div class="cup-section__head">
+            <div>
+              <h2 class="cup-section__title">All fixtures</h2>
+              <p class="cup-section__hint">Live first, then what is next, then results. Filter by status or sport.</p>
+            </div>
+            <span class="browse-count" data-cup-schedule-count>&mdash;</span>
           </div>
-          <span class="browse-count" data-cup-schedule-count>&mdash;</span>
-        </div>
-        <div class="chip-row cup-chips" data-cup-status-chips></div>
-        <div class="chip-row cup-chips cup-chips--sports" data-cup-sport-chips></div>
-        <div class="card-grid cup-grid" data-cup-grid></div>
-      </section>
+          <div class="chip-row cup-chips" data-cup-status-chips></div>
+          <div class="chip-row cup-chips cup-chips--sports" data-cup-sport-chips></div>
+          <div class="match-grid cup-grid" data-cup-grid></div>
+        </section>
+      </div>
+    </div>
 
-      <!-- NEWS & UPDATES -->
-      <section class="cup-section" data-cup-news-section>
-        <div class="panel cup-news" data-cup-news></div>
-      </section>
+    <!-- ==================== CALENDAR ==================== -->
+    <div class="cup-view" id="cup-view-calendar" role="tabpanel" aria-labelledby="cup-tab-calendar" data-cup-view="calendar" hidden>
+      <div class="wrap">
+        <section class="cup-section" data-cup-teams-section>
+          <div class="cup-section__head">
+            <div>
+              <h2 class="cup-section__title">Follow your team</h2>
+              <p class="cup-section__hint" data-cup-team-note>Pick a team, then tap a day to see when they play.</p>
+            </div>
+          </div>
+          <div data-cup-teams aria-label="Pick the team you follow"></div>
+        </section>
+
+        <!-- CALENDAR — the season as a month; the picked team's games,
+             or every game when no team is picked. -->
+        <section class="cup-section" data-cup-calendar-section>
+          <div class="cup-section__head">
+            <div>
+              <h2 class="cup-section__title" data-cup-calendar-title>Season calendar</h2>
+              <p class="cup-section__hint">Tap a day to list its games underneath.</p>
+            </div>
+          </div>
+          <div class="cal" data-cup-calendar></div>
+          <div class="cal-day" data-cup-calendar-day aria-live="polite"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ==================== NEWS & UPDATES ==================== -->
+    <div class="cup-view" id="cup-view-news" role="tabpanel" aria-labelledby="cup-tab-news" data-cup-view="news" hidden>
+      <div class="wrap">
+        <section class="cup-section" data-cup-news-section>
+          <div class="cup-news" data-cup-news></div>
+        </section>
+      </div>
     </div>
   </main>
 
@@ -936,9 +1099,10 @@
         <div class="settings__row" data-settings-row="design">
           <div class="settings__label">
             <span class="settings__name">Design</span>
-            <span class="settings__hint">This season&rsquo;s World Cup look, or the original Sands of Time beach.</span>
+            <span class="settings__hint">This season&rsquo;s Xavier Cup look, the World Cup pitch, or the original Sands of Time beach.</span>
           </div>
           <div class="seg" role="group" aria-label="Design">
+            <button class="seg__btn" type="button" data-set-skin="txc" aria-pressed="false">Xavier Cup 2026</button>
             <button class="seg__btn" type="button" data-set-skin="worldcup" aria-pressed="false">World Cup</button>
             <button class="seg__btn" type="button" data-set-skin="sands"    aria-pressed="false">Sands of Time</button>
           </div>

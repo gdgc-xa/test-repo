@@ -10,6 +10,7 @@
    ============================================================ */
 
 import { CUP_CONFIG, VENUE_BY_ID, sportsInPlay } from '../data/xavier-cup.js';
+import { teamFor } from '../data/teams.js';
 import { parseDate, formatRange, relativeLabel, computeStatus, formatTime, formatDay } from '../lib/dates.js';
 import { statusPillHtml, GAME_STATUS_LABEL } from './status.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
@@ -38,7 +39,7 @@ const SPORT_GLYPH = {
   swimming:   `<path d="M2 18c2 0 2-1.5 4-1.5S8 18 10 18s2-1.5 4-1.5S16 18 18 18s2-1.5 4-1.5"/><path d="M6.5 13 11 9l5 3.5"/><circle cx="17.5" cy="7.5" r="1.8"/>`,
 };
 
-function sportGlyph(sport) {
+export function sportGlyph(sport) {
   const key = String(sport || '').toLowerCase().replace(/[^a-z]/g, '');
   const paths = SPORT_GLYPH[key];
   if (!paths) return null;
@@ -60,7 +61,11 @@ export function resolveGame(g, now = new Date()) {
   }
   const status = computeStatus(g, now, CUP_CONFIG.defaultDurationMins);
   const start = parseDate(g.start);
-  const teams = Array.isArray(g.teams) ? g.teams.filter(Boolean) : [];
+  // `teams` in the data are ids from data/teams.js; `sides` are the
+  // full records and `teams` becomes their display names, so every
+  // older template that prints g.teams keeps working unchanged.
+  const sides = (Array.isArray(g.teams) ? g.teams : []).filter(Boolean).map(teamFor);
+  const teams = sides.map(t => t.name);
   const title = g.title || (teams.length >= 2 ? `${teams[0]} vs ${teams[1]}` : (teams[0] || g.sport || 'Fixture'));
 
   return {
@@ -70,6 +75,8 @@ export function resolveGame(g, now = new Date()) {
     venueName: venue?.name || '',
     status,
     start,
+    sides,
+    teamIds: sides.map(t => t.id).filter(Boolean),
     teams,
     title,
     color: colorForSport(g.sport),
@@ -171,6 +178,7 @@ export function gameMatches(g, query) {
   const hay = [
     g.title, g.sport, g.division, g.round, g.description,
     g.venueName, g.venue?.short, g.when, g.note, ...(g.teams || []),
+    ...(g.sides || []).flatMap(t => [t.college, t.mascot, t.short]),
   ];
   return hay.some(v => v && String(v).toLowerCase().includes(q));
 }

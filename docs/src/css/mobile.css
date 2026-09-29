@@ -1,0 +1,275 @@
+/* ============================================================
+   mobile.css — the phone pass. Loaded LAST, after every other
+   stylesheet, so it can adjust without editing them.
+
+   Only media-query rules live here; desktop is untouched.
+   The aim: the same sections, in the same order, with the same
+   hierarchy as desktop, but laid out for a phone rather than
+   shrunk onto one.
+
+     · 16px side gutter on everything
+     · reading text at 16px, headings stepped down in proportion
+     · every tap target at least 44 × 44px
+     · organizations in a 2-up grid of equal cards
+     · nothing truncated mid-word, nothing scrolling sideways
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+  /* ---------- Gutter: one 16px edge for the whole page ---------- */
+  .wrap,
+  .site-nav__wrap,
+  .site-footer__wrap { padding-inline: 16px; }
+  .nav-sheet { padding: 12px 16px 20px; }
+
+  /* ---------- Type: 16px reading text, headings in proportion ---------- */
+  body { font-size: 16px; }
+
+  .bento__lede,
+  .cup-hero__lede,
+  .cup-section__hint,
+  .events-head__lede,
+  .about-head__lede,
+  .about-list li,
+  .about-card__body,
+  .theme-block__copy,
+  .detail__body,
+  .news-hero__body,
+  .news-post__body,
+  .cup-event__desc,
+  .featured-match__more,
+  .venue-panel__hint,
+  .card__desc { font-size: 16px; line-height: 1.55; }
+
+  .browse-title,
+  .about-head__title,
+  .cup-hero__title          { font-size: 30px; line-height: 1.1; }
+  .cup-section__title,
+  .landing-featured__title,
+  .browse-featured__title,
+  .theme-block__title,
+  .about-team__title,
+  .news-title               { font-size: 22px; line-height: 1.2; }
+  .about-card__title,
+  .bento__row-title,
+  .news-more__title         { font-size: 19px; }
+
+  /* Small labels stay small, but never below 12px. */
+  .theme-legend__clusters,
+  .card__short,
+  .cup-counter__label       { font-size: 12.5px; }
+
+  /* ---------- Section rhythm: 32px between sections ---------- */
+  .cup-section                 { padding-top: 32px; }
+  .landing-featured            { padding-block: 32px; }
+  :root[data-skin] .landing-theme { padding-block: 32px 40px; }
+  .browse-featured             { margin-top: 24px; margin-bottom: 24px; padding-bottom: 24px; }
+  .bento__teams,
+  .bento__clusters             { margin-top: 20px; }
+
+  /* ---------- Tap targets: 44 × 44px minimum ---------- */
+  .nav-toggle,
+  .theme-toggle,
+  .modal__close              { width: 44px; height: 44px; }
+  .brand                     { min-height: 44px; }
+  .btn,
+  .btn--sm,
+  .btn--back                 { min-height: 44px; }
+  .btn--sm                   { padding: 10px 16px; font-size: 14px; }
+  .chip,
+  .tag-cloud .tag,
+  .cup-tabs__tab,
+  .seg__btn,
+  .venue-row                 { min-height: 44px; }
+  .featured-match__step,
+  .news-step,
+  .cal-step                  { width: 44px; height: 44px; }
+  .search-shell__submit      { min-height: 44px; }
+
+  /* Text links get a thumb-sized hit area without changing their look. */
+  .bento__season-link,
+  .bento__row-link,
+  .landing-featured__link,
+  .news-post__link,
+  .browse-crumb a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* ---------- Nav sheet: the appearance row lines up with the links ---------- */
+  .nav-sheet__foot { padding-inline: 16px; }
+  .nav-sheet__actions .btn { min-width: 96px; }
+
+  /* ---------- Filter toolbars: hint on its own line, button under it ---------- */
+  .filter-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 14px;
+  }
+  /* inline-flex made every run of words its own column; flow as text. */
+  .filter-toolbar__help { display: block; line-height: 1.5; }
+  .filter-toolbar__help-icon { display: inline-block; vertical-align: -3px; margin-right: 6px; }
+  /* The hidden "Clear filters" button kept an empty 44px row. */
+  .clear-filters:not(.is-visible) { display: none; }
+
+  /* ---------- Organizations: a 2-up grid of equal cards ----------
+     Only the org grids (Browse, its Featured row, Discover's
+     Featured row). Event cards keep one column: their date lines
+     need the width. grid-auto-rows: 1fr makes every card the same
+     height as the tallest, so rows line up. */
+  .browse-grid,
+  .browse-featured__grid,
+  .landing-featured .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+    gap: 12px;
+  }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card {
+    min-height: 0;
+    padding: 16px;
+    gap: 10px;
+  }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card--ghost { min-height: 0; }
+
+  /* Logo and short code on one row, the full name across the card
+     under them. Side by side with the logo, the name got a sliver
+     of width and broke into fragments. .card__headtext steps out of
+     the way (display: contents) so its two lines can be placed. */
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__head {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-areas:
+      "emblem short"
+      "title  title";
+    align-items: center;
+    gap: 10px;
+  }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__headtext { display: contents; }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__short {
+    grid-area: short;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__emblem {
+    grid-area: emblem;
+    width: 52px;
+    height: 52px;
+    padding: 4px;
+  }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__logo {
+    object-fit: contain;
+    max-height: 44px;
+  }
+
+  /* The full name, always: no clamp, and lines break between words. */
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__title {
+    grid-area: title;
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+    font-size: 15.5px;
+    line-height: 1.3;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: manual;
+  }
+
+  /* A grid holding a single featured org: that card takes the row. */
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card:only-child { grid-column: 1 / -1; }
+
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__badges {
+    justify-content: flex-start;
+    margin-bottom: 0;
+  }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__badge { white-space: normal; }
+
+  /* ---------- Card footers (orgs and events): stacked, full-width button ---------- */
+  .card__foot {
+    margin-top: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .card__meta {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .card__cta {
+    justify-content: center;
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  /* ---------- Event cards: the date line wraps instead of cutting off ---------- */
+  .card__when { flex-wrap: wrap; align-items: flex-start; }
+  .card__when > span:not(.card__when-rel) {
+    white-space: normal;
+    overflow: visible;
+  }
+  .card__when-rel { margin-left: 0; }
+
+  /* ---------- Cluster legend: colour group on one line, clusters under it ---------- */
+  .theme-legend__row { flex-wrap: wrap; row-gap: 4px; padding: 12px 16px; }
+  .theme-legend__clusters {
+    flex-basis: 100%;
+    margin-left: 26px;
+    text-align: left;
+  }
+
+  /* ---------- About ---------- */
+  .about-card { padding: 20px; }
+  .about-list { padding-left: 0; }          /* the browser's default 40px list indent */
+  .about-list li { padding-left: 20px; }
+
+  /* ---------- Booth pop-up: the breadcrumb clears the close button ---------- */
+  .booth__crumb { padding-right: 56px; }
+
+  /* ---------- Settings: label above, choices full width ---------- */
+  .settings__row { flex-direction: column; align-items: stretch; gap: 12px; }
+  .seg { display: flex; width: 100%; }
+  .seg__btn { flex: 1 1 0; padding-inline: 8px; white-space: normal; text-align: center; }
+
+  /* ---------- Xavier Cup: counters and tiles at a readable size ---------- */
+  .cup-counter { padding: 16px; }
+  .featured-match { padding: 12px; }
+}
+
+/* ============================================================
+   PHONES (≤480px) — the 2-up org cards are about 165px wide here,
+   so they carry the logo, name, clusters and button. The
+   description is one tap away in the booth.
+   ============================================================ */
+@media (max-width: 480px) {
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__body,
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__meta { display: none; }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card { padding: 14px; }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__foot {
+    padding-top: 10px;
+  }
+  /* ...except a lone featured card, which has the full width for them. */
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card:only-child .card__body { display: block; }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card:only-child .card__meta { display: inline-flex; }
+
+  /* Cluster tags: two even columns that fill the row. */
+  .tag-cloud { max-width: none; }
+  .tag-cloud .tag { justify-content: flex-start; }
+
+  /* Tab labels stay at a readable size on the sticky bar. */
+  .cup-tabs__tab { font-size: 14px; }
+}
+
+/* ============================================================
+   NARROW PHONES (≤340px) — one org per row, with room for the
+   description again.
+   ============================================================ */
+@media (max-width: 340px) {
+  .browse-grid,
+  .browse-featured__grid,
+  .landing-featured .card-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+  }
+  :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__body { display: block; }
+}
