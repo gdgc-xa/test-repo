@@ -20,10 +20,10 @@ export function gameDetailHtml(g) {
 
   const teamsBlock = g.teams.length >= 2
     ? `<div class="versus${hasScore ? ' versus--scored' : ''}">
-         ${teamSide(g.teams[0], hasScore ? g.score.home : null,
+         ${teamSide(g.sides?.[0] || g.teams[0], hasScore ? g.score.home : null,
                     hasScore && Number(g.score.home) > Number(g.score.away))}
          <span class="versus__sep" aria-hidden="true">${hasScore ? '–' : 'vs'}</span>
-         ${teamSide(g.teams[1], hasScore ? g.score.away : null,
+         ${teamSide(g.sides?.[1] || g.teams[1], hasScore ? g.score.away : null,
                     hasScore && Number(g.score.away) > Number(g.score.home))}
        </div>`
     : `<p class="versus versus--solo">${escapeHtml(g.teams[0] || g.sport || '')}</p>`;
@@ -41,13 +41,14 @@ export function gameDetailHtml(g) {
     </div>`).join('');
 
   /* The venue is shown, not just named: the mini map is the same
-     component as the tab's big one, with this venue selected. */
+     drawing as the tab's big one, with this venue lit and the
+     sport's icon on the spot where it is played. */
   const where = g.venue ? `
     <section class="panel detail__where">
       <div class="panel__kicker">Where it is being played</div>
       <p class="detail__venue-name">${escapeHtml(g.venue.name)}</p>
       ${g.venue.note ? `<p class="detail__venue-note">${escapeHtml(g.venue.note)}</p>` : ''}
-      <div class="detail__map">${cupMapHtml({}, { selected: g.venueId, mini: true })}</div>
+      <div class="detail__map">${cupMapHtml({}, { selected: g.venueId, sport: g.sport })}</div>
       <button class="btn btn--ghost btn--sm detail__venue-cta" type="button" data-show-venue="${escapeAttr(g.venueId)}">
         See everything at this venue
       </button>
@@ -101,10 +102,16 @@ export function gameDetailHtml(g) {
     </article>`;
 }
 
-function teamSide(name, score, isWinner) {
+function teamSide(team, score, isWinner) {
+  // A team record from data/teams.js, or a bare name for anything else.
+  const t = typeof team === 'string' ? { name: team } : (team || {});
   return `
     <div class="versus__side${isWinner ? ' is-winner' : ''}">
-      <span class="versus__team">${escapeHtml(name || '—')}</span>
+      ${t.logo ? `<img class="versus__crest" src="${escapeAttr(t.logo)}" alt="">` : ''}
+      <span class="versus__who">
+        <span class="versus__team">${escapeHtml(t.name || '—')}</span>
+        ${t.college ? `<span class="versus__college">${escapeHtml(t.college)}</span>` : ''}
+      </span>
       ${score !== null && score !== undefined
         ? `<span class="versus__score">${escapeHtml(String(score))}</span>` : ''}
     </div>`;
