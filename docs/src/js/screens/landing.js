@@ -10,21 +10,26 @@ import { resolveFeatured } from '../components/featured.js';
 import { cardHtml } from '../components/card.js';
 import { FEATURED_ENABLED } from '../data/featured.js';
 import { watchReveals } from '../reveal-observer.js';
+import { initBentoHero } from '../components/bento-hero.js';
 import { navigate } from '../router.js';
 
 /**
  * Called once during main.js hydration.
  * The static HTML skeleton is in index.html — we only wire up
- * dynamic bits (tag cloud + search + featured strip).
+ * dynamic bits (tag cloud + search + featured strip, and the
+ * Xavier Cup 2026 tiles).
+ *
+ * Each design has its own hero, so there can be more than one
+ * search box and tag cloud in the markup; all of them are wired.
  */
 export function initLanding(root) {
-  hydrateTagCloud(root);
-  hydrateSearch(root);
+  root.querySelectorAll('[data-tag-cloud]').forEach(hydrateTagCloud);
+  root.querySelectorAll('[data-hero-search]').forEach(hydrateSearch);
   hydrateFeatured(root);
+  initBentoHero(root);
 }
 
-function hydrateTagCloud(root) {
-  const container = root.querySelector('[data-tag-cloud]');
+function hydrateTagCloud(container) {
   if (!container) return;
 
   container.innerHTML = CATEGORIES.map((c, i) => {
@@ -47,8 +52,7 @@ function hydrateTagCloud(root) {
   });
 }
 
-function hydrateSearch(root) {
-  const shell = root.querySelector('[data-hero-search]');
+function hydrateSearch(shell) {
   if (!shell) return;
   attachSearchShell(shell, (query) => {
     if (!query) return;

@@ -1,133 +1,416 @@
 /* ============================================================
-   cup-map.css — the consolidated venue map and the panel beside it.
+   cup-map.css — the Xavier Cup campus map and the panel beside it.
 
-   The map is inline SVG, so every colour below is a token and the
-   whole thing re-themes with the site. Pins are real controls:
-   they take focus, they announce a pressed state, and they are
-   sized for a thumb, not a mouse.
+   The drawing is inline SVG and the markers are real buttons laid
+   over it, so every colour is a --campus-* token (tokens.css) and
+   the whole map re-themes with the site. Markers keep a readable
+   size however far the map is zoomed; the drawing scales under
+   them.
    ============================================================ */
 
+/* ---------- Frame ---------- */
 .cup-map {
-  display: block;
-  width: 100%;
-  height: auto;
+  position: relative;
   border-radius: var(--radius);
   overflow: hidden;
+  background: var(--campus-ground);
+  /* The zoomed canvas is wider than the map; without this it would
+     widen the grid column, which widens the map, which zooms the
+     canvas again — without end. */
+  contain: inline-size;
 }
 
-/* ---------- The ground ---------- */
-.cup-map__ground { fill: var(--surface-2); }
-.cup-map__area {
-  fill: var(--cup-green-soft);
-  stroke: color-mix(in srgb, var(--cup-green) 30%, transparent);
-  stroke-width: 2;
+/* The viewport is the drawing's shape. At 1× the canvas fills it
+   exactly; zoomed, the canvas grows and the viewport scrolls — by
+   dragging with a mouse, natively with a finger. */
+.cup-map__viewport {
+  position: relative;
+  aspect-ratio: 560 / 310;
+  overflow: hidden;
+  outline: none;
 }
-.cup-map__area-label {
-  fill: var(--muted);
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-anchor: middle;
+.cup-map__viewport.is-zoomed {
+  overflow: auto;
+  cursor: grab;
+  scrollbar-width: thin;
 }
-.cup-map__path {
+.cup-map__viewport.is-dragging { cursor: grabbing; }
+.cup-map__viewport:focus-visible { box-shadow: inset 0 0 0 3px var(--campus-select); }
+.cup-map__viewport[hidden],
+.cup-map__3d[hidden] { display: none; }
+
+.cup-map__canvas {
+  position: relative;
+  width: var(--canvas-w, 100%);
+  height: var(--canvas-h, 100%);
+  container-type: inline-size;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Sport icon size: grows with the map, within thumb-sized limits */
+  --icon: clamp(30px, 6.2cqw, 48px);
+}
+.cup-map__canvas .campus {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================================
+   THE DRAWING
+   ============================================================ */
+.campus { display: block; max-width: none; }
+
+.campus__road {
   fill: none;
-  stroke: var(--border-strong);
-  stroke-width: 10;
-  stroke-linecap: round;
-  opacity: 0.45;
+  stroke: var(--campus-road);
+  stroke-width: 12;
 }
-.cup-map__building {
-  fill: color-mix(in srgb, var(--muted) 82%, var(--ink));
-  stroke: color-mix(in srgb, var(--ink) 18%, transparent);
+.campus__road-line {
+  fill: none;
+  stroke: var(--campus-road-line);
+  stroke-width: 0.7;
+  stroke-dasharray: 5 4;
+}
+.campus__road-label {
+  fill: var(--campus-landmark);
+  font-family: var(--font-map);
+  font-stretch: 75%;
+  font-size: 4.4px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
+}
+
+.campus__land {
+  fill: var(--campus-land);
+  stroke: var(--campus-land-edge);
   stroke-width: 1.5;
+  stroke-linejoin: round;
 }
-.cup-map__building-label {
-  fill: var(--surface);
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 700;
-  text-anchor: middle;
-  dominant-baseline: middle;
-}
-
-/* ---------- Pins ---------- */
-.cup-pin { cursor: pointer; }
-.cup-pin.is-static { cursor: default; pointer-events: none; }
-
-.cup-pin__hit { fill: transparent; }
-.cup-pin__dot {
-  fill: var(--cup-green);
-  stroke: var(--surface);
-  stroke-width: 4;
-  transition: fill 180ms, r 180ms;
-}
-.cup-pin__roof {
+.campus__walk {
   fill: none;
-  stroke: var(--cup-green-dk);
-  stroke-width: 4;
+  stroke: var(--campus-walk);
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.cup-pin__count {
-  fill: #fff;
-  font-family: var(--font-serif);
-  font-size: 20px;
-  font-weight: 800;
-  text-anchor: middle;
-  dominant-baseline: central;
-  pointer-events: none;
+
+/* ---------- Buildings ---------- */
+.campus__fp {
+  fill: var(--campus-building);
+  stroke: var(--campus-building-edge);
+  stroke-width: 1;
+  stroke-linejoin: round;
 }
-.cup-pin__labelbg {
-  fill: var(--surface);
-  stroke: var(--border);
-  stroke-width: 1.5;
-}
-.cup-pin__label {
-  fill: var(--ink);
-  font-family: var(--font-body);
-  font-size: 15px;
+.campus__fp--field  { fill: var(--campus-field); stroke: var(--campus-field-edge); }
+.campus__fp--court  { fill: var(--campus-court); }
+.campus__fp--gym    { fill: var(--campus-gym); }
+.campus__fp--church { fill: var(--campus-church); }
+
+.campus__roof { pointer-events: none; }
+.campus__roof-line { stroke: var(--campus-roof); stroke-width: 0.3; }
+
+.campus__fp-label {
+  fill: var(--campus-label);
+  font-family: var(--font-map);
+  font-stretch: 75%;
+  font-size: 5.2px;
   font-weight: 700;
+  letter-spacing: 0.1px;
   text-anchor: middle;
-  dominant-baseline: middle;
   pointer-events: none;
 }
+.campus__fp-label--small { font-size: 3.4px; }
 
-.cup-pin:hover .cup-pin__dot { fill: var(--cup-green-lt); }
-.cup-pin:focus-visible { outline: none; }
-.cup-pin:focus-visible .cup-pin__dot {
-  stroke: var(--cup-gold);
-  stroke-width: 6;
+/* A venue's building is a control too — the tag is the keyboard
+   way in, the building the pointer way. */
+.campus__fp.is-venue {
+  cursor: pointer;
+  transition: stroke 150ms, stroke-width 150ms;
+}
+.campus__fp.is-venue:hover { stroke: var(--campus-select); stroke-width: 1.8; }
+.campus__fp.is-selected {
+  stroke: var(--campus-select);
+  stroke-width: 2.6;
 }
 
-/* A venue with nothing booked is still drawn — it is part of the
-   campus — but it recedes. */
-.cup-pin.is-empty .cup-pin__dot { fill: var(--border-strong); }
-.cup-pin.is-empty .cup-pin__roof { stroke: var(--muted); }
-.cup-pin.is-empty .cup-pin__labelbg { opacity: 0.6; }
-.cup-pin.is-empty .cup-pin__label { fill: var(--muted); }
-
-/* Selected */
-.cup-pin__halo {
+/* ---------- Pitch lines, gates ---------- */
+.campus__markings { pointer-events: none; }
+.campus__stripe { fill: var(--campus-marking); opacity: 0.12; }
+.campus__lines {
   fill: none;
-  stroke: var(--cup-gold);
-  stroke-width: 4;
+  stroke: var(--campus-marking);
+  stroke-width: 1.1;
 }
-.cup-pin.is-selected .cup-pin__dot { fill: var(--cup-gold-dk); }
-.cup-pin.is-selected .cup-pin__labelbg {
-  fill: var(--cup-gold-dk);
-  stroke: var(--cup-gold-dk);
+.campus__landmarks { pointer-events: none; }
+.campus__gate {
+  fill: none;
+  stroke: var(--campus-landmark);
+  stroke-width: 2;
+  opacity: 0.7;
 }
-.cup-pin.is-selected .cup-pin__label { fill: #fff; }
+.campus__landmark {
+  fill: var(--campus-landmark);
+  font-family: var(--font-map);
+  font-stretch: 75%;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-anchor: middle;
+}
 
-/* Live: the ring breathes so the eye finds it without the pin moving */
-.cup-pin__pulse {
-  fill: color-mix(in srgb, var(--red) 45%, transparent);
-  transform-origin: center;
-  transform-box: fill-box;
+/* ============================================================
+   MARKERS — venue name tags and sport icons
+   ============================================================ */
+.cup-map__markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cup-map__markers > * { pointer-events: auto; }
+
+/* 2D placement: centred on their spot. In 3D, Mapbox places them. */
+.cup-map__markers > .cup-tag,
+.cup-map__markers > .cup-sport {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  transform: translate(-50%, -50%);
+}
+
+/* ---------- Venue name tag ---------- */
+.cup-tag {
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 4px 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--campus-tag);
+  color: var(--campus-tag-ink);
+  box-shadow: 0 1px 4px var(--campus-shadow);
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 800;
+  line-height: 1.15;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: box-shadow 150ms, background 150ms;
+}
+/* A bigger target than the tag itself, for a thumb */
+.cup-tag::after {
+  content: "";
+  position: absolute;
+  inset: -9px -5px;
+}
+.cup-tag__count {
+  min-width: 19px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--campus-ground);
+  font-size: 10.5px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.cup-tag__live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--campus-live);
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+.cup-tag:hover { box-shadow: 0 0 0 2px var(--campus-select), 0 1px 4px var(--campus-shadow); }
+.cup-tag:focus-visible { outline: 3px solid var(--campus-select); outline-offset: 2px; }
+.cup-tag.is-selected {
+  background: var(--campus-select);
+  color: var(--campus-on-select);
+}
+.cup-tag.is-selected .cup-tag__count {
+  background: color-mix(in srgb, var(--campus-on-select) 22%, transparent);
+}
+.cup-tag.is-empty { opacity: 0.8; }
+
+/* ---------- Sport icon ---------- */
+.cup-sport {
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: var(--icon);
+  height: var(--icon);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.cup-sport.is-selected { z-index: 3; }
+.cup-sport__icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 3px var(--campus-shadow));
+  transition: transform 160ms ease-out;
+  pointer-events: none;
+}
+.cup-sport:hover .cup-sport__icon,
+.cup-sport.is-selected .cup-sport__icon { transform: scale(1.14); }
+.cup-sport:focus-visible { outline: 3px solid var(--campus-select); outline-offset: 2px; }
+
+/* A sport with no picture in CUP_MAP.sportIcons */
+.cup-sport__icon--letter {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--campus-select);
+  color: var(--campus-on-select);
+  font-family: var(--font-serif);
+  font-size: calc(var(--icon) * 0.45);
+  font-weight: 800;
+}
+
+/* Above the icon, like a label on a pin: below it would sit on the
+   venue's own name tag. */
+.cup-sport__name {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 2px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--campus-tag);
+  color: var(--campus-tag-ink);
+  box-shadow: 0 1px 4px var(--campus-shadow);
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.cup-sport.is-live .cup-sport__name {
+  background: var(--campus-live);
+  color: var(--campus-on-live);
+}
+.cup-sport.is-selected .cup-sport__name {
+  background: var(--campus-select);
+  color: var(--campus-on-select);
+}
+
+/* Live: a ring breathes behind the icon, so the eye finds it
+   without the icon itself moving. */
+.cup-sport__pulse {
+  position: absolute;
+  inset: -16%;
+  z-index: -1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--campus-live) 55%, transparent);
   animation: venuePulse 2.4s ease-in-out infinite;
 }
-.cup-pin.is-live .cup-pin__dot { fill: var(--red); }
+
+/* The icons carry it at first sight — three sports share the field,
+   and their names would pile up on it. A name shows for the icon
+   being pointed at or picked, and for all of them once the map is
+   zoomed in far enough to have room. */
+.cup-sport__name { display: none; }
+.cup-sport:hover .cup-sport__name,
+.cup-sport:focus-visible .cup-sport__name,
+.cup-sport.is-selected .cup-sport__name { display: block; }
+.cup-sport:hover,
+.cup-sport:focus-visible { z-index: 4; }
+@container (min-width: 1000px) {
+  .cup-sport__name { display: block; }
+}
+@container (max-width: 560px) {
+  .cup-tag { font-size: 10.5px; padding: 2px 3px 2px 7px; }
+  .cup-tag__count { font-size: 10px; min-width: 17px; padding: 0 5px; }
+  /* Lean edge tags inwards (--lean, set per tag) so none is cut off */
+  .cup-map__markers > .cup-tag { transform: translate(var(--lean, -50%), -50%); }
+}
+
+/* ============================================================
+   CONTROLS — 2D / 3D and zoom, top right (the campus leaves that
+   corner empty; bottom right is the gym)
+   ============================================================ */
+.cup-map__dock {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.cup-map__modes,
+.cup-map__zoom {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.cup-map__btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+.cup-map__btn + .cup-map__btn { border-top: 1px solid var(--border); }
+.cup-map__btn svg { width: 18px; height: 18px; }
+.cup-map__btn:hover:not(:disabled) { background: var(--surface-2); }
+.cup-map__btn:disabled { color: var(--border-strong); cursor: default; }
+.cup-map__btn:focus-visible { outline: 2px solid var(--campus-select); outline-offset: -2px; }
+.cup-map__btn--mode {
+  font-family: var(--font-serif);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.cup-map__btn--mode[aria-pressed="true"] {
+  background: var(--campus-select);
+  color: var(--campus-on-select);
+}
+
+/* ============================================================
+   3D (Mapbox) — only ever shown when a token is set
+   ============================================================ */
+.cup-map__3d {
+  position: relative;
+  aspect-ratio: 560 / 310;
+  min-height: 320px;
+  --icon: 44px;
+}
+.cup-map__3d.is-far .cup-sport__name { display: none; }
+.cup-map__3d-note {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.cup-map__3d-note strong { color: var(--ink); }
+
+/* ============================================================
+   MINI MAP — one venue lit, in a match's detail view
+   ============================================================ */
+.cup-map-mini { background: var(--campus-ground); }
+.cup-map-mini .campus { width: 100%; height: auto; }
+.campus__mini-tag rect { fill: var(--campus-select); }
+.campus__mini-tag text {
+  fill: var(--campus-on-select);
+  font-family: var(--font-body);
+  font-size: 8px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
 
 /* ---------- Legend ---------- */
 .cup-legend {
@@ -147,10 +430,8 @@
   border: 2px solid var(--surface);
   box-shadow: 0 0 0 1px var(--border);
 }
-.cup-legend__swatch--live  { background: var(--red); }
-.cup-legend__swatch--has   { background: var(--cup-green); }
-.cup-legend__swatch--empty { background: var(--border-strong); }
-.cup-legend__item--hint { color: var(--muted); font-style: italic; }
+.cup-legend__swatch--live { background: var(--campus-live); }
+.cup-legend__item--hint { color: var(--muted); }
 
 /* ============================================================
    VENUE PANEL — what is on at the selected venue, or the list of
@@ -180,6 +461,12 @@
   line-height: 1.5;
   color: var(--muted);
 }
+.venue-panel__sports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
 .venue-panel__clear { margin-top: var(--space-4); }
 .venue-panel__empty {
   margin-top: var(--space-4);
@@ -204,12 +491,21 @@
 }
 .venue-row:last-child { border-bottom: 0; }
 .venue-row:hover { background: var(--surface-2); }
-.venue-row__name {
+.venue-row__text {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.venue-row__name {
   font-size: 13.5px;
   font-weight: 600;
   color: var(--ink);
+}
+.venue-row__sports {
+  font-size: 12px;
+  color: var(--muted);
 }
 .venue-row__count {
   font-size: 12px;
@@ -288,16 +584,23 @@
 .mini-game__status { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cup-pin__pulse { animation: none !important; }
+  .cup-sport__pulse,
+  .cup-tag__live { animation: none !important; }
+  .cup-sport__icon { transition: none; }
 }
 
-/* ---------- Phones ----------
-   At this width a pin label is three pixels tall and unreadable,
-   and the venue list below the map says the same thing properly.
-   Drop the labels, keep the counts, and let the list do the work. */
-@media (max-width: 720px) {
-  .cup-map:not(.cup-map--mini) .cup-pin__labelgroup { display: none; }
-  .cup-map:not(.cup-map--mini) .cup-pin__count { font-size: 26px; }
-  .cup-map__area-label { font-size: 19px; }
-  .cup-map__building-label { font-size: 17px; }
+/* On a phone the map is too small to give a corner to the controls,
+   so they become a strip under it. */
+@media (max-width: 560px) {
+  .cup-map__dock {
+    position: static;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 6px;
+    border-top: 1px solid var(--border);
+  }
+  .cup-map__modes,
+  .cup-map__zoom { flex-direction: row; box-shadow: none; }
+  .cup-map__btn { width: 42px; height: 36px; }
+  .cup-map__btn + .cup-map__btn { border-top: 0; border-left: 1px solid var(--border); }
 }

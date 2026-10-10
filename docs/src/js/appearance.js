@@ -3,7 +3,7 @@
    how the site looks, in one place:
 
      data-theme   light | dark          (the original toggle)
-     data-skin    worldcup | sands      (which design is painted)
+     data-skin    txc | worldcup | sands (which design is painted)
      data-motion  full | reduced        (ambient animation)
 
    All three are written onto <html> as attributes, saved to
@@ -25,7 +25,7 @@ const KEY = {
 };
 
 const THEMES  = ['light', 'dark'];
-const SKINS   = ['worldcup', 'sands'];
+const SKINS   = ['txc', 'worldcup', 'sands'];
 const MOTIONS = ['full', 'reduced'];
 
 /* localStorage throws in some privacy modes — never let that
@@ -50,7 +50,7 @@ export function getSkin() {
   if (!SITE.skin.allowToggle) return SITE.skin.defaultSkin;
   const stored = read(KEY.skin);
   if (SKINS.includes(stored)) return stored;
-  return SKINS.includes(SITE.skin.defaultSkin) ? SITE.skin.defaultSkin : 'worldcup';
+  return SKINS.includes(SITE.skin.defaultSkin) ? SITE.skin.defaultSkin : SKINS[0];
 }
 
 export function getMotion() {
@@ -74,7 +74,7 @@ export function setTheme(value, { persist = true } = {}) {
 }
 
 export function setSkin(value, { persist = true } = {}) {
-  const v = SKINS.includes(value) ? value : 'worldcup';
+  const v = SKINS.includes(value) ? value : SKINS[0];
   root().setAttribute('data-skin', v);
   if (persist) write(KEY.skin, v);
   applySeasonWords(v);
@@ -98,7 +98,8 @@ export function getAppliedTheme() {
   return root().getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
 }
 export function getAppliedSkin() {
-  return root().getAttribute('data-skin') === 'sands' ? 'sands' : 'worldcup';
+  const skin = root().getAttribute('data-skin');
+  return SKINS.includes(skin) ? skin : SKINS[0];
 }
 export function getAppliedMotion() {
   return root().getAttribute('data-motion') === 'reduced' ? 'reduced' : 'full';

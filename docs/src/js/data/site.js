@@ -53,16 +53,18 @@ export const SITE = {
   },
 
   /* ---------- Design / skin ----------
-     'worldcup' — the current season's look (pitch, stadium, trophy).
+     'txc'      — The Xavier Cup 2026: navy, lime and cream tiles.
+     'worldcup' — the floodlit pitch and stadium.
      'sands'    — the original Sands of Time beach design, kept intact.
 
      defaultSkin  what a first-time visitor sees.
      allowToggle  false hides the Design row in Settings and locks
                   everyone to defaultSkin (the saved choice is ignored).  */
   skin: {
-    defaultSkin: 'worldcup',
+    defaultSkin: 'txc',
     allowToggle: true,
     labels: {
+      txc: 'Xavier Cup 2026',
       worldcup: 'World Cup',
       sands: 'Sands of Time',
     },
@@ -72,6 +74,13 @@ export const SITE = {
      The short season line printed under the brand and in the footer.
      One per skin, so switching the design switches the words too.   */
   season: {
+    txc: {
+      brandSub: 'Xavier Ateneo · The Xavier Cup 2026',
+      heroTagline: 'The Xavier Cup',
+      heroAnchor: 'Every org is a team. Every cluster a side of the draw.',
+      footerTagline: 'Built for The Xavier Cup 2026 · University-wide Season',
+      footerSeason: 'Xavier Cup 2026',
+    },
     worldcup: {
       brandSub: 'Xavier Ateneo · The Xavier Cup',
       heroTagline: 'The Xavier Cup',
@@ -93,7 +102,7 @@ export const SITE = {
      hides the gear button entirely.                                */
   settings: {
     showAppearance: true,   // Light / Dark
-    showDesign: true,       // World Cup / Sands of Time
+    showDesign: true,       // Xavier Cup 2026 / World Cup / Sands of Time
     showMotion: true,       // Full / Reduced animation
   },
 };

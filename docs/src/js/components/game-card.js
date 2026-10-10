@@ -10,6 +10,7 @@
    ============================================================ */
 
 import { CUP_CONFIG, VENUE_BY_ID, sportsInPlay } from '../data/xavier-cup.js';
+import { teamFor } from '../data/teams.js';
 import { parseDate, formatRange, relativeLabel, computeStatus, formatTime, formatDay } from '../lib/dates.js';
 import { statusPillHtml, GAME_STATUS_LABEL } from './status.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
@@ -31,6 +32,9 @@ const SPORT_GLYPH = {
   basketball: `<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18"/><path d="M5.6 5.6c3.4 3.4 3.4 9.4 0 12.8M18.4 5.6c-3.4 3.4-3.4 9.4 0 12.8"/>`,
   volleyball: `<circle cx="12" cy="12" r="9"/><path d="M12 3c-3 4-3 12 0 18M3.6 9c4.5 1.2 11 .2 15.6-3M3.9 15.6C8 13 15 13 19.6 16.4"/>`,
   football:   `<circle cx="12" cy="12" r="9"/><path d="M12 7.5l4 2.9-1.5 4.7h-5L8 10.4z"/><path d="M12 3v4.5M4.2 9.6l3.8.8M6.2 19l3.3-3.9M17.8 19l-3.3-3.9M19.8 9.6l-3.8.8"/>`,
+  soccer:     `<circle cx="12" cy="12" r="9"/><path d="M12 7.5l4 2.9-1.5 4.7h-5L8 10.4z"/><path d="M12 3v4.5M4.2 9.6l3.8.8M6.2 19l3.3-3.9M17.8 19l-3.3-3.9M19.8 9.6l-3.8.8"/>`,
+  softball:   `<circle cx="12" cy="12" r="9"/><path d="M6.2 5.2c2.6 3.8 2.6 9.8 0 13.6M17.8 5.2c-2.6 3.8-2.6 9.8 0 13.6"/>`,
+  frisbee:    `<ellipse cx="12" cy="12" rx="9.5" ry="4.5"/><path d="M2.5 12v1.5c0 2.5 4.3 4.5 9.5 4.5s9.5-2 9.5-4.5V12"/><ellipse cx="12" cy="11.4" rx="4.5" ry="1.8"/>`,
   chess:      `<path d="M9 21h6M8.5 21c0-3 2-4 2-6H9a3 3 0 0 1 1.2-5.2A2.5 2.5 0 1 1 13.8 9.8 3 3 0 0 1 15 15h-1.5c0 2 2 3 2 6"/>`,
   badminton:  `<path d="M14.5 3.5 9 12l3 3 8.5-5.5z"/><path d="M12 15l-6.5 6.5"/><circle cx="4" cy="20" r="1.6"/><path d="M11.5 6 15 9.5M13 4.6 16.4 8"/>`,
   athletics:  `<circle cx="14" cy="4.5" r="2"/><path d="M6 21l3.5-5 3-2.5-1-4.5L8 11l-2.5-1"/><path d="M11.5 11.5 15 14l1.5 5M14.5 9l3.5 1.5"/>`,
@@ -38,7 +42,7 @@ const SPORT_GLYPH = {
   swimming:   `<path d="M2 18c2 0 2-1.5 4-1.5S8 18 10 18s2-1.5 4-1.5S16 18 18 18s2-1.5 4-1.5"/><path d="M6.5 13 11 9l5 3.5"/><circle cx="17.5" cy="7.5" r="1.8"/>`,
 };
 
-function sportGlyph(sport) {
+export function sportGlyph(sport) {
   const key = String(sport || '').toLowerCase().replace(/[^a-z]/g, '');
   const paths = SPORT_GLYPH[key];
   if (!paths) return null;
@@ -60,7 +64,11 @@ export function resolveGame(g, now = new Date()) {
   }
   const status = computeStatus(g, now, CUP_CONFIG.defaultDurationMins);
   const start = parseDate(g.start);
-  const teams = Array.isArray(g.teams) ? g.teams.filter(Boolean) : [];
+  // `teams` in the data are ids from data/teams.js; `sides` are the
+  // full records and `teams` becomes their display names, so every
+  // older template that prints g.teams keeps working unchanged.
+  const sides = (Array.isArray(g.teams) ? g.teams : []).filter(Boolean).map(teamFor);
+  const teams = sides.map(t => t.name);
   const title = g.title || (teams.length >= 2 ? `${teams[0]} vs ${teams[1]}` : (teams[0] || g.sport || 'Fixture'));
 
   return {
@@ -70,6 +78,8 @@ export function resolveGame(g, now = new Date()) {
     venueName: venue?.name || '',
     status,
     start,
+    sides,
+    teamIds: sides.map(t => t.id).filter(Boolean),
     teams,
     title,
     color: colorForSport(g.sport),
@@ -171,6 +181,7 @@ export function gameMatches(g, query) {
   const hay = [
     g.title, g.sport, g.division, g.round, g.description,
     g.venueName, g.venue?.short, g.when, g.note, ...(g.teams || []),
+    ...(g.sides || []).flatMap(t => [t.college, t.mascot, t.short]),
   ];
   return hay.some(v => v && String(v).toLowerCase().includes(q));
 }
