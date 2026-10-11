@@ -1,0 +1,94 @@
+/* ============================================================
+   discover-grid.css — Discover tab layout (UI only, static content)
+   Put in: docs/src/css/components/discover-grid.css
+   Wireframe:  [ Latest Updates                ]
+               [ Map Hub    ][ Ongoing Game    ]
+               [            ][ Program Flow    ]
+               [ Teams -> fixtures             ]
+   Shown only under data-skin="txc"; replaces .bento-hero there.
+   ============================================================ */
+.discover { display: none; position: relative; z-index: 7; padding-block: var(--space-5) var(--space-6); }
+:root[data-skin="txc"] .screen--landing .discover { display: block; }
+:root[data-skin="txc"] .screen--landing .bento-hero { display: none; }
+
+.dgrid {
+  --dg-r: 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "updates updates"
+    "map     game"
+    "map     flow"
+    "teams   teams";
+  gap: var(--space-3);
+}
+.dtile {
+  position: relative; display: flex; flex-direction: column; gap: var(--space-2);
+  min-width: 0; padding: clamp(22px, 3vw, 36px);
+  border-radius: var(--dg-r); text-decoration: none; color: inherit;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+a.dtile:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(9, 32, 64, .16); }
+a.dtile:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 3px; }
+
+.dtile__eyebrow { margin: 0; font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.dtile__title { margin: 0; font-family: var(--font-serif); font-stretch: 125%; font-weight: 800; line-height: 1; letter-spacing: -.02em; text-wrap: balance; }
+.dtile__meta { margin: 0; font-size: 15px; }
+.dtile__cta { margin-top: auto; align-self: flex-end; font-weight: 700; font-size: 14px; }
+
+/* Latest Updates — wide navy */
+.dtile--updates { grid-area: updates; min-height: clamp(190px, 26vw, 270px); color: var(--tx-tile-ink);
+  background: radial-gradient(circle at 90% 0%, var(--tx-glow), transparent 45%), var(--tx-tile); }
+.dtile--updates .dtile__eyebrow, .dtile--updates .dtile__cta { color: var(--tx-accent); }
+.dtile--updates .dtile__title { font-size: clamp(34px, 6vw, 68px); }
+.dtile--updates .dtile__meta { color: var(--tx-tile-muted); max-width: 52ch; }
+
+/* Map Hub — tall, painted like a mini campus map */
+.dtile--map { grid-area: map; min-height: 360px; background: var(--surface); border: 1px solid var(--border); }
+.dtile--map .dtile__title { font-size: clamp(30px, 4vw, 48px); }
+.dtile--map .dtile__eyebrow { color: var(--tx-primary); }
+.dtile__mapart { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; z-index: 0;
+  background:
+    radial-gradient(circle at 70% 28%, var(--tx-accent) 0 7px, transparent 8px),
+    radial-gradient(circle at 32% 62%, var(--tx-primary) 0 7px, transparent 8px),
+    radial-gradient(circle at 62% 78%, var(--tx-live) 0 7px, transparent 8px),
+    repeating-linear-gradient(0deg,  transparent 0 39px, var(--border) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, var(--border) 39px 40px),
+    var(--surface-2);
+  opacity: .9; }
+.dtile--map > :not(.dtile__mapart) { position: relative; z-index: 1; }
+.dtile--map .dtile__cta { padding: 9px 16px; border-radius: var(--radius-pill); background: var(--tx-primary); color: var(--tx-on-primary); }
+
+/* Latest Ongoing Game — lime */
+.dtile--game { grid-area: game; background: var(--tx-accent); color: var(--tx-on-accent); }
+.dtile--game .dtile__title { font-size: clamp(24px, 3vw, 36px); }
+.dtile__live { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: var(--radius-pill);
+  background: var(--tx-live); color: var(--tx-on-live); font-size: 11.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.dtile__live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.dtile--game .dtile__cta { color: var(--tx-on-accent); }
+
+/* Program Flow — cream */
+.dtile--flow { grid-area: flow; background: var(--tx-scorebox); color: var(--ink); flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.dtile--flow .dtile__title { font-size: clamp(22px, 2.6vw, 30px); }
+.dtile--flow .dtile__cta { margin: 0; }
+
+/* Teams — wide strip */
+.dtile--teams { grid-area: teams; background: var(--surface); border: 1px solid var(--border); }
+.dtile__teamhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+.dtile--teams .dtile__title { font-size: clamp(26px, 3.4vw, 40px); }
+.dtile__teams { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: var(--space-2); }
+.dteam { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 8px; border-radius: 22px;
+  background: var(--surface-2); font-size: 12.5px; font-weight: 700; text-align: center; }
+.dteam__logo { width: 44px; height: 44px; border-radius: 50%; background: var(--tx-tile); }
+
+@media (max-width: 820px) {
+  .dgrid { --dg-r: 28px; grid-template-columns: 1fr;
+    grid-template-areas: "updates" "game" "map" "flow" "teams"; }
+  .dtile--map { min-height: 300px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dtile { transition: none; }
+  a.dtile:hover { transform: none; }
+}
+:root[data-motion="reduced"] .dtile { transition: none; }
+:root[data-motion="reduced"] a.dtile:hover { transform: none; }

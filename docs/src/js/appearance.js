@@ -57,7 +57,7 @@ export function getMotion() {
   const stored = read(KEY.motion);
   if (MOTIONS.includes(stored)) return stored;
   // First-time visitors inherit the OS setting; base.css already
-  // honours the media query, this just keeps the UI in sync.
+  // honours the media query, this just keeps the UI in sync
   return matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduced' : 'full';
 }
 

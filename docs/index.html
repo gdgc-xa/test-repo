@@ -47,6 +47,7 @@
   <link rel="stylesheet" href="src/css/components/team-strip.css"/>
   <link rel="stylesheet" href="src/css/components/match-card.css"/>
   <link rel="stylesheet" href="src/css/components/cup-calendar.css"/>
+  <link rel="stylesheet" href="src/css/components/discover-grid.css"/>
 
   <link rel="stylesheet" href="src/css/screens/landing.css"/>
   <link rel="stylesheet" href="src/css/components/featured.css"/>
@@ -186,11 +187,57 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       LANDING — bright cel-shaded beach hero, "Sands of Time"
-       ============================================================ -->
   <main id="screen-landing" class="screen screen--landing" data-screen="landing">
+    <section class="discover" aria-label="Discover">
+      <div class="wrap">
+        <div class="dgrid">
 
+          <a class="dtile dtile--updates" href="?screen=cup&amp;tab=news" data-nav="cup">
+            <p class="dtile__eyebrow">Campus Compass · Xavier Cup 2026</p>
+            <h1 class="dtile__title">Latest Updates</h1>
+            <p class="dtile__meta">The newest announcement from the Xavier Cup will appear here.</p>
+            <span class="dtile__cta">View more →</span>
+          </a>
+
+          <a class="dtile dtile--map" href="?screen=cup&amp;tab=map" data-nav="cup">
+            <span class="dtile__mapart" aria-hidden="true"></span>
+            <p class="dtile__eyebrow">Campus</p>
+            <h2 class="dtile__title">Map Hub</h2>
+            <span class="dtile__cta">View full map →</span>
+          </a>
+
+          <a class="dtile dtile--game" href="?screen=cup&amp;tab=fixtures" data-nav="cup">
+            <span class="dtile__live">Live now</span>
+            <h2 class="dtile__title">Latest Ongoing Game</h2>
+            <p class="dtile__meta">Team vs Team · Oct 12, 2:00 PM</p>
+            <span class="dtile__cta">Know more →</span>
+          </a>
+
+          <a class="dtile dtile--flow" href="?screen=cup&amp;tab=calendar" data-nav="cup">
+            <h2 class="dtile__title">Program Flow</h2>
+            <span class="dtile__cta">See schedule →</span>
+          </a>
+
+          <a class="dtile dtile--teams" href="?screen=cup&amp;tab=fixtures" data-nav="cup">
+            <div class="dtile__teamhead">
+              <h2 class="dtile__title">Teams</h2>
+              <span class="dtile__cta">Go to fixtures →</span>
+            </div>
+            <div class="dtile__teams" aria-hidden="true">
+              <span class="dteam"><i class="dteam__logo"></i>CCS</span>
+              <span class="dteam"><i class="dteam__logo"></i>NSG</span>
+              <span class="dteam"><i class="dteam__logo"></i>SBM</span>
+              <span class="dteam"><i class="dteam__logo"></i>ENG’G</span>
+              <span class="dteam"><i class="dteam__logo"></i>ARTSCIES</span>
+              <span class="dteam"><i class="dteam__logo"></i>LAW</span>
+              <span class="dteam"><i class="dteam__logo"></i>MED</span>
+              <span class="dteam"><i class="dteam__logo"></i>AGG·SOE</span>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </section>
     <!-- ============================================================
          XAVIER CUP 2026 TILES — painted only when data-skin="txc".
          Static copy lives here; the counts, the season tile, the
