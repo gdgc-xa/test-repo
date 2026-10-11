@@ -183,3 +183,52 @@ a.dtile:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 3px
 
 @media (prefers-reduced-motion: reduce) { .dchip__status.is-live::before { animation: none; } }
 :root[data-motion="reduced"] .dchip__status.is-live::before { animation: none; }
+
+/* ============================================================
+   Program Flow — the tile (now a button) and its popup
+   ============================================================ */
+button.dtile { border: 0; font: inherit; text-align: left; cursor: pointer; width: 100%; }
+button.dtile:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(9, 32, 64, .16); }
+button.dtile:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 3px; }
+.dtile--flow .dflow__txt { display: flex; flex-direction: column; gap: 10px; }
+.dflow__dots { display: flex; align-items: center; gap: 6px; }
+.dflow__dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--dot); }
+.dflow__dots i:not(:last-child)::after { content: ""; display: block; width: 8px; height: 2px; margin: 5px 0 0 12px; background: var(--border); }
+
+.pflow { padding: clamp(22px, 4vw, 40px); display: flex; flex-direction: column; gap: var(--space-4); }
+.pflow__kicker { margin: 0 0 6px; font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--tx-primary); }
+.pflow__title { margin: 0; font-family: var(--font-serif); font-stretch: 125%; font-weight: 800; font-size: clamp(26px, 4vw, 40px); line-height: 1.05; letter-spacing: -.02em; }
+.pflow__stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: var(--space-3); }
+.pflow__stats span { padding: 6px 14px; border-radius: var(--radius-pill); background: var(--tx-tile); color: var(--tx-tile-ink); font-size: 13px; }
+.pflow__stats b { color: var(--tx-accent); font-size: 15px; margin-right: 3px; }
+.pflow__ph { margin: var(--space-2) 0 0; font-size: 12.5px; font-style: italic; color: var(--muted); }
+
+.pflow__steps { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+.pflow__steps::-webkit-scrollbar { display: none; }
+.pflow__step { flex: 1 0 118px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px; border: 1px solid var(--border);
+  border-radius: 20px; background: var(--surface); color: inherit; font: inherit; cursor: pointer; transition: background .16s, border-color .16s; }
+.pflow__step:hover { border-color: var(--hue); }
+.pflow__dot { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: var(--hue); color: #fff; font-weight: 800; }
+.pflow__label { font-weight: 700; font-size: 13.5px; text-align: center; }
+.pflow__days { font-size: 11.5px; color: var(--muted); }
+.pflow__step.is-on { background: var(--tx-tile); border-color: var(--tx-tile); color: var(--tx-tile-ink); }
+.pflow__step.is-on .pflow__days { color: var(--tx-tile-muted); }
+.pflow__step:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 2px; }
+
+.pflow__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; position: relative; }
+.pflow__list::before { content: ""; position: absolute; left: 21px; top: 22px; bottom: 22px; width: 2px; background: var(--border); }
+.pflow__item { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; align-items: start; }
+.pflow__node { z-index: 1; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: var(--hue); color: #fff; box-shadow: 0 0 0 4px var(--surface); }
+.pflow__node svg { width: 22px; height: 22px; }
+.pflow__card { display: flex; flex-direction: column; gap: 4px; padding: 14px 18px; border: 1px solid var(--border); border-left: 4px solid var(--hue); border-radius: 18px; background: var(--surface); }
+.pflow__time { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.pflow__name { margin: 0; font-size: 17px; line-height: 1.2; }
+.pflow__note { margin: 0; font-size: 14px; color: var(--muted); }
+.pflow__place { display: inline-flex; align-items: center; gap: 5px; align-self: flex-start; margin-top: 4px; padding: 3px 10px; border-radius: var(--radius-pill); background: var(--surface-2); font-size: 12px; font-weight: 600; }
+.pflow__place svg { width: 14px; height: 14px; }
+.pflow__foot { display: flex; justify-content: center; }
+.pflow__body .pflow__item { animation: pflowIn .3s ease both; }
+.pflow__body .pflow__item:nth-child(2) { animation-delay: .05s; } .pflow__body .pflow__item:nth-child(3) { animation-delay: .1s; } .pflow__body .pflow__item:nth-child(4) { animation-delay: .15s; }
+@keyframes pflowIn { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .pflow__body .pflow__item { animation: none; } }
+:root[data-motion="reduced"] .pflow__body .pflow__item { animation: none; }
