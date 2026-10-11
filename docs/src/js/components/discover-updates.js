@@ -25,13 +25,13 @@ const norm = (p, i) => ({
 });
 
 async function loadPosts() {
-  const fallback = (CUP_NEWS.posts || []).map(norm);
-  if (!CUP_NEWS.feed) return fallback;
-  try {
-    const res = await fetch(new URL(`../data/${CUP_NEWS.feed}`, import.meta.url), { cache: 'no-cache' });
-    const data = res.ok ? await res.json() : null;
-    return Array.isArray(data) && data.length ? data.map(norm) : fallback;
-  } catch { return fallback; }
+    const fallback = (CUP_NEWS.posts || []).map(norm);
+    if (!CUP_NEWS.feed) return fallback;
+    try {
+        const res = await fetch(new URL(`../data/${CUP_NEWS.feed}`, import.meta.url), { cache: 'no-cache' });
+        const data = res.ok ? await res.json() : null;
+        return Array.isArray(data) && data.length ? data.map(norm) : fallback;
+    } catch { return fallback; }
 }
 
 const ph = (p) => `<span class="news-ph news-ph--${p.i % 4} news-ph--hero" aria-hidden="true">
