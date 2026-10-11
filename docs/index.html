@@ -229,23 +229,15 @@
           </a>
 
           <section class="dtile dtile--game" data-discover-games aria-roledescription="carousel" aria-label="Ongoing games">
-            <div class="dgames__head">
-              <h2 class="dgames__title" data-dg-title>Ongoing Games</h2>
-              <span class="dgames__count" data-dg-count></span>
-            </div>
             <!-- JS fills the chips; this one shows until it runs. -->
             <div class="dgames__track" data-dg-track>
               <a class="dchip dchip--empty" href="?screen=cup&amp;tab=fixtures" data-nav="cup">
                 <span class="dchip__solo">Latest Ongoing Game</span><span class="dchip__cta">See fixtures →</span>
               </a>
             </div>
-            <div class="dgames__ctrl">
-              <div class="dgames__dots" data-dg-dots></div>
-              <div class="dgames__btns">
-                <button class="dgames__btn" type="button" data-dg-prev aria-label="Previous game"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="10,3 5,8 10,13"/></svg></button>
-                <button class="dgames__btn" type="button" data-dg-next aria-label="Next game"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6,3 11,8 6,13"/></svg></button>
-              </div>
-            </div>
+            <button class="dgames__btn dgames__btn--prev" type="button" data-dg-prev aria-label="Previous game"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="10,3 5,8 10,13"/></svg></button>
+            <button class="dgames__btn dgames__btn--next" type="button" data-dg-next aria-label="Next game"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6,3 11,8 6,13"/></svg></button>
+            <div class="dgames__dots" data-dg-dots></div>
           </section>
 
           <button class="dtile dtile--flow" type="button" data-open-flow>

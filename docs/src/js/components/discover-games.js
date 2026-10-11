@@ -76,8 +76,6 @@ function init() {
   tile.__wired = true;
 
   const track = tile.querySelector('[data-dg-track]');
-  const title = tile.querySelector('[data-dg-title]');
-  const count = tile.querySelector('[data-dg-count]');
   const dots = tile.querySelector('[data-dg-dots]');
   let games = [], sig = '', n = 0, w = 0, ready = false;
 
@@ -90,10 +88,6 @@ function init() {
     const s = next.map(g => `${g.id}:${g.status}`).join('|');
     if (s === sig) return;                       // nothing changed: keep scroll position
     sig = s; games = next; n = games.length; ready = false;
-    const live = games.some(g => g.status === 'ongoing');
-    title.textContent = live ? 'Ongoing Games' : 'Up Next';
-    count.textContent = n ? `${n} ${live ? 'live' : 'coming up'}` : '';
-    tile.classList.toggle('is-live', live);
     tile.classList.toggle('is-single', n < 2);
 
     if (!n) {
@@ -140,10 +134,49 @@ function init() {
     track.scrollTo({ left: (n + Number(i)) * w, behavior: reduced() ? 'auto' : 'smooth' });
   });
   tile.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') step(1); else if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') { showArrows(n > 1); step(1); }
+    else if (e.key === 'ArrowLeft') { showArrows(n > 1); step(-1); }
+  });
+
+  /* The side arrows show once the visitor swipes sideways, and go
+     away when they swipe up/down or scroll the page. */
+  const showArrows = (on) => tile.classList.toggle('show-arrows', on);
+  let g0 = null, lock = null;
+  tile.addEventListener('touchstart', (e) => { const t = e.touches[0]; g0 = { x: t.clientX, y: t.clientY }; lock = null; }, { passive: true });
+  tile.addEventListener('touchmove', (e) => {
+    if (!g0 || lock) return;
+    const t = e.touches[0], dx = Math.abs(t.clientX - g0.x), dy = Math.abs(t.clientY - g0.y);
+    if (dx < 6 && dy < 6) return;
+    lock = dx > dy ? 'h' : 'v';
+    showArrows(lock === 'h' && n > 1);
+  }, { passive: true });
+  tile.addEventListener('touchend', () => { g0 = null; }, { passive: true });
+  tile.addEventListener('wheel', (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) showArrows(n > 1); }, { passive: true });
+  window.addEventListener('scroll', () => showArrows(false), { passive: true });
+
+  /* Mouse drag (touch and trackpad already scroll sideways by themselves). */
+  let drag = null, justDragged = false;
+  track.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || n < 2) return;
+    drag = { x: e.clientX, left: track.scrollLeft, moved: false };
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x;
+    if (!drag.moved && Math.abs(dx) > 6) { drag.moved = true; track.classList.add('is-drag'); showArrows(true); }
+    if (drag.moved) track.scrollLeft = drag.left - dx;
+  });
+  window.addEventListener('pointerup', () => {
+    if (!drag) return;
+    const moved = drag.moved; drag = null;
+    if (!moved) return;
+    track.classList.remove('is-drag');
+    track.scrollTo({ left: Math.round(track.scrollLeft / w) * w, behavior: 'smooth' });
+    justDragged = true; setTimeout(() => { justDragged = false; }, 0);
   });
 
   track.addEventListener('click', (e) => {
+    if (justDragged) return;
     const chip = e.target.closest('[data-game]');
     const g = chip && games.find(x => x.id === chip.dataset.game);
     if (g) openGame(g);
