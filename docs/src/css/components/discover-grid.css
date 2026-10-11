@@ -92,3 +92,39 @@ a.dtile:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 3px
 }
 :root[data-motion="reduced"] .dtile { transition: none; }
 :root[data-motion="reduced"] a.dtile:hover { transform: none; }
+
+/* ============================================================
+   Latest Updates — the slideshow tile (reuses .news-hero__* and
+   .news-ph from screens/cup.css; this only resizes and frames it)
+   ============================================================ */
+.dtile--updates.news-hero { margin: 0; padding: 0; gap: 0; border-radius: var(--dg-r); overflow: hidden; min-height: 0; }
+.dtile--updates .news-hero__slide { min-height: clamp(420px, 46vw, 580px); }
+.dtile--updates .news-hero__panel { max-width: 760px; padding-bottom: 76px; }
+.dtile--updates .news-hero__title { font-size: clamp(28px, 4.4vw, 56px); }
+.dtile--updates .news-hero__bars { bottom: 28px; right: clamp(150px, 16vw, 210px); }
+
+.du-top { position: absolute; z-index: 3; inset: 0 0 auto 0; display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-2); padding: clamp(18px, 2.6vw, 30px) clamp(24px, 4vw, 48px); pointer-events: none; }
+.du-top > * { pointer-events: auto; }
+.du-eyebrow { margin: 0; padding: 6px 14px; border-radius: var(--radius-pill); background: rgba(4, 12, 28, .55);
+  backdrop-filter: blur(6px); color: var(--tx-accent); font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.du-more { padding: 9px 18px; border-radius: var(--radius-pill); background: var(--tx-accent); color: var(--tx-on-accent);
+  font-size: 14px; font-weight: 700; text-decoration: none; transition: transform .16s; }
+.du-more:hover { transform: translateY(-2px); color: var(--tx-on-accent); }
+
+.du-nav { position: absolute; z-index: 3; right: clamp(24px, 4vw, 48px); bottom: 18px; display: flex; align-items: center; gap: 10px; color: #fff; }
+.du-count { font-size: 13px; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.du-step { width: 38px; height: 38px; display: grid; place-items: center; padding: 0; border-radius: 50%; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .4); background: rgba(4, 12, 28, .45); color: #fff; transition: background .16s, color .16s; }
+.du-step:hover { background: var(--tx-accent); color: var(--tx-on-accent); }
+.du-step svg { width: 16px; height: 16px; }
+.dtile--updates.is-single .du-nav { display: none; }
+
+@media (max-width: 820px) {
+  .dtile--updates .news-hero__slide { min-height: 440px; }
+  .dtile--updates .news-hero__bars { right: clamp(24px, 4vw, 48px); bottom: 66px; }
+  .du-nav { left: clamp(24px, 4vw, 48px); right: auto; }
+  .du-step { width: 34px; height: 34px; }
+  .du-eyebrow { display: none; }
+  .du-top { justify-content: flex-end; }
+}

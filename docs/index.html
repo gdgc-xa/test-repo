@@ -188,16 +188,38 @@
   </div>
 
   <main id="screen-landing" class="screen screen--landing" data-screen="landing">
+        <!-- Put this in docs/index.html inside #screen-landing, right after the
+        opening <main ...> tag (above the old <section class="bento-hero">,
+        which the CSS hides under the txc design). Static copy only. -->
     <section class="discover" aria-label="Discover">
       <div class="wrap">
         <div class="dgrid">
 
-          <a class="dtile dtile--updates" href="?screen=cup&amp;tab=news" data-nav="cup">
-            <p class="dtile__eyebrow">Campus Compass · Xavier Cup 2026</p>
-            <h1 class="dtile__title">Latest Updates</h1>
-            <p class="dtile__meta">The newest announcement from the Xavier Cup will appear here.</p>
-            <span class="dtile__cta">View more →</span>
-          </a>
+          <section class="dtile dtile--updates news-hero" data-discover-updates
+                  aria-roledescription="carousel" aria-label="Latest updates">
+            <div class="du-top">
+              <p class="du-eyebrow">Latest Updates</p>
+              <a class="du-more" href="?screen=cup&amp;tab=news" data-nav="cup">View more →</a>
+            </div>
+            <!-- One static slide so the tile looks right before the script runs;
+                discover-updates.js swaps in the real posts. -->
+            <div class="news-hero__viewport" data-du-viewport>
+              <article class="news-hero__slide is-active">
+                <div class="news-hero__media"><span class="news-ph news-ph--0 news-ph--hero" aria-hidden="true"><span class="news-ph__mark">News</span></span></div>
+                <div class="news-hero__panel">
+                  <p class="news-hero__kicker"><span class="news-hero__flag">Latest</span></p>
+                  <h2 class="news-hero__title">Latest Updates</h2>
+                  <p class="news-hero__body">The newest announcements from the Xavier Cup appear here.</p>
+                </div>
+              </article>
+            </div>
+            <div class="news-hero__bars" data-du-bars></div>
+            <div class="du-nav">
+              <button class="du-step" type="button" data-du-prev aria-label="Previous update"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="10,3 5,8 10,13"/></svg></button>
+              <span class="du-count" data-du-count aria-live="off">01 / 01</span>
+              <button class="du-step" type="button" data-du-next aria-label="Next update"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6,3 11,8 6,13"/></svg></button>
+            </div>
+          </section>
 
           <a class="dtile dtile--map" href="?screen=cup&amp;tab=map" data-nav="cup">
             <span class="dtile__mapart" aria-hidden="true"></span>

@@ -12,6 +12,7 @@ import { initSettings }     from './settings.js';
 import { watchReveals }     from './reveal-observer.js';
 import { initLanding }      from './screens/landing.js';
 import { initNavSheet }     from './nav-sheet.js';
+import './components/discover-updates.js';
 
 function boot() {
   // Appearance first: it stamps data-theme / data-skin / data-motion
