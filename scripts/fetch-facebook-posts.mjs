@@ -38,7 +38,7 @@ const GRAPH_VERSION = 'v26.0';
 // TXC Compass Facebook Page ("Campuss Compass TEST" for now). This is the Graph API Page ID from
 // the Page's About > Page transparency, not the number in its profile.php web address.
 // Set the FB_PAGE_ID repository variable to switch pages without editing this file.
-const PAGE_ID = process.env.FB_PAGE_ID || '1301081723094199';
+const PAGE_ID = process.env.FB_PAGE_ID || '1374516699075273';
 // Badge shown on posts the Page wrote itself (reshares get the department's name instead).
 const DEFAULT_TAG = process.env.FB_DEFAULT_TAG || 'TXC';
 const POST_COUNT = 6; // 1 featured + 5 more
@@ -53,7 +53,7 @@ const MAX_IMAGE_BYTES = 4 * 1024 * 1024;       // skip anything larger than 4 MB
 // the feed never goes down because of them.
 const FIELDS_BASIC = 'id,message,story,created_time,permalink_url,full_picture';
 const FIELDS_RICH = FIELDS_BASIC +
-  ',status_type,parent_id,attachments{type,media_type,title,description,url,target{url}}';
+  ',status_type,parent_id,attachments{type,media_type,title,description,url,target{url},media}';
 
 const EXT_BY_TYPE = {
   'image/jpeg': 'jpg',
@@ -97,6 +97,10 @@ async function graph(path, params) {
 
 /* ---------- Reshares ---------- */
 
+// Facebook names a reshare's source in two places, both ending "X's post":
+//   story            "TXC Compass shared Nursing Council's post."
+//   attachment title "Photos from The Xavier Cup: Arcane Wizards's post"
+const TITLE_FROM = /\bfrom (.+?)[’']s (?:post|photo|video|reel|event|album|story)\s*$/i;
 // "TXC Compass shared Nursing Council's post." → a reshare of someone else's post.
 const SHARE_STORY = /\bshared (.+?)[’']s (?:post|photo|video|reel|event|album|story)\b/i;
 
@@ -106,13 +110,13 @@ const isReshare = (post) =>
 
 /**
  * The department that first published a reshared post, or null.
- * 1. The Page's own story line names it ("… shared X's post.") — free.
+ * 1. The story line or the attachment title names it — free.
  * 2. Otherwise ask for the parent post's author. Facebook may refuse that
  *    for other Pages' posts (it needs Page Public Content Access); a
  *    refusal just means no department name, never a failed run.
  */
-async function originOf(post) {
-  const named = plain(post.story).match(SHARE_STORY);
+async function originOf(post, att) {
+  const named = plain(post.story).match(SHARE_STORY) || plain(att?.title).match(TITLE_FROM);
   if (named) return named[1].trim();
   if (post.parent_id) {
     const r = await graph(post.parent_id, { fields: 'from{name}' });
@@ -135,10 +139,12 @@ function facebookUrl(value) {
  * path, or null when the post has no picture or the download fails —
  * a missing picture must never stop the news from updating.
  */
-async function savePicture(post) {
-  if (!post.full_picture) return null;
+async function savePicture(post, att) {
+  // Reshares often have no full_picture; the attachment carries the image.
+  const source = post.full_picture || att?.media?.image?.src;
+  if (!source) return null;
   try {
-    const res = await fetch(post.full_picture);
+    const res = await fetch(source);
     const type = (res.headers.get('content-type') || '').split(';')[0].trim();
     const ext = EXT_BY_TYPE[type];
     if (!res.ok || !ext) return null;
@@ -155,25 +161,29 @@ async function savePicture(post) {
 
 async function toPost(post) {
   const shared = isReshare(post);
-  const origin = shared ? await originOf(post) : null;
   const att = post.attachments?.data?.[0];
+  const origin = shared ? await originOf(post, att) : null;
 
   // The Page's own words first. A bare reshare has none, so fall back to
   // the original post's text, then to the Page's story line.
   const split = (t) => plain(t).split('\n').map(l => l.trim()).filter(Boolean);
   let lines = split(post.message);
-  if (!lines.length && shared) lines = [...split(att?.title), ...split(att?.description)];
+  // A title like "Photos from X's post" is only a label, never a headline.
+  const attTitle = TITLE_FROM.test(plain(att?.title)) ? [] : split(att?.title);
+  if (!lines.length && shared) lines = [...attTitle, ...split(att?.description)];
   if (!lines.length) lines = split(post.story);
 
-  const fallbackTitle = origin ? `Shared from ${origin}` : `New post from ${DEFAULT_TAG}`;
+  // Page names like "The Xavier Cup: Arcane Wizards" read better as "Arcane Wizards".
+  const short = origin?.replace(/^the xavier cup\s*[:–-]\s*/i, '') || origin;
+  const fallbackTitle = origin ? `Shared from ${short}` : `New post from ${DEFAULT_TAG}`;
   return {
     id: post.id,
-    tag: origin ? truncate(origin, 28) : DEFAULT_TAG,
+    tag: origin ? truncate(short, 28) : DEFAULT_TAG,
     title: truncate(lines[0] || fallbackTitle, 90),
     body: truncate(lines.slice(1).join(' '), 180),
     date: isoDate(post.created_time),
     link: post.permalink_url,                  // the TXC Compass post
-    image: await savePicture(post),
+    image: await savePicture(post, att),
     shared,
     origin,
     originalLink: shared ? facebookUrl(att?.url || att?.target?.url) : null,
@@ -181,8 +191,10 @@ async function toPost(post) {
 }
 
 let r = await graph(`${PAGE_ID}/posts`, { fields: FIELDS_RICH, limit: String(POST_COUNT) });
-if (!r.ok && r.body.error?.code === 100) {
-  console.log(`::warning::Facebook rejected the reshare fields (${r.body.error.message}). Retrying without them; departments will not be named.`);
+// 100 = unknown field, 10 = the reshare fields reach into other Pages' content,
+// which Facebook only allows with Page Public Content Access.
+if (!r.ok && [100, 10].includes(r.body.error?.code)) {
+  console.log(`::warning::Facebook rejected the reshare fields (${r.body.error.message}). Retrying without them; departments are named from the story line or attachment title only.`);
   r = await graph(`${PAGE_ID}/posts`, { fields: FIELDS_BASIC, limit: String(POST_COUNT) });
 }
 if (!r.ok) {
