@@ -363,7 +363,7 @@ export const CUP_NEWS = {
 
   /** The file the Action writes, relative to this data folder.
       null = use the hand-written posts only. */
-  feed: 'https://txc-compass-news.jihadp2005.workers.dev/posts.json',
+  feed: 'https://txc-compass-news.gdsc-0c0.workers.dev/posts.json',
 
   /** How many posts to show. The first one is featured. */
   maxPosts: 6,
