@@ -659,7 +659,10 @@ async function loadPosts() {
   const fallback = (CUP_NEWS.posts || []).map(normalisePost);
   if (!CUP_NEWS.feed) return fallback;
   try {
-    const url = new URL(`../data/${CUP_NEWS.feed}`, import.meta.url);
+    // A full https:// address (the news Worker) is used as is; anything
+    // else is a file name inside ../data/.
+    const feed = String(CUP_NEWS.feed);
+    const url = /^https:\/\//i.test(feed) ? new URL(feed) : new URL(`../data/${feed}`, import.meta.url);
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) return fallback;
     const data = await res.json();

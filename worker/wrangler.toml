@@ -1,0 +1,20 @@
+name = "txc-compass-news"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# Refresh from Facebook every 15 minutes.
+[triggers]
+crons = ["*/15 * * * *"]
+
+# The TXC Compass Page (Graph API ID, from /me/accounts).
+# The access token is NOT here: set it with `npx wrangler secret put FB_PAGE_TOKEN`.
+[vars]
+FB_PAGE_ID = "1374516699075273"
+# Optional: badge for posts the Page wrote itself.
+# FB_DEFAULT_TAG = "TXC"
+
+# Run `npx wrangler kv namespace create NEWS`, then paste the id it prints here.
+[[kv_namespaces]]
+binding = "NEWS"
+id = "17f3c649d1824d8f97c1ed4aeb501f61"
