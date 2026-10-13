@@ -199,7 +199,7 @@
                   aria-roledescription="carousel" aria-label="Latest updates">
             <div class="du-top">
               <p class="du-eyebrow">Latest Updates</p>
-              <a class="du-more" href="?screen=cup&amp;tab=news" data-nav="cup">View more →</a>
+              <a class="du-more" href="?screen=cup&amp;tab=news" data-go-tab="news">View more →</a>
             </div>
             <!-- One static slide so the tile looks right before the script runs;
                 discover-updates.js swaps in the real posts. -->
@@ -221,7 +221,7 @@
             </div>
           </section>
 
-          <a class="dtile dtile--map" href="?screen=cup&amp;tab=map" data-nav="cup">
+          <a class="dtile dtile--map" href="?screen=cup&amp;tab=map" data-go-tab="map">
             <span class="dtile__mapart" aria-hidden="true"></span>
             <p class="dtile__eyebrow">Campus</p>
             <h2 class="dtile__title">Map Hub</h2>
@@ -231,7 +231,7 @@
           <section class="dtile dtile--game" data-discover-games aria-roledescription="carousel" aria-label="Ongoing games">
             <!-- JS fills the chips; this one shows until it runs. -->
             <div class="dgames__track" data-dg-track>
-              <a class="dchip dchip--empty" href="?screen=cup&amp;tab=fixtures" data-nav="cup">
+              <a class="dchip dchip--empty" href="?screen=cup&amp;tab=fixtures" data-go-tab="fixtures">
                 <span class="dchip__solo">Latest Ongoing Game</span><span class="dchip__cta">See fixtures →</span>
               </a>
             </div>
@@ -250,22 +250,14 @@
             <span class="dtile__cta">See schedule →</span>
           </button>
 
-          <a class="dtile dtile--teams" href="?screen=cup&amp;tab=fixtures" data-nav="cup">
+          <section class="dtile dtile--teams" aria-label="Teams">
             <div class="dtile__teamhead">
               <h2 class="dtile__title">Teams</h2>
-              <span class="dtile__cta">Go to fixtures →</span>
+              <a class="dtile__cta" href="?screen=cup&amp;tab=fixtures" data-go-tab="fixtures">Go to fixtures →</a>
             </div>
-            <div class="dtile__teams" aria-hidden="true">
-              <span class="dteam"><i class="dteam__logo"></i>CCS</span>
-              <span class="dteam"><i class="dteam__logo"></i>NSG</span>
-              <span class="dteam"><i class="dteam__logo"></i>SBM</span>
-              <span class="dteam"><i class="dteam__logo"></i>ENG’G</span>
-              <span class="dteam"><i class="dteam__logo"></i>ARTSCIES</span>
-              <span class="dteam"><i class="dteam__logo"></i>LAW</span>
-              <span class="dteam"><i class="dteam__logo"></i>MED</span>
-              <span class="dteam"><i class="dteam__logo"></i>AGG·SOE</span>
-            </div>
-          </a>
+            <!-- discover-teams.js fills this with the logo tiles. -->
+            <div data-discover-teams></div>
+          </section>
 
         </div>
       </div>

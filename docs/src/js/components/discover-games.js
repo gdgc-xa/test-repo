@@ -91,7 +91,7 @@ function init() {
     tile.classList.toggle('is-single', n < 2);
 
     if (!n) {
-      track.innerHTML = `<a class="dchip dchip--empty" href="?screen=cup&amp;tab=fixtures" data-nav="cup">
+      track.innerHTML = `<a class="dchip dchip--empty" href="?screen=cup&amp;tab=fixtures" data-go-tab="fixtures">
         <span class="dchip__solo">No games right now</span><span class="dchip__cta">See fixtures →</span></a>`;
       dots.innerHTML = ''; return;
     }

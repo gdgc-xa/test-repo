@@ -238,3 +238,12 @@ button.dtile:focus-visible { outline: 3px solid var(--tx-accent); outline-offset
 @keyframes pflowIn { from { opacity: 0; transform: translateY(8px); } }
 @media (prefers-reduced-motion: reduce) { .pflow__body .pflow__item { animation: none; } }
 :root[data-motion="reduced"] .pflow__body .pflow__item { animation: none; }
+
+/* ============================================================
+   Teams — the border stays; the logo tiles come from team-strip.css
+   ============================================================ */
+.dtile--teams .dtile__cta { margin: 0; align-self: auto; color: var(--tx-primary); text-decoration: none; }
+.dtile--teams .dtile__cta:hover { text-decoration: underline; }
+.dtile--teams .team-strip { margin-top: var(--space-2); }
+.dtile--teams .team-tile { background: var(--surface-2); }
+.dtile--teams .team-tile:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 2px; }

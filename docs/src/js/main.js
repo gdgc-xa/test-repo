@@ -15,6 +15,7 @@ import { initNavSheet }     from './nav-sheet.js';
 import './components/discover-updates.js';
 import './components/discover-games.js';
 import './components/discover-flow.js';
+import './components/discover-teams.js';
 
 function boot() {
   // Appearance first: it stamps data-theme / data-skin / data-motion
