@@ -332,12 +332,15 @@ export const GAMES = [
 /* ============================================================
    4. NEWS & UPDATES
    ------------------------------------------------------------
-   The newest posts from the CSG Facebook page.
+   The newest posts from the main TXC Compass Facebook page,
+   including departmental posts the page has reshared. Each
+   reshared post carries its department's name as `tag`.
 
    They arrive through `feed`: a GitHub Action
    (.github/workflows/facebook-news.yml) runs every hour, reads the
    page through the Graph API with a token kept in the repository's
-   secrets, and writes the latest posts to data/cup-posts.json.
+   secrets, and writes the latest posts to data/cup-posts.json
+   (scripts/fetch-facebook-posts.mjs).
    The browser only ever reads that file, so no token ships with
    the site.
 
@@ -351,15 +354,16 @@ export const GAMES = [
 export const CUP_NEWS = {
   enabled: true,
   title: 'News & Updates',
-  kicker: 'From the CSG page',
-  pageName: 'Central Student Government',
+  kicker: 'From the TXC Compass page',
+  pageName: 'TXC Compass',
+  // TODO: set these to the TXC Compass Page's real address and handle.
   pageUrl: 'https://www.facebook.com/XUCSG',
   pageHandle: 'XUCSG',
   followLabel: 'Open the Facebook page',
 
   /** The file the Action writes, relative to this data folder.
       null = use the hand-written posts only. */
-  feed: 'cup-posts.json',
+  feed: 'https://txc-compass-news.jihadp2005.workers.dev/posts.json',
 
   /** How many posts to show. The first one is featured. */
   maxPosts: 6,
