@@ -366,7 +366,7 @@ export const CUP_NEWS = {
   feed: 'https://txc-compass-news.gdsc-0c0.workers.dev/posts.json',
 
   /** How many posts to show. The first one is featured. */
-  maxPosts: 6,
+  maxPosts: 18,
 
   /** Facebook's own page plugin. Off by default — see the note above. */
   embed: {
