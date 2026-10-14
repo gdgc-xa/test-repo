@@ -188,9 +188,68 @@
   </div>
 
   <main id="screen-landing" class="screen screen--landing" data-screen="landing">
-    <!-- Put this in docs/index.html inside #screen-landing, right after the
-     opening <main ...> tag (above the old <section class="bento-hero">,
-     which the CSS hides under the txc design). Static copy only. -->
+    <section class="dhero" aria-labelledby="dhero-title">
+      <div class="wrap">
+        <div class="dhero__panel">
+          <div class="dhero__copy">
+            <p class="dhero__eyebrow">Campus Compass · Xavier Ateneo</p>
+            <h1 class="dhero__title" id="dhero-title">Find your way around <em>Xavier.</em></h1>
+            <p class="dhero__lede">Every student organization, every event and the Xavier Cup &mdash; all in one place.</p>
+
+            <form class="search-shell hero-search dhero__search" data-hero-search role="search" onsubmit="return false;">
+              <svg class="search-shell__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="6"/><line x1="17" y1="17" x2="13.5" y2="13.5"/></svg>
+              <input class="search-shell__input" type="search" placeholder="Search orgs &mdash; try 'debate', 'coders', 'farm'&hellip;" aria-label="Search organizations"/>
+              <button class="btn hero-search__submit search-shell__submit" type="submit">Search</button>
+            </form>
+
+            <a class="dhero__live" data-dhero-live data-go-tab="fixtures" href="?screen=cup&amp;tab=fixtures" hidden></a>
+          </div>
+
+          <div class="dhero__compass" aria-hidden="true">
+            <svg viewBox="-12 -12 224 224">
+              <g class="dc-ring" stroke="currentColor" fill="none">
+                <circle cx="100" cy="100" r="92" stroke-width="1.6"/>
+                <g opacity=".6"><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(0 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(6 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(12 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(18 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(24 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(30 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(36 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(42 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(48 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(54 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(60 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(66 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(72 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(78 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(84 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(90 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(96 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(102 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(108 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(114 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(120 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(126 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(132 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(138 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(144 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(150 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(156 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(162 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(168 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(174 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(180 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(186 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(192 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(198 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(204 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(210 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(216 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(222 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(228 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(234 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(240 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(246 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(252 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(258 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(264 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(270 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(276 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(282 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(288 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(294 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(300 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(306 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(312 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(318 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(324 100 100)"/><line x1="100" y1="10.0" x2="100" y2="16.0" transform="rotate(330 100 100)" stroke-width="1.6"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(336 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(342 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(348 100 100)"/><line x1="100" y1="10.0" x2="100" y2="13.0" transform="rotate(354 100 100)"/></g>
+              </g>
+              <circle cx="100" cy="100" r="68" fill="none" stroke="currentColor" stroke-width=".8" opacity=".5"/>
+              <g fill="currentColor" opacity=".45">
+                <polygon points="150,50 108,92 100,100 92,92"/><polygon points="150,150 108,108 100,100 108,92"/>
+                <polygon points="50,150 92,108 100,100 108,108"/><polygon points="50,50 92,92 100,100 92,108"/>
+              </g>
+              <g class="dc-needle">
+                <polygon points="100,22 111,100 100,92 89,100" fill="currentColor"/>
+                <polygon points="100,178 111,100 100,108 89,100" fill="#fff" opacity=".4"/>
+                <polygon points="178,100 100,111 108,100 100,89" fill="currentColor" opacity=".8"/>
+                <polygon points="22,100 100,111 92,100 100,89" fill="currentColor" opacity=".8"/>
+              </g>
+              <circle cx="100" cy="100" r="6" fill="currentColor"/><circle cx="100" cy="100" r="2.4" fill="var(--tx-tile)"/>
+              <g class="dc-letters" fill="currentColor" font-family="Archivo, system-ui, sans-serif" font-weight="800" font-size="11" text-anchor="middle">
+                <text x="100" y="2">N</text><text x="202" y="104">E</text><text x="100" y="206">S</text><text x="-2" y="104">W</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="dhero__browse">
+          <h2 class="dhero__h">What are you into?</h2>
+          <!-- Filled and wired by landing.js: tap a cluster, land on Browse filtered to it. -->
+          <div class="tag-cloud dhero__chips" data-tag-cloud></div>
+        </div>
+
+        <!-- Org logos drift past; filled by discover-hero.js. -->
+        <div class="dhero__ticker" data-dhero-ticker role="region" aria-label="Student organizations">
+          <div class="dhero__track" data-dhero-track></div>
+        </div>
+
+        <ul class="dhero__stats" data-dhero-stats>
+          <li><b data-count="orgs">75</b><span>Organizations</span></li>
+          <li><b data-count="clusters">11</b><span>Clusters</span></li>
+          <li><b data-count="teams">8</b><span>Teams</span></li>
+          <li><b data-count="games">0</b><span>Games</span></li>
+        </ul>
+      </div>
+    </section>
+
     <section class="discover" aria-label="Discover">
       <div class="wrap">
         <div class="dgrid">
@@ -199,7 +258,7 @@
                   aria-roledescription="carousel" aria-label="Latest updates">
             <div class="du-top">
               <p class="du-eyebrow">Latest Updates</p>
-              <a class="du-more" href="?screen=cup&amp;tab=news" data-go-tab="news">View more →</a>
+              <a class="du-more" href="?screen=cup&amp;tab=news" data-go-tab="news">View More →</a>
             </div>
             <!-- One static slide so the tile looks right before the script runs;
                 discover-updates.js swaps in the real posts. -->
@@ -225,7 +284,7 @@
             <span class="dtile__mapart" aria-hidden="true"></span>
             <p class="dtile__eyebrow">Campus</p>
             <h2 class="dtile__title">Map Hub</h2>
-            <span class="dtile__cta">View full map →</span>
+            <span class="dtile__cta">View Full Map →</span>
           </a>
 
           <section class="dtile dtile--game" data-discover-games aria-roledescription="carousel" aria-label="Ongoing games">
@@ -240,20 +299,20 @@
             <div class="dgames__dots" data-dg-dots></div>
           </section>
 
-          <button class="dtile dtile--flow" type="button" data-open-flow>
+          <a class="dtile dtile--flow" href="#" data-program-flow>
             <span class="dflow__txt">
               <h2 class="dtile__title">Program Flow</h2>
               <span class="dflow__dots" aria-hidden="true">
                 <i style="--dot: var(--blue);"></i><i style="--dot: var(--green);"></i><i style="--dot: var(--yellow);"></i><i style="--dot: var(--red);"></i><i style="--dot: var(--blue);"></i>
               </span>
             </span>
-            <span class="dtile__cta">See schedule →</span>
-          </button>
+            <span class="dtile__cta">See Schedule →</span>
+          </a>
 
           <section class="dtile dtile--teams" aria-label="Teams">
             <div class="dtile__teamhead">
               <h2 class="dtile__title">Teams</h2>
-              <a class="dtile__cta" href="?screen=cup&amp;tab=fixtures" data-go-tab="fixtures">Go to fixtures →</a>
+              <a class="dtile__cta" href="?screen=cup&amp;tab=fixtures" data-go-tab="fixtures">Go to Fixtures →</a>
             </div>
             <!-- discover-teams.js fills this with the logo tiles. -->
             <div data-discover-teams></div>

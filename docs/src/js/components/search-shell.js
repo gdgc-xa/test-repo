@@ -3,7 +3,7 @@
    Renders live results as the user types (debounced).
    ============================================================ */
 
-export function attachSearchShell(shellEl, onQuery, { debounceMs = 120 } = {}) {
+export function attachSearchShell(shellEl, onQuery, { debounceMs = 120, live = true } = {}) {
   const input  = shellEl.querySelector('.search-shell__input');
   const submit = shellEl.querySelector('.search-shell__submit');
   if (!input) return;
@@ -11,10 +11,12 @@ export function attachSearchShell(shellEl, onQuery, { debounceMs = 120 } = {}) {
   let timer = 0;
   const emit = () => onQuery(input.value.trim());
 
-  input.addEventListener('input', () => {
-    clearTimeout(timer);
-    timer = setTimeout(emit, debounceMs);
-  });
+  if (live) {                                   // typing only searches when live
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(emit, debounceMs);
+    });
+  }
 
   // Enter key or explicit submit button click
   input.addEventListener('keydown', (e) => {

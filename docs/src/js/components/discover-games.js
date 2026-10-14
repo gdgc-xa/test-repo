@@ -8,7 +8,7 @@
    Load it with one line in main.js:
      import './components/discover-games.js';
    ============================================================ */
-import { GAMES, CUP_CONFIG, cupNow } from '../data/xavier-cup.js';
+import { GAMES, cupNow } from '../data/xavier-cup.js';
 import { resolveGame, sportGlyph } from './game-card.js';
 import { gameDetailHtml } from './game-detail.js';
 import { openDetail, closeDetail } from './detail-modal.js';
@@ -23,17 +23,17 @@ const crest = (t) => (t && t.logo
 
 function chipHtml(g, clone) {
   const live = g.status === 'ongoing';
-  const scored = CUP_CONFIG.showScores && g.score && g.score.home !== undefined && g.score.away !== undefined;
+  // Where the score used to be: the status badge ("Live now" / "Up next").
+  const badge = `<span class="dchip__status${live ? ' is-live' : ''}">${live ? 'Live now' : 'Up next'}</span>`;
   const [a, b] = g.sides || [];
   const match = g.sides && g.sides.length >= 2
     ? `<span class="dchip__side">${crest(a)}<span>${escapeHtml(a.short || a.name)}</span></span>
-       <b class="dchip__vs">${scored ? `${escapeHtml(String(g.score.home))} – ${escapeHtml(String(g.score.away))}` : 'vs'}</b>
+       ${badge}
        <span class="dchip__side">${crest(b)}<span>${escapeHtml(b.short || b.name)}</span></span>`
-    : `<span class="dchip__solo">${escapeHtml(g.title)}</span>`;
+    : `<span class="dchip__solo">${escapeHtml(g.title)}</span>${badge}`;
   return `<button class="dchip" type="button" data-game="${escapeAttr(g.id)}"
       ${clone ? 'aria-hidden="true" tabindex="-1"' : ''}>
     <span class="dchip__top">
-      <span class="dchip__status${live ? ' is-live' : ''}">${live ? 'Live now' : 'Up next'}</span>
       <span class="dchip__sport">${sportGlyph(g.sport) || ''}${escapeHtml(g.sport || '')}</span>
     </span>
     <span class="dchip__match">${match}</span>
@@ -41,7 +41,7 @@ function chipHtml(g, clone) {
       <span>${escapeHtml(g.dayLabel)}${g.timeLabel ? ` · ${escapeHtml(g.timeLabel)}` : ''}</span>
       ${g.venueName ? `<span>${escapeHtml(g.venueName)}</span>` : ''}
     </span>
-    <span class="dchip__cta">Know more →</span>
+    <span class="dchip__cta">Know More →</span>
   </button>`;
 }
 

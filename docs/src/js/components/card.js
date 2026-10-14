@@ -86,7 +86,7 @@ export function cardHtml(org, i = 0, opts = {}) {
       <div class="card__body">${body}</div>
       <div class="card__foot">
         ${foot}
-        <span class="card__cta">${escapeHtml(cta || 'Know more →')}</span>
+        <span class="card__cta">${escapeHtml(cta || 'Know More →')}</span>
       </div>
     </button>
   `;
