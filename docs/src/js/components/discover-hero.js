@@ -107,10 +107,99 @@ function initTicker(ticker, track, orgs) {
   requestAnimationFrame(frame);
 }
 
+/* Phones: the cluster chips become one themed dropdown with each cluster's colour dot.
+   It is built from the chips landing.js already makes, and choosing a row clicks the
+   matching chip, so the filtering behaviour is exactly the same. */
+function initClusterSelect(hero) {
+  const cloud = hero.querySelector('.dhero__chips');
+  if (!cloud || cloud.__select) return;
+  cloud.__select = true;
+
+  const uid = 'cdrop-' + Math.random().toString(36).slice(2, 7);
+  const wrap = document.createElement('div');
+  wrap.className = 'cdrop';
+  wrap.innerHTML = `
+    <button class="cdrop__btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="${uid}">
+      <span class="cdrop__dots" aria-hidden="true">
+        <i style="--dot: var(--blue);"></i><i style="--dot: var(--green);"></i><i style="--dot: var(--yellow);"></i><i style="--dot: var(--red);"></i>
+      </span>
+      <span class="cdrop__label">Choose a cluster</span>
+      <svg class="cdrop__chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3,6 8,11 13,6"/></svg>
+    </button>
+    <ul class="cdrop__list" id="${uid}" role="listbox" aria-label="Clusters" hidden></ul>`;
+  cloud.before(wrap);
+  const btn = wrap.querySelector('.cdrop__btn');
+  const list = wrap.querySelector('.cdrop__list');
+  let chips = [], items = [], active = -1;
+
+  // The dot colour is read from the chip itself, so it always matches the chips (and the theme).
+  const dotColor = (chip) => {
+    const ok = (c) => c && c !== 'transparent' && c !== 'rgba(0, 0, 0, 0)';
+    const d = chip.querySelector('[class*="dot"]');
+    if (d) { const c = getComputedStyle(d).backgroundColor; if (ok(c)) return c; }
+    for (const p of ['::before', '::after']) {          // the dot may be drawn by the chip itself
+      const c = getComputedStyle(chip, p).backgroundColor; if (ok(c)) return c;
+    }
+    for (const el of chip.querySelectorAll('*')) { const c = getComputedStyle(el).backgroundColor; if (ok(c)) return c; }
+    return '';
+  };
+  const paintDots = () => items.forEach((li, i) => {
+    const c = dotColor(chips[i]);
+    if (c) li.firstElementChild.style.background = c;
+  });
+  const fill = () => {
+    chips = [...cloud.querySelectorAll('button, a')].filter(el => el.textContent.trim());
+    if (!chips.length) return;
+    list.innerHTML = chips.map((el, i) => `<li class="cdrop__opt" role="option" id="${uid}-${i}" data-i="${i}">
+        <i class="cdrop__dot"></i><span>${escapeHtml(el.textContent.replace(/\s+/g, ' ').trim())}</span></li>`).join('');
+    items = [...list.children];
+    paintDots();
+  };
+  new MutationObserver(fill).observe(cloud, { childList: true });
+  fill();
+
+  const isOpen = () => !list.hidden;
+  const setActive = (i) => {
+    active = i;
+    items.forEach((li, k) => li.classList.toggle('is-active', k === i));
+    if (i >= 0 && items[i]) { btn.setAttribute('aria-activedescendant', items[i].id); items[i].scrollIntoView({ block: 'nearest' }); }
+    else btn.removeAttribute('aria-activedescendant');
+  };
+  const open = () => {
+    if (!items.length) return;
+    paintDots();
+    list.hidden = false; wrap.classList.add('is-open'); btn.setAttribute('aria-expanded', 'true');
+    setActive(-1);
+    requestAnimationFrame(() => list.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+  };
+  const close = () => {
+    list.hidden = true; wrap.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); setActive(-1);
+  };
+  const pick = (i) => { close(); const el = chips[i]; if (el) el.click(); };
+
+  btn.addEventListener('click', () => (isOpen() ? close() : open()));
+  list.addEventListener('click', (e) => {
+    const li = e.target.closest('[data-i]');
+    if (li) pick(Number(li.dataset.i));
+  });
+  document.addEventListener('pointerdown', (e) => { if (isOpen() && !wrap.contains(e.target)) close(); });
+  btn.addEventListener('keydown', (e) => {
+    const k = e.key;
+    if (k === 'ArrowDown') { e.preventDefault(); isOpen() ? setActive(Math.min(items.length - 1, active + 1)) : open(); }
+    else if (k === 'ArrowUp') { e.preventDefault(); if (isOpen()) setActive(Math.max(0, active - 1)); else open(); }
+    else if (k === 'Home' && isOpen()) { e.preventDefault(); setActive(0); }
+    else if (k === 'End' && isOpen()) { e.preventDefault(); setActive(items.length - 1); }
+    else if (k === 'Enter' && isOpen() && active >= 0) { e.preventDefault(); pick(active); }
+    else if (k === 'Escape' && isOpen()) { e.preventDefault(); close(); }
+    else if (k === 'Tab') close();
+  });
+}
+
 function init() {
   const hero = document.querySelector('.dhero');
   if (!hero || hero.__wired) return;
   hero.__wired = true;
+  initClusterSelect(hero);
 
   const counts = { orgs: ORGS.length, clusters: CATEGORIES.length, teams: TEAMS.length, games: GAMES.length };
 

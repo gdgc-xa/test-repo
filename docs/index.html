@@ -188,7 +188,9 @@
   </div>
 
   <main id="screen-landing" class="screen screen--landing" data-screen="landing">
-    <section class="dhero" aria-labelledby="dhero-title">
+    <!-- FULL-SCREEN hero (current). To go back to the BOXED hero (old), use this instead:
+    <section class="dhero" aria-labelledby="dhero-title">   -->
+    <section class="dhero dhero--full" aria-labelledby="dhero-title">
       <div class="wrap">
         <div class="dhero__panel">
           <div class="dhero__copy">
@@ -198,7 +200,7 @@
 
             <form class="search-shell hero-search dhero__search" data-hero-search role="search" onsubmit="return false;">
               <svg class="search-shell__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="6"/><line x1="17" y1="17" x2="13.5" y2="13.5"/></svg>
-              <input class="search-shell__input" type="search" placeholder="Search orgs &mdash; try 'debate', 'coders', 'farm'&hellip;" aria-label="Search organizations"/>
+              <input class="search-shell__input" type="search" placeholder="Search orgs &mdash; try 'debate'&hellip;" aria-label="Search organizations"/>
               <button class="btn hero-search__submit search-shell__submit" type="submit">Search</button>
             </form>
 
@@ -258,7 +260,7 @@
                   aria-roledescription="carousel" aria-label="Latest updates">
             <div class="du-top">
               <p class="du-eyebrow">Latest Updates</p>
-              <a class="du-more" href="?screen=cup&amp;tab=news" data-go-tab="news">View More →</a>
+              <a class="du-more" href="?screen=cup&amp;tab=news" data-go-tab="news">View more →</a>
             </div>
             <!-- One static slide so the tile looks right before the script runs;
                 discover-updates.js swaps in the real posts. -->
@@ -284,7 +286,7 @@
             <span class="dtile__mapart" aria-hidden="true"></span>
             <p class="dtile__eyebrow">Campus</p>
             <h2 class="dtile__title">Map Hub</h2>
-            <span class="dtile__cta">View Full Map →</span>
+            <span class="dtile__cta">View full map →</span>
           </a>
 
           <section class="dtile dtile--game" data-discover-games aria-roledescription="carousel" aria-label="Ongoing games">
@@ -306,13 +308,13 @@
                 <i style="--dot: var(--blue);"></i><i style="--dot: var(--green);"></i><i style="--dot: var(--yellow);"></i><i style="--dot: var(--red);"></i><i style="--dot: var(--blue);"></i>
               </span>
             </span>
-            <span class="dtile__cta">See Schedule →</span>
+            <span class="dtile__cta">See schedule →</span>
           </a>
 
           <section class="dtile dtile--teams" aria-label="Teams">
             <div class="dtile__teamhead">
               <h2 class="dtile__title">Teams</h2>
-              <a class="dtile__cta" href="?screen=cup&amp;tab=fixtures" data-go-tab="fixtures">Go to Fixtures →</a>
+              <a class="dtile__cta" href="?screen=cup&amp;tab=fixtures" data-go-tab="fixtures">Go to fixtures →</a>
             </div>
             <!-- discover-teams.js fills this with the logo tiles. -->
             <div data-discover-teams></div>
