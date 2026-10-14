@@ -4,10 +4,9 @@
   A shared header, then three views under a sticky tab bar. One
   view is shown at a time and the choice is kept in ?tab=…
 
-    HEADER     on every view: the banner (a slideshow of photos),
-                the counters (live / upcoming / results / venues)
-                and the one "Follow your teams" picker. Followed
-                teams' games get a lime ring and go first.
+    HEADER     on every view: the banner (a full-screen slideshow of
+                photos) and the one "Follow your teams" picker.
+                Followed teams' games get a lime ring and go first.
     MATCHES    your teams' games on top, then every game grouped by
                 day under a sticky strip of days, with the featured
                 match first on the chosen day. All · Live · Upcoming ·
@@ -172,7 +171,6 @@ export function initCup(root) {
 
   // --- Section visibility ---
   toggle(root, '[data-cup-hero]', CUP_CONFIG.showHero);
-  toggle(root, '[data-cup-counters]', CUP_CONFIG.showCounters);
   toggle(root, '[data-cup-teams-section]', CUP_CONFIG.showTeams);
   toggle(root, '[data-cup-map-section]', CUP_CONFIG.showMap);
   toggle(root, '[data-cup-news-section]', CUP_CONFIG.showNews && CUP_NEWS.enabled);
@@ -524,7 +522,7 @@ function render() {
   const games = allGames();
   const mine = myTeams();
 
-  renderCounters(root, games);
+  renderLiveDot(root, games);
   renderTeamNote(root, mine);
   renderMatches(root, games, mine);
   renderSports(root, games, mine);
@@ -533,21 +531,10 @@ function render() {
   syncUrl();
 }
 
-/* --- Counters --- */
-function renderCounters(root, games) {
-  if (!CUP_CONFIG.showCounters) return;
-  const counts = {
-    upcoming: games.filter(g => g.status === 'upcoming').length,
-    ongoing:  games.filter(g => g.status === 'ongoing').length,
-    finished: games.filter(g => g.status === 'finished').length,
-    venues:   new Set(games.map(g => g.venueId).filter(Boolean)).size,
-  };
-  for (const [key, value] of Object.entries(counts)) {
-    setText(root, `[data-cup-count="${key}"]`, String(value));
-  }
-  // A red dot on the Matches tab while anything is being played.
+/* --- A red dot on the Matches tab while anything is being played --- */
+function renderLiveDot(root, games) {
   const live = root.querySelector('[data-cup-tab-live]');
-  if (live) live.hidden = counts.ongoing === 0;
+  if (live) live.hidden = !games.some(g => g.status === 'ongoing');
 }
 
 /* --- The line under the team picker: how to use it, nothing more

@@ -51,7 +51,6 @@ export const CUP_CONFIG = {
          left in it loses its tab. --- */
   showHero: true,          // the banner, above every view
   showHeroPhotos: true,    // a photo slideshow inside the banner (CUP_PHOTOS)
-  showCounters: true,      // the live / upcoming / results tallies under it
   showTeams: true,         // the one "follow your teams" picker, above every view
   showFeatured: true,      // the featured match, first card of the chosen day
   showSchedule: true,      // Matches: the list, grouped by day

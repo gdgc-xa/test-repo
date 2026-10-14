@@ -56,8 +56,7 @@
 
   /* Small labels stay small, but never below 12px. */
   .theme-legend__clusters,
-  .card__short,
-  .cup-counter__label       { font-size: 12.5px; }
+  .card__short              { font-size: 12.5px; }
 
   /* ---------- Section rhythm: 32px between sections ---------- */
   .cup-section                 { padding-top: 32px; }
@@ -232,8 +231,7 @@
   .seg { display: flex; width: 100%; }
   .seg__btn { flex: 1 1 0; padding-inline: 8px; white-space: normal; text-align: center; }
 
-  /* ---------- Xavier Cup: counters and tiles at a readable size ---------- */
-  .cup-counter { padding: 16px; }
+  /* ---------- Xavier Cup: tiles at a readable size ---------- */
   .featured-match { padding: 12px; }
 }
 
@@ -277,46 +275,15 @@
 
 /* ============================================================
    THE XAVIER CUP ON A PHONE (≤560px) — short, not tall.
-   The header (photos, counters, team picker) fits in about half a
-   screen, and the Matches tools in a few thin rows, so the games
-   start near the top. Here, last, so it wins over skins.css; the
-   :root[data-skin] prefix matches the skins' own weight.
+   Under the full-screen banner, the team picker is one sideways row
+   and the Matches tools a few thin rows. Here, last, so it wins
+   over skins.css; the :root[data-skin] prefix matches the skins'
+   own weight.
    ============================================================ */
 @media (max-width: 560px) {
-  /* --- Banner: a shorter photo frame --- */
-  :root[data-skin] .cup-hero { padding-block: var(--space-3) 0; }
-  :root[data-skin] .cup-hero.has-photos .cup-hero__tile {
-    min-height: 0;
-    padding: 44px 16px 38px;
-    border-radius: var(--radius-lg);
-  }
-  .cup-hero__kicker { font-size: 10px; }
-  .cup-hero__title { font-size: 26px; }
-  .cup-hero__tagline { margin-top: 4px; font-size: 14px; }
-  .cup-hero__preview { margin-top: var(--space-2); padding: 3px 10px; font-size: 11px; }
-  .cup-photo__caption { top: 12px; left: 16px; padding: 3px 9px; font-size: 11px; }
-  .cup-photos .news-hero__bars { left: 16px; right: 16px; bottom: 10px; }
-
-  /* --- Counters: one row of four --- */
-  :root[data-skin] .cup-counters {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 6px;
-    margin-top: 10px;
-  }
-  :root[data-skin] .cup-counter {
-    padding: 8px 4px;
-    border-radius: 14px;
-    text-align: center;
-  }
-  :root[data-skin] .cup-counter__value { font-size: 20px; }
-  :root[data-skin] .cup-counter__label {
-    justify-content: center;
-    margin-top: 2px;
-    font-size: 10.5px;
-    letter-spacing: 0;
-    line-height: 1.2;
-  }
-  :root[data-skin] .cup-counter--ongoing .cup-counter__label::before { width: 6px; height: 6px; }
+  /* --- Banner: still the full screen (cup.css), small labels smaller --- */
+  .cup-hero__preview { padding: 3px 10px; font-size: 11px; }
+  .cup-photo__caption { padding: 3px 9px; font-size: 11px; }
 
   /* --- Follow your teams: one row that scrolls sideways --- */
   .cup-follow { padding-top: 14px; }

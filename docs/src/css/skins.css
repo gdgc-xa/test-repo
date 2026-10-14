@@ -340,7 +340,6 @@
 :root[data-skin="txc"] .about-head__title,
 :root[data-skin="txc"] .cup-hero__title,
 :root[data-skin="txc"] .cup-section__title,
-:root[data-skin="txc"] .cup-counter__value,
 :root[data-skin="txc"] .news-title,
 :root[data-skin="txc"] .settings__title,
 :root[data-skin="txc"] .theme-block__title,
@@ -452,36 +451,6 @@
 }
 :root[data-skin="txc"] .cup-hero__lede { color: var(--tx-tile-muted); }
 :root[data-skin="txc"] .cup-hero__trophy { width: 132px; }
-
-:root[data-skin="txc"] .cup-counters { margin-top: var(--space-3); }
-:root[data-skin="txc"] .cup-counter {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  text-align: left;
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-lg);
-}
-:root[data-skin="txc"] .cup-counter__value { color: var(--ink); font-size: 32px; }
-:root[data-skin="txc"] .cup-counter__label {
-  color: var(--muted);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-:root[data-skin="txc"] .cup-counter--ongoing {
-  background: var(--surface);
-  border-color: var(--border);
-}
-:root[data-skin="txc"] .cup-counter--ongoing .cup-counter__value { color: var(--ink); }
-:root[data-skin="txc"] .cup-counter--ongoing .cup-counter__label::before {
-  content: "";
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--tx-live);
-  animation: livePulse 1.8s ease-in-out infinite;
-}
 
 /* ---------- Map ---------- */
 :root[data-skin="txc"] .cup-map-panel,
