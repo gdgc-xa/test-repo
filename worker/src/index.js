@@ -21,7 +21,7 @@
  */
 
 const GRAPH_VERSION = 'v26.0';
-const POST_COUNT = 18;          // 3 hero + 15 in "More updates"
+const POST_COUNT = 15;          // 3 hero + 12 in "More updates"
 const ALWAYS_REFRESH = 3;       // the newest posts are rebuilt every run; older ones are reused
 const BUILD_MAX = 8;            // posts rebuilt per run: ~5 subrequests each, free plan allows 50
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;

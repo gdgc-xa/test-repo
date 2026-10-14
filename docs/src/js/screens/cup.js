@@ -695,7 +695,7 @@ async function loadPosts() {
  * slot, so layouts never jump when real pictures arrive.
  */
 const HERO_COUNT = 3;
-const MORE_MAX = 15;
+const MORE_MAX = 12;
 const HERO_MS = 7000;
 const NEW_FOR_DAYS = 7;
 
