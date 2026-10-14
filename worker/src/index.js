@@ -21,7 +21,7 @@
  */
 
 const GRAPH_VERSION = 'v26.0';
-const POST_COUNT = 6;
+const POST_COUNT = 15;
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const POSTS_KEY = 'posts';
 const IMG_PREFIX = 'img:';
