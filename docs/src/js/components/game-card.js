@@ -69,7 +69,7 @@ export function resolveGame(g, now = new Date()) {
   // older template that prints g.teams keeps working unchanged.
   const sides = (Array.isArray(g.teams) ? g.teams : []).filter(Boolean).map(teamFor);
   const teams = sides.map(t => t.name);
-  const title = g.title || (teams.length >= 2 ? `${teams[0]} vs ${teams[1]}` : (teams[0] || g.sport || 'Fixture'));
+  const title = g.title || (teams.length >= 2 ? `${teams[0]} vs ${teams[1]}` : (teams[0] || g.sport || 'Match'));
 
   return {
     ...g,

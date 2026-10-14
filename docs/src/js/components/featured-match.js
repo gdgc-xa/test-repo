@@ -6,7 +6,7 @@
    screen paints it with matchCardHtml().
 
    The pick for a day, in order:
-     1. your team's game (live first, then next up, then any)
+     1. a followed team's game (live first, then next up, then any)
      2. a live game
      3. the next game still to start
      4. a game marked `featured` in the data
@@ -41,14 +41,16 @@ export function gamesOn(games, key) {
     .sort((a, b) => (a.start?.getTime() ?? 0) - (b.start?.getTime() ?? 0));
 }
 
-export function pickFeatured(dayGames, myTeam = '') {
+/** `myTeams`: the followed team ids (one id as a string works too). */
+export function pickFeatured(dayGames, myTeams = []) {
   if (!dayGames.length) return null;
   const firstOf = (list) =>
     list.find(g => g.status === 'ongoing')
     || list.find(g => g.status === 'upcoming')
     || list[0];
 
-  const mine = myTeam ? dayGames.filter(g => g.teamIds?.includes(myTeam)) : [];
+  const ids = [].concat(myTeams).filter(Boolean);
+  const mine = dayGames.filter(g => g.teamIds?.some(id => ids.includes(id)));
   if (mine.length) return firstOf(mine);
 
   return dayGames.find(g => g.status === 'ongoing')

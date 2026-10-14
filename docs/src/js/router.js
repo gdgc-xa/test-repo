@@ -10,11 +10,15 @@
      ?screen=browse&filter=<id>&q=<query>   browse w/ preselect
      ?…&org=<id>              open the org booth  (any screen)
      ?…&event=<id>            open an event       (events)
-     ?…&game=<id>             open a fixture      (cup)
+     ?…&game=<id>             open a match        (cup)
      ?screen=cup&venue=<id>   the map with that venue selected
-     ?screen=cup&tab=<id>     one Xavier Cup view: map | fixtures | calendar | news
-     ?…&status=…&sport=…      the list filters, so a filtered view
+     ?screen=cup&tab=<id>     one Xavier Cup view: matches | sports | map | news
+                              (old fixtures / calendar links still land)
+     ?…&status=…&sport=…&venue=…&day=…&view=calendar
+                              the Matches filters, so a filtered view
                               can be linked to and shared
+     ?screen=cup&tab=sports&sport=<id>&div=<division>&team=<id>
+                              a sport's page, or a team inside it
 
    pushState is used for user-initiated navigations; the modals and
    the in-screen filters use replaceState so the Back button steps
@@ -69,6 +73,10 @@ export function currentQuery() {
     mapsport: q.get('mapsport') || '',
     status: q.get('status') || '',
     sport:  q.get('sport') || '',
+    div:    q.get('div') || '',
+    team:   q.get('team') || '',
+    day:    q.get('day') || '',
+    view:   q.get('view') || '',
     tab:    q.get('tab') || '',
   };
 }
@@ -86,6 +94,10 @@ export function navigate(params = {}) {
   if (merged.venue)  q.set('venue', merged.venue);
   if (merged.status) q.set('status', merged.status);
   if (merged.sport)  q.set('sport', merged.sport);
+  if (merged.div)    q.set('div', merged.div);
+  if (merged.team)   q.set('team', merged.team);
+  if (merged.day)    q.set('day', merged.day);
+  if (merged.view)   q.set('view', merged.view);
   if (merged.tab)    q.set('tab', merged.tab);
 
   // location.pathname, not '/': the site is served from a subpath on

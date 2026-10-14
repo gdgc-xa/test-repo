@@ -21,7 +21,7 @@ import { CUP_CONFIG, GAMES, cupNow, seasonState } from '../data/xavier-cup.js';
 import { resolveGame } from './game-card.js';
 import { mountTeamStrip } from './team-strip.js';
 import { formatDay, formatTime } from '../lib/dates.js';
-import { currentTeam, onMyTeamChange } from '../lib/my-team.js';
+import { myTeams, onMyTeamChange } from '../lib/my-team.js';
 import { escapeHtml, escapeAttr } from '../lib/html.js';
 import { navigate } from '../router.js';
 
@@ -94,7 +94,7 @@ function paintSeason(el, now, games) {
       <p class="bento__season-note">${today.length
         ? `${today.length} game${today.length === 1 ? '' : 's'} today · ${live} live · ${left} still to start`
         : 'No games today. Rest day.'}</p>
-      <a class="bento__season-link" href="?screen=cup&amp;tab=fixtures" data-bento-tab="fixtures">Today’s fixtures →</a>`;
+      <a class="bento__season-link" href="?screen=cup&amp;tab=matches" data-bento-tab="matches">Today’s matches →</a>`;
     return;
   }
 
@@ -102,19 +102,20 @@ function paintSeason(el, now, games) {
     <p class="bento__eyebrow">Season complete</p>
     <p class="bento__season-date">${escapeHtml(formatDay(s.end, { withYear: false, weekday: false }))}</p>
     <p class="bento__season-note">Every result from all ${s.totalDays} days is on the Xavier Cup tab.</p>
-    <a class="bento__season-link" href="?screen=cup&amp;tab=fixtures&amp;status=finished"
-       data-bento-tab="fixtures" data-bento-status="finished">See the results →</a>`;
+    <a class="bento__season-link" href="?screen=cup&amp;tab=matches&amp;status=finished"
+       data-bento-tab="matches" data-bento-status="finished">See the results →</a>`;
 }
 
 /* ---------- The live strip ---------- */
 function paintLive(el, games) {
   if (!el) return;
-  const mine = currentTeam();
-  const ofMine = (list) => (mine ? list.find(g => g.teamIds.includes(mine)) : null) || list[0];
+  const mine = myTeams();
+  const isMine = (g) => g.teamIds.some(id => mine.includes(id));
+  const ofMine = (list) => list.find(isMine) || list[0];
 
   const live = games.filter(g => g.status === 'ongoing').sort((a, b) => a.start - b.start);
   const next = games.filter(g => g.status === 'upcoming').sort((a, b) => a.start - b.start);
-  const g = live.length ? ofMine(live) : ofMine(next.filter(x => !mine || x.teamIds.includes(mine))) || next[0];
+  const g = live.length ? ofMine(live) : ofMine(next.filter(x => !mine.length || isMine(x))) || next[0];
 
   if (!g) { el.hidden = true; return; }
   el.hidden = false;

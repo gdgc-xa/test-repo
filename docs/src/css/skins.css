@@ -435,7 +435,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-6);
-  padding: clamp(24px, 4vw, 44px);
+  padding: clamp(20px, 3vw, 34px);
   border-radius: var(--radius-xl);
   color: var(--tx-tile-ink);
   background:
@@ -451,7 +451,7 @@
   letter-spacing: 0.16em;
 }
 :root[data-skin="txc"] .cup-hero__lede { color: var(--tx-tile-muted); }
-:root[data-skin="txc"] .cup-hero__trophy { width: 168px; }
+:root[data-skin="txc"] .cup-hero__trophy { width: 132px; }
 
 :root[data-skin="txc"] .cup-counters { margin-top: var(--space-3); }
 :root[data-skin="txc"] .cup-counter {

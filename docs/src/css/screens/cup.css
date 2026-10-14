@@ -20,11 +20,13 @@
 /* ============================================================
    BANNER
    ============================================================ */
+/* Compact: the banner sits above every view now, so it leaves the
+   first screen to the matches. */
 .cup-hero {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding-block: var(--space-7) var(--space-6);
+  padding-block: var(--space-6) var(--space-5);
   background: linear-gradient(180deg, var(--cup-navy) 0%, var(--cup-green-dk) 100%);
   color: #fff;
 }
@@ -77,7 +79,7 @@
 .cup-hero__title {
   margin-top: var(--space-3);
   font-family: var(--font-serif);
-  font-size: clamp(34px, 4.4vw, 56px);
+  font-size: clamp(30px, 3.6vw, 46px);
   font-weight: 900;
   letter-spacing: -1.4px;
   line-height: 1.02;
@@ -93,7 +95,7 @@
   color: var(--cup-gold-lt);
 }
 .cup-hero__lede {
-  margin-top: var(--space-4);
+  margin-top: var(--space-3);
   font-size: 15.5px;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.86);
@@ -101,7 +103,7 @@
 }
 
 .cup-hero__trophy {
-  width: 190px;
+  width: 150px;
   flex: 0 0 auto;
   filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.42));
   animation: trophyFloat 7s ease-in-out infinite;
@@ -114,7 +116,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-3);
-  margin-top: var(--space-6);
+  margin-top: var(--space-5);
 }
 .cup-counter {
   padding: var(--space-4);
@@ -216,10 +218,351 @@
 }
 .cup-map-panel__legend { margin-top: var(--space-4); }
 
-/* ---------- Fixture list ---------- */
-.cup-chips { margin-bottom: var(--space-3); }
-.cup-chips--sports { margin-bottom: var(--space-5); }
-.cup-grid { margin-top: var(--space-2); }
+/* ============================================================
+   SHARED HEADER — the team picker under the banner
+   ============================================================ */
+.cup-follow { padding-top: var(--space-5); }
+.cup-follow__head { margin-bottom: var(--space-3); }
+.cup-follow .cup-section__hint { margin-top: 4px; }
+.cup-section__title--sm { font-size: 19px; letter-spacing: -0.3px; }
+
+/* ============================================================
+   MATCHES
+   ============================================================ */
+/* Title on the left, a small List / Calendar switch on the right,
+   on every screen size. */
+.screen--cup .cup-matches__head {
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+.seg.cup-viewswitch { display: inline-flex; width: auto; flex: 0 0 auto; }
+.seg.cup-viewswitch[hidden] { display: none; }
+.cup-viewswitch .seg__btn {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 5px 14px;
+  font-size: 13px;
+}
+
+/* The toolbar: the status chips on one line, the venue beside them
+   (under them on a phone), then Clear. */
+.cup-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+/* All · Live · Upcoming · Results — small chips, never wrapping. A
+   phone too narrow for all four scrolls them sideways instead. */
+.cup-status {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cup-status[hidden] { display: none; }
+.cup-status::-webkit-scrollbar { display: none; }
+.cup-status .chip {
+  flex: 0 0 auto;
+  gap: 6px;
+  min-height: 34px;
+  padding: 5px 11px;
+  font-size: 12.5px;
+}
+.cup-status .chip:hover,
+.cup-status .chip[aria-pressed="true"] { transform: none; }
+.cup-status .chip[aria-pressed="true"] .chip__dot { display: block; background: currentColor; }
+.cup-status .chip__count { margin-left: 0; padding: 0 6px; font-size: 10.5px; }
+
+.cup-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.cup-filters [data-cup-clear-filters][hidden] { display: none; }
+.cup-select { display: block; min-width: 170px; }
+/* "All venues" says what the dropdown is; the label is for screen readers. */
+.cup-select__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+.cup-select__field { position: relative; display: block; }
+.cup-select select {
+  width: 100%;
+  min-height: 34px;
+  padding: 5px 34px 5px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: border-color 160ms;
+}
+.cup-select select:hover { border-color: var(--border-strong); }
+.cup-select svg {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* The strip of days. Sticks under the tab bar (--cup-tabs-h is set
+   by screens/cup.js) for as long as the list is on screen. */
+.day-strip {
+  position: sticky;
+  top: calc(var(--nav-h) + var(--cup-tabs-h, 64px));
+  z-index: 20;
+  display: flex;
+  gap: 6px;
+  margin-bottom: var(--space-4);
+  padding-block: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: color-mix(in srgb, var(--ground) 92%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.day-strip::-webkit-scrollbar { display: none; }
+.day-strip[hidden] { display: none; }
+.day-strip__day {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 58px;
+  padding: 6px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  transition: background 160ms, border-color 160ms, color 160ms;
+}
+.day-strip__day:hover { border-color: var(--border-strong); color: var(--ink); }
+.day-strip__dow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.day-strip__day.is-today .day-strip__dow { color: var(--tx-live); }
+.day-strip__num {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.day-strip__count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.day-strip__live {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tx-live);
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+.day-strip__day[aria-pressed="true"] {
+  background: var(--tx-primary);
+  border-color: var(--tx-primary);
+  color: var(--tx-on-primary-hi);
+}
+.day-strip__day[aria-pressed="true"] :is(.day-strip__dow, .day-strip__num, .day-strip__count) { color: inherit; }
+.day-strip__day[aria-pressed="true"] .day-strip__live { background: currentColor; }
+
+/* One group per day; the featured match spans the row. */
+/* minmax(0, 1fr): a swipe row inside must scroll, not widen the column. */
+.match-days { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+.match-day__title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px var(--space-3);
+  margin-bottom: var(--space-3);
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.match-day__sub {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.match-day__today {
+  align-self: center;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--tx-accent);
+  color: var(--tx-on-accent);
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.match-grid > .match--featured { grid-column: 1 / -1; }
+.cup-matches__calendar[hidden],
+.cup-matches__list[hidden] { display: none; }
+
+/* Your teams: the followed teams' games, in a panel above the list. */
+.cup-yours {
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  border-radius: 24px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.cup-yours[hidden] { display: none; }
+.cup-yours__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.cup-yours__title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.cup-yours__crests { display: inline-flex; gap: 2px; }
+.cup-yours__crests img { width: 28px; height: 28px; object-fit: contain; }
+.cup-yours__more { margin-top: var(--space-3); }
+/* Every card here is a followed team's: the ring says so, the badge
+   would only repeat it. */
+.cup-yours .match__mine { display: none; }
+
+/* ============================================================
+   BANNER PHOTOS — a slideshow in the banner (screens/cup.js →
+   mountHeroPhotos, data/xavier-cup.js → CUP_PHOTOS). The banner
+   becomes a rounded photo frame in every design; the title sits
+   bottom-left over a dark fade, and bars along the bottom pick a
+   photo. The progress bars are the news hero's.
+   ============================================================ */
+.cup-photos[hidden] { display: none; }
+.cup-hero.has-photos .cup-hero__wrap { display: block; }
+.screen--cup .cup-hero.has-photos .cup-hero__tile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  gap: 0;
+  min-height: clamp(300px, 36vw, 440px);
+  /* Room at the top for the caption, at the bottom for the bars. */
+  padding: 60px clamp(20px, 3vw, 36px) 64px;
+  border-radius: var(--radius-xl);
+  background: var(--tx-tile);
+  color: #FFFFFF;
+}
+.cup-hero.has-photos .cup-hero__trophy { display: none; }
+.cup-hero.has-photos .cup-hero__text { position: relative; z-index: 1; }
+
+.cup-photos {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template: 1fr / 1fr;
+}
+/* The fade the title is read against. */
+.cup-photos::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, rgba(4, 12, 28, 0.9) 0%, rgba(4, 12, 28, 0.5) 45%, transparent 75%),
+    linear-gradient(90deg, rgba(4, 12, 28, 0.6) 0%, transparent 65%);
+  pointer-events: none;
+}
+.cup-photo {
+  grid-area: 1 / 1;
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 700ms ease, visibility 0s linear 700ms;
+}
+.cup-photo.is-active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 700ms ease, visibility 0s;
+}
+.cup-photo__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cup-photo.is-active .cup-photo__img { animation: heroDrift var(--hero-ms) ease-out both; }
+.cup-photo .news-ph__mark { font-size: 15px; }
+.cup-photo .news-ph__mark svg { width: 26px; height: 26px; }
+.cup-photo__caption {
+  position: absolute;
+  z-index: 1;
+  top: clamp(16px, 2.4vw, 24px);
+  left: clamp(20px, 3vw, 36px);
+  max-width: calc(100% - 160px);
+  padding: 4px 11px;
+  border-radius: var(--radius-pill);
+  background: rgba(4, 12, 28, 0.6);
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cup-photos .news-hero__bars {
+  left: clamp(20px, 3vw, 36px);
+  right: clamp(20px, 3vw, 36px);
+  bottom: 16px;
+}
+/* wireHero() pauses the tile on hover and focus, and stills it for
+   anyone who asks for less motion. */
+.cup-hero__tile.is-paused .news-hero__bar.is-active .news-hero__fill,
+.cup-hero__tile.is-paused .cup-photo.is-active .cup-photo__img { animation-play-state: paused; }
+.cup-hero__tile.is-static .news-hero__bar.is-active .news-hero__fill { animation: none; width: 100%; }
+.cup-hero__tile.is-static .cup-photo__img { animation: none; }
 
 /* ============================================================
    NEWS & UPDATES
@@ -307,14 +650,16 @@
    skins.css turns it into the navy tile for Xavier Cup 2026. */
 .cup-hero__tile { display: contents; }
 
-/* ---------- Sticky tab bar (Map · Fixtures · Calendar · News) ----------
-   Sticks under the site nav. The pill behind the selected tab is
-   one element that slides (screens/cup.js → movePill), as in the
-   TXC proposal. On a phone the row scrolls sideways if it must. */
+/* ---------- Sticky tab bar (Matches · Map · News) ----------
+   Comes after the shared header and sticks under the site nav. The
+   pill behind the selected tab is one element that slides
+   (screens/cup.js → movePill), as in the TXC proposal. On a phone
+   the row scrolls sideways if it must. */
 .cup-tabs {
   position: sticky;
   top: var(--nav-h);
   z-index: 30;
+  margin-top: var(--space-5);
   padding-block: var(--space-3);
   background: color-mix(in srgb, var(--ground) 90%, transparent);
   backdrop-filter: blur(10px);
@@ -379,6 +724,7 @@
 
 @media (max-width: 820px) {
   .cup-tabs { top: var(--nav-h-mob); padding-block: var(--space-2); }
+  .day-strip { top: calc(var(--nav-h-mob) + var(--cup-tabs-h, 56px)); }
 }
 @media (max-width: 480px) {
   .cup-tabs__nav { display: flex; width: 100%; }
@@ -836,6 +1182,43 @@
 }
 
 /* ============================================================
+   SWIPE ROWS — on narrow screens every list of matches on the Cup
+   tab (Your teams, each day, the calendar's day, a sport's and a
+   team's matches) is one row of cards you swipe, so a list is one
+   card tall however many it holds. The next card peeks in at the
+   edge to say there is more. The 720px matches isSwipe() in
+   screens/cup.js, which then puts every card in the row.
+   ============================================================ */
+@media (max-width: 720px) {
+  .screen--cup .match-grid {
+    --swipe-bleed: 16px;           /* the .wrap padding: rows run edge to edge */
+    display: flex;
+    gap: 10px;
+    margin-inline: calc(-1 * var(--swipe-bleed));
+    padding: 12px var(--swipe-bleed) 8px;   /* room for the "Your team" badge and rings */
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--swipe-bleed);
+    scrollbar-width: none;
+  }
+  .screen--cup .match-grid::-webkit-scrollbar { display: none; }
+  /* No fade-in here: a card swiped in from the side would be waiting
+     on a scroll-into-view that never comes from below. */
+  .screen--cup .match-grid > .match {
+    flex: 0 0 min(320px, 86%);
+    scroll-snap-align: start;
+    opacity: 1;
+    transform: none;
+    transition: box-shadow 180ms, border-color 180ms;
+  }
+  .screen--cup .match-grid > .match:only-child { flex-basis: 100%; }
+  .cup-yours .match-grid { --swipe-bleed: var(--space-4); }
+  .cup-yours__head { margin-bottom: 0; }
+  .match-day__title { margin-bottom: 0; }
+}
+
+/* ============================================================
    Responsive
    ============================================================ */
 @media (max-width: 1000px) {
@@ -857,7 +1240,24 @@
   .cup-map-panel__legend { padding: 0 var(--space-2) var(--space-2); }
   .cup-hero__wrap { flex-direction: column; align-items: flex-start; }
   .cup-hero__trophy { position: absolute; right: -14px; top: -10px; width: 96px; opacity: 0.9; }
-  .cup-hero__lede { font-size: 14.5px; }
+  .cup-hero__lede { display: none; }
+  /* The placeholder's label would crowd the caption: icon only. */
+  .cup-photo .news-ph__mark > span { display: none; }
+  .cup-photo__caption { max-width: calc(100% - 90px); }
+  .cup-yours { padding: var(--space-3); }
+  /* The strip is the day picker on a phone: smaller days. */
+  .day-strip { gap: 5px; margin-bottom: var(--space-3); padding-block: 6px; }
+  .day-strip__day { min-width: 50px; padding: 4px 8px; border-radius: 12px; }
+  .day-strip__num { font-size: 17px; }
+  /* The four status chips share the width; the venue goes under them. */
+  .cup-toolbar { margin-bottom: var(--space-4); }
+  .cup-status { flex: 1 1 100%; }
+  .cup-status .chip { flex: 1 0 auto; justify-content: center; gap: 5px; padding: 5px 8px; }
+  .cup-status .chip__dot { display: none; }
+  .cup-status .chip[aria-pressed="true"] .chip__dot { display: none; }
+  .cup-filters { flex: 1 1 100%; }
+  .cup-select { flex: 1 1 auto; min-width: 0; }
+  .match-days { gap: var(--space-5); }
   .news-head { flex-direction: column; }
   .cup-results { padding: var(--space-4); }
   .cup-results__head { flex-direction: column; align-items: flex-start; }

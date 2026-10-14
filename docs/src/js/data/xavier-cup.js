@@ -9,6 +9,8 @@
      3. GAMES       every match, with its venue and kickoff time
      4. CUP_NEWS    the News & Updates column
      5. CUP_EVENTS  the Upcoming Events cards under the news
+     6. CUP_PHOTOS  the photo slideshow in the banner
+     7. SPORTS      one entry per sport: its page, icon and points
 
    The tab works out Upcoming / Ongoing / Finished from the clock,
    counts the games at each venue for the map, and powers the
@@ -28,7 +30,7 @@ export const CUP_CONFIG = {
   name: 'The Xavier Cup',
   kicker: 'University-wide · 2026',
   tagline: 'One campus. Every college. One trophy.',
-  lede: 'Every fixture of the season — where it is being played, when it starts, and how it finished. Tap the map to see what is on at a venue, or open Fixtures to follow your team.',
+  lede: 'Every match of the season — where it is being played, when it starts, and how it finished. Follow your teams below and their games come first in Matches.',
 
   /** The season itself. Drives the countdown on Discover and the
       "Day 3 of 11" line once play has started. Plain dates. */
@@ -45,32 +47,34 @@ export const CUP_CONFIG = {
       the season starts. Set it to null for launch.               */
   previewNow: '2026-10-12T15:30',
 
-  /* --- Sections. Each one is independent. --- */
-  showHero: true,          // the trophy banner at the top
-  showCounters: true,      // the upcoming / ongoing / finished tallies
-  showTeams: true,         // the "follow your team" picker
-  showFeatured: true,      // one featured match per day, with a day pager
-  showMap: true,           // the consolidated venue map
-  showSchedule: true,      // the full fixture list below the map
-  showCalendar: true,      // the month calendar of the chosen team's games
+  /* --- Sections. Each one is independent. A view with nothing
+         left in it loses its tab. --- */
+  showHero: true,          // the banner, above every view
+  showHeroPhotos: true,    // a photo slideshow inside the banner (CUP_PHOTOS)
+  showCounters: true,      // the live / upcoming / results tallies under it
+  showTeams: true,         // the one "follow your teams" picker, above every view
+  showFeatured: true,      // the featured match, first card of the chosen day
+  showSchedule: true,      // Matches: the list, grouped by day
+  showCalendar: true,      // Matches: the List / Calendar switch (off = list only)
+  showSports: true,        // the Sports view: one page per sport (SPORTS)
+  showMap: true,           // the Map view
   showNews: true,          // News & Updates from the Facebook page
   showLegend: true,        // the colour key under the map
 
-  /* --- Filters on the fixture list --- */
-  showStatusFilter: true,  // All / Upcoming / Ongoing / Finished
-  showSportFilter: true,   // one chip per sport found in GAMES
+  /* --- Filters on Matches (sports have their own pages on Sports) --- */
+  showStatusFilter: true,  // All / Live / Upcoming / Results, on one line
 
   /** How long a match with no `end` is assumed to run, in minutes. */
   defaultDurationMins: 90,
 
-  /** Which fixture list the tab opens on:
-      'all' | 'upcoming' | 'ongoing' | 'finished'  */
+  /** Which status Matches opens on:
+      'all' | 'ongoing' (Live) | 'upcoming' | 'finished' (Results)  */
   defaultStatus: 'all',
 
   /** Show scores on finished game cards. */
   showScores: true,
 
-  /** Cap on the fixture list; null = show everything. */
+  /** Cap on the match list; null = show everything. */
   maxGamesShown: null,
 };
 
@@ -149,18 +153,9 @@ export const CUP_MAP = {
     },
   ],
 
-  /* --- SPORT ICONS ---------------------------------------------
-     The picture for each sport, keyed by the sport exactly as it
-     is written in GAMES. A sport with no picture still shows — as
-     a plain badge with its first letter.
-     ------------------------------------------------------------ */
-  sportIcons: {
-    Basketball: 'assets/sports/basketball.webp',
-    Soccer:     'assets/sports/soccer.webp',
-    Frisbee:    'assets/sports/frisbee.webp',
-    Softball:   'assets/sports/softball.webp',
-    Volleyball: 'assets/sports/volleyball.webp',
-  },
+  /* Each sport's picture is its `icon` in SPORTS (section 7). A
+     sport with no picture still shows — as a plain badge with its
+     first letter. */
 
   /* --- THE 3D VIEW ---------------------------------------------
      Mapbox draws the campus in 3D. It needs a public access token
@@ -184,9 +179,11 @@ export const CUP_MAP = {
    ------------------------------------------------------------
    id        unique, url-safe (used in the ?game=… link)
    sport     free text — the sport chips are built from these, and
-             the same spelling picks its map icon (CUP_MAP.sportIcons)
+             the same spelling finds it in SPORTS (its page, its icon)
    division  optional ('Men', 'Women', 'Mixed', 'Open')
-   round     optional ('Elimination', 'Semifinal', 'Final')
+   round     optional ('Elimination', 'Semifinal', 'Final', 'Bronze').
+             Finished Elimination games make the standings on the
+             Sports tab; the others make its bracket.
    teams     [home, away] as ids from data/teams.js ('ccs', 'eng').
              Anything that is not a team id prints as written, so
              ['All colleges'] works for a solo or all-in event.
@@ -196,12 +193,15 @@ export const CUP_MAP = {
    status    'auto' (default) | 'upcoming' | 'ongoing' | 'finished'
              A manual value beats the clock — use it for a
              postponement or a walkover.
+   winner    optional 'home' | 'away' — who won when the score does
+             not say (penalties, a shootout, a walkover)
    score     { home: 0, away: 0 } — shown once a match has started,
              so update it during play for a live score
    description  a short paragraph for the detail view
    link      optional external link (livestream, bracket, recap)
    note      short badge on the card ('Championship')
-   featured  true → pinned to the top of the fixture list
+   featured  true → the day's featured match when nothing is live
+             or still to start that day
    ------------------------------------------------------------
    Everything below is sample content for the Oct 10–20 season.
    Replace it wholesale once the official schedule is out.
@@ -376,11 +376,14 @@ export const CUP_NEWS = {
   },
 
   /** Fallback posts, newest first. `date` accepts the same forms
-      as a game's start. */
+      as a game's start. `sport` (optional, as named in SPORTS)
+      puts a post on that sport's page too; a post from the feed
+      can do the same with a hashtag such as #Basketball. */
   posts: [
     {
       id: 'post-bracket',
       date: '2026-10-11T19:40',
+      sport: 'Basketball',
       tag: 'Bracket',
       title: 'Semifinal pairings are out',
       body: 'Both basketball semifinals are set after tonight’s results. Full bracket on the page; the finals schedule follows tomorrow morning.',
@@ -452,9 +455,85 @@ export const CUP_EVENTS = {
   ],
 };
 
+/* ============================================================
+   6. BANNER PHOTOS
+   ------------------------------------------------------------
+   The slideshow in the banner at the top of the tab, behind its
+   title. Slides show in this order, one every `secondsPerSlide`;
+   CUP_CONFIG.showHeroPhotos switches it off.
+
+   src      a photo in assets/cup/photos/ — landscape, about
+            1600×900, kept under ~300 KB. null = a placeholder
+            graphic in the same frame.
+   alt      what the photo shows, for screen readers
+   caption  the short label on the slide (optional)
+
+   PLACEHOLDERS: swap in real TXC photos before launch.
+   ============================================================ */
+export const CUP_PHOTOS = {
+  secondsPerSlide: 6,
+  slides: [
+    { src: null, caption: 'Parade of colleges', alt: 'The colleges marching in the opening parade at the SBM steps' },
+    { src: null, caption: 'Basketball · University Gym', alt: 'A basketball game at the Xavier University Gym' },
+    { src: null, caption: 'Volleyball · Covered Court', alt: 'A volleyball rally at the XU Covered Court' },
+    { src: null, caption: 'Soccer · XU Soccer Field', alt: 'A soccer match at the XU Soccer Field' },
+    { src: null, caption: 'The crowd', alt: 'Students cheering for their college' },
+  ],
+};
+
+/* ============================================================
+   7. SPORTS
+   ------------------------------------------------------------
+   One entry per sport, in the order they show on the Sports tab.
+   A game names its sport by `name`, spelled exactly the same;
+   `id` is what goes in the link (?tab=sports&sport=soccer).
+
+   id         url-safe, lower case
+   name       as written in GAMES[].sport
+   icon       the sport's picture: its tile, its match cards, its
+              marker on the map
+   photo      a wide photo for the top of the sport's page
+              (assets/sports/photos/…). null = a placeholder graphic
+   photos     more photos, shown as a strip on the sport's page
+              ([{ src, alt }]; leave empty for none)
+
+   The standings (wins and losses from the finished Elimination
+   games) work themselves out from GAMES. A sport in GAMES that is
+   missing here still gets a page, with no pictures.
+   ============================================================ */
+export const SPORTS = [
+  { id: 'basketball', name: 'Basketball', icon: 'assets/sports/basketball.webp', photo: null, photos: [] },
+  { id: 'volleyball', name: 'Volleyball', icon: 'assets/sports/volleyball.webp', photo: null, photos: [] },
+  { id: 'soccer',     name: 'Soccer',     icon: 'assets/sports/soccer.webp',     photo: null, photos: [] },
+  { id: 'frisbee',    name: 'Frisbee',    icon: 'assets/sports/frisbee.webp',    photo: null, photos: [] },
+  { id: 'softball',   name: 'Softball',   icon: 'assets/sports/softball.webp',   photo: null, photos: [] },
+];
+
 /* ---------- Lookups ---------- */
 
 export const VENUE_BY_ID = Object.fromEntries(CUP_MAP.venues.map(v => [v.id, v]));
+export const SPORT_BY_NAME = Object.fromEntries(SPORTS.map(s => [s.name, s]));
+
+/**
+ * allSports() — SPORTS in order, then any sport GAMES plays that
+ * SPORTS leaves out (with no pictures), so every sport with a game
+ * has a page.
+ */
+export function allSports() {
+  const extra = sportsInPlay()
+    .filter(name => !SPORT_BY_NAME[name])
+    .map(name => ({
+      id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+      name, icon: null, photo: null, photos: [],
+    }));
+  return [...SPORTS, ...extra];
+}
+
+/** A sport from a link: its id ("soccer") or its name ("Soccer"). */
+export function findSport(value) {
+  const v = String(value || '');
+  return allSports().find(s => s.id === v.toLowerCase() || s.name === v) || null;
+}
 
 /** Every distinct sport in GAMES, in the order they first appear. */
 export function sportsInPlay() {

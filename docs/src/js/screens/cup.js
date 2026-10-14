@@ -1,23 +1,32 @@
 /* ============================================================
   screens/cup.js — The Xavier Cup tab.
 
-  Four views under a sticky tab bar, as in the TXC proposal. One
-  is shown at a time and the choice is kept in ?tab=…
+  A shared header, then three views under a sticky tab bar. One
+  view is shown at a time and the choice is kept in ?tab=…
 
-    MAP        hero + counters (how many fixtures are upcoming /
-                live / done), and the campus map. Tapping a venue
-                fills the panel beside it with what is live, upcoming
-                and finished there; tapping a sport's icon narrows
-                that to the one sport.
-    FIXTURES   pick the team you follow (its games get a lime ring
-                everywhere), one featured match per day under a
-                ‹ day › pager, and the full list with status + sport
-                chips
-    CALENDAR   the team picker again, and the season as a month with
-                the chosen day's games below
+    HEADER     on every view: the banner (a slideshow of photos),
+                the counters (live / upcoming / results / venues)
+                and the one "Follow your teams" picker. Followed
+                teams' games get a lime ring and go first.
+    MATCHES    your teams' games on top, then every game grouped by
+                day under a sticky strip of days, with the featured
+                match first on the chosen day. All · Live · Upcoming ·
+                Results on one line, a venue filter, and a List /
+                Calendar switch. All of it is in the URL.
+    SPORTS     a tile per sport (data SPORTS); a sport's page has its
+                news, standings, knockouts and matches per division,
+                and a team in its standings opens that team's games
+                (components/sports.js, lib/standings.js). Going in
+                and out adds history, so Back steps back up.
+    MAP        the campus map. Tapping a venue fills the panel beside
+                it with its live games, upcoming games and results;
+                tapping a sport's icon narrows that to the one sport.
     NEWS       the TXC Compass Facebook page via the news Worker: the
                 newest post large, the rest in a looping carousel
                 that "See all" swaps for a grid
+
+  Old links still land: ?tab=fixtures opens Matches, ?tab=calendar
+  opens Matches as a calendar.
 
   Each piece can still be switched off in data/xavier-cup.js
   (CUP_CONFIG.show*); a view with nothing left in it loses its tab.
@@ -29,10 +38,11 @@
   ============================================================ */
 
 import {
-  CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, GAMES, VENUE_BY_ID, sportsInPlay,
-  cupNow, isPreviewClock,
+  CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, CUP_PHOTOS, GAMES, VENUE_BY_ID,
+  allSports, findSport, cupNow, isPreviewClock, seasonState,
 } from '../data/xavier-cup.js';
 import { TEAM_BY_ID, teamFor } from '../data/teams.js';
+import { SITE } from '../data/site.js';
 import { byWhen, parseDate, formatDay, formatTime, formatRange } from '../lib/dates.js';
 import { resolveGame } from '../components/game-card.js';
 import { matchCardHtml } from '../components/match-card.js';
@@ -43,39 +53,69 @@ import { mountTeamStrip } from '../components/team-strip.js';
 import { dayKey, gameDays, initialDay, gamesOn, pickFeatured, keyToDate } from '../components/featured-match.js';
 import { calendarHtml, gameMonths } from '../components/cup-calendar.js';
 import { openDetail, closeDetail } from '../components/detail-modal.js';
-import { currentTeam, onMyTeamChange } from '../lib/my-team.js';
+import { sportsIndexHtml, sportPageHtml } from '../components/sports.js';
+import { myTeams, toggleMyTeam, onMyTeamChange } from '../lib/my-team.js';
+import { divisionOf, divisionsFor, standings, knockouts } from '../lib/standings.js';
 import { watchReveals } from '../reveal-observer.js';
 import { currentQuery } from '../router.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
 
 const STATUS_ORDER = { ongoing: 0, upcoming: 1, finished: 2 };
 
+/* `finished` stays the internal value; people read "Results". */
 const STATUS_FILTERS = [
   { id: 'all',      label: 'All',      color: 'blue'   },
-  { id: 'upcoming', label: 'Upcoming', color: 'green'  },
   { id: 'ongoing',  label: 'Live',     color: 'red'    },
-  { id: 'finished', label: 'Finished', color: 'yellow' },
+  { id: 'upcoming', label: 'Upcoming', color: 'green'  },
+  { id: 'finished', label: 'Results',  color: 'yellow' },
 ];
+// Friendlier spellings a link may use for ?status=
+const STATUS_ALIAS = { live: 'ongoing', results: 'finished' };
 
-/* The four views, in tab order, and whether each has anything in it. */
-const TABS = ['map', 'fixtures', 'calendar', 'news'];
+/* The views, in tab order, and whether each has anything in it. */
+const TABS = ['matches', 'sports', 'map', 'news'];
 const tabHasContent = {
-  map:      () => CUP_CONFIG.showHero || CUP_CONFIG.showMap,
-  fixtures: () => CUP_CONFIG.showTeams || CUP_CONFIG.showFeatured || CUP_CONFIG.showSchedule,
-  calendar: () => CUP_CONFIG.showCalendar,
-  news:     () => CUP_CONFIG.showNews && CUP_NEWS.enabled,
+  matches: () => CUP_CONFIG.showSchedule || CUP_CONFIG.showCalendar,
+  sports:  () => CUP_CONFIG.showSports && allSports().length > 0,
+  map:     () => CUP_CONFIG.showMap,
+  news:    () => CUP_CONFIG.showNews && CUP_NEWS.enabled,
 };
 const enabledTabs = () => TABS.filter(t => tabHasContent[t]());
 
+// Views that are now part of Matches, for links made before the change.
+const OLD_TABS = { fixtures: 'matches', calendar: 'matches' };
+
+/* Phones get the short version of each view: one day of matches at
+   a time, fewer cards before a "Show all". Same width as the phone
+   rules in the CSS. */
+const PHONE = matchMedia('(max-width: 560px)');
+const isPhone = () => PHONE.matches;
+// Narrow screens show each list of matches as one row you swipe
+// (cup.css), so every card goes in the row and no "Show all" is needed.
+const SWIPE = matchMedia('(max-width: 720px)');
+const isSwipe = () => SWIPE.matches;
+
+const defaultStatus = () =>
+  (STATUS_FILTERS.some(f => f.id === CUP_CONFIG.defaultStatus) ? CUP_CONFIG.defaultStatus : 'all');
+
 const state = {
-  tab: 'map',
+  tab: 'matches',
+  // Matches
   status: 'all',
-  sport: null,
+  matchVenue: null,   // a filter; the map's own pick is `venue`
+  yoursAll: false,    // "Your teams" block opened past its first few
+  day: '',            // the chosen day, shared by the list and the calendar
+  dayPicked: false,   // chosen by the visitor (kept in the URL) or the default
+  view: 'list',       // 'list' | 'calendar'
+  calMonth: null,
+  // Sports
+  sportsSport: '',    // a SPORTS id; '' = the grid of sports
+  sportsDiv: '',      // 'Men' | 'Women' | …; '' = the sport's first
+  sportsTeam: '',     // a team id for the team view, or ''
+  sportsAll: false,   // a sport's match list opened past its first few
+  // Map
   venue: null,
   mapSport: null,     // a sport picked on the map, within state.venue
-  featuredDay: '',
-  calMonth: null,
-  calDay: '',
 };
 
 let rootEl = null;
@@ -88,18 +128,32 @@ export function initCup(root) {
   rootEl = root;
 
   const q = currentQuery();
-  state.status = STATUS_FILTERS.some(f => f.id === q.status)
-    ? q.status
-    : (CUP_CONFIG.defaultStatus || 'all');
-  state.sport = q.sport || null;
-  state.venue = (q.venue && VENUE_BY_ID[q.venue]) ? q.venue : null;
-  state.mapSport = state.venue ? (q.mapsport || null) : null;
 
-  // Which view to open: the one named in the link, or the one a
-  // filter in the link belongs to, or the first one.
+  // Which view to open: the one named in the link (an old Fixtures or
+  // Calendar link opens Matches), a bare ?venue= opens the Map as it
+  // always did, and otherwise the first view. A Matches or Fixtures
+  // link from when Matches filtered by sport (?sport=…) opens that
+  // sport's page instead.
   const tabs = enabledTabs();
-  const implied = state.venue ? 'map' : ((q.status || q.sport) ? 'fixtures' : '');
-  state.tab = [q.tab, implied].find(t => tabs.includes(t)) || tabs[0] || 'map';
+  const asked = OLD_TABS[q.tab] || q.tab;
+  const implied = (!q.tab && q.venue) ? 'map' : '';
+  const sportLink = (!asked || asked === 'matches') && findSport(q.sport) && tabs.includes('sports');
+  state.tab = sportLink ? 'sports'
+    : ([asked, implied].find(t => tabs.includes(t)) || tabs[0] || 'matches');
+
+  // Each view reads only its own filters from the link: ?venue= is a
+  // filter on Matches and the picked venue on the Map.
+  const onMatches = state.tab === 'matches';
+  const status = STATUS_ALIAS[q.status] || q.status;
+  state.status = (onMatches && STATUS_FILTERS.some(f => f.id === status)) ? status : defaultStatus();
+  state.matchVenue = (onMatches && VENUE_BY_ID[q.venue]) ? q.venue : null;
+  state.dayPicked = onMatches && /^\d{4}-\d{2}-\d{2}$/.test(q.day);
+  state.day = state.dayPicked ? q.day : '';
+  state.view = (q.tab === 'calendar' || q.view === 'calendar') ? 'calendar' : 'list';
+  state.calMonth = null;
+  state.venue = (state.tab === 'map' && VENUE_BY_ID[q.venue]) ? q.venue : null;
+  state.mapSport = state.venue ? (q.mapsport || null) : null;
+  readSports(q);
 
   // --- Static copy, straight from the config ---
   setText(root, '[data-cup-kicker]', CUP_CONFIG.kicker);
@@ -120,10 +174,7 @@ export function initCup(root) {
   toggle(root, '[data-cup-hero]', CUP_CONFIG.showHero);
   toggle(root, '[data-cup-counters]', CUP_CONFIG.showCounters);
   toggle(root, '[data-cup-teams-section]', CUP_CONFIG.showTeams);
-  toggle(root, '[data-cup-featured-section]', CUP_CONFIG.showFeatured);
   toggle(root, '[data-cup-map-section]', CUP_CONFIG.showMap);
-  toggle(root, '[data-cup-schedule-section]', CUP_CONFIG.showSchedule);
-  toggle(root, '[data-cup-calendar-section]', CUP_CONFIG.showCalendar);
   toggle(root, '[data-cup-news-section]', CUP_CONFIG.showNews && CUP_NEWS.enabled);
   root.querySelectorAll('[data-cup-tab]').forEach(btn => {
     btn.hidden = !tabs.includes(btn.dataset.cupTab);
@@ -137,14 +188,45 @@ export function initCup(root) {
       root.querySelectorAll('[data-cup-teams]').forEach(el => mountTeamStrip(el));
     }
     onMyTeamChange(() => {
+      state.yoursAll = false;
       if (currentQuery().screen === 'cup') render();
     });
 
+    mountHeroPhotos(root);
     wireTabs(root);
+    mountFilters(root);
+
+    // Crossing the phone or swipe width changes how much each view shows.
+    const rerender = () => { if (currentQuery().screen === 'cup') render(); };
+    PHONE.addEventListener('change', rerender);
+    SWIPE.addEventListener('change', rerender);
+
+    // Back and Forward step through the Sports pages (sport, team);
+    // screens and the match pop-up are the router's.
+    window.addEventListener('popstate', () => {
+      const q = currentQuery();
+      if (q.screen !== 'cup' || q.game) return;
+      const tab = OLD_TABS[q.tab] || q.tab;
+      if (tab !== 'sports' && state.tab !== 'sports') return;
+      readSports(q, tab);
+      showTab(tab, { scroll: false });
+      render();
+    });
 
     // Taps on the map itself are handled by the map (mountCupMap);
-    // these are the venue list and the sport chips in the panel.
+    // these are the venue list and the sport chips in the panel, and
+    // everything on Matches.
     root.addEventListener('click', (e) => {
+      // A match card's venue: the Map with that venue picked. A
+      // new-tab click is left to the browser.
+      const venueLink = e.target.closest('[data-match-venue]');
+      if (venueLink) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+        e.preventDefault();
+        showVenue(venueLink.dataset.matchVenue);
+        return;
+      }
+
       const row = e.target.closest('[data-venue-id]');
       if (row) { selectVenue(row.dataset.venueId, { toggle: true }); return; }
 
@@ -156,36 +238,89 @@ export function initCup(root) {
         return;
       }
 
+      // Sports: into a sport or a team, back up the breadcrumb.
+      const sportOpen = e.target.closest('[data-sports-open]');
+      if (sportOpen) { goSports({ sport: sportOpen.dataset.sportsOpen }); return; }
+
+      const crumb = e.target.closest('[data-sports-crumb]');
+      if (crumb) {
+        goSports({ sport: crumb.dataset.sportsCrumb === 'sport' ? state.sportsSport : '' });
+        return;
+      }
+
+      const sportsTeam = e.target.closest('[data-sports-team]');
+      if (sportsTeam) { goSports({ sport: state.sportsSport, team: sportsTeam.dataset.sportsTeam }); return; }
+
+      if (e.target.closest('[data-sports-more]')) {
+        state.sportsAll = !state.sportsAll;
+        render();
+        root.querySelector('[data-sports-more]')?.focus({ preventScroll: true });
+        return;
+      }
+
+      const sportsDiv = e.target.closest('[data-sports-div]');
+      if (sportsDiv) {
+        state.sportsDiv = sportsDiv.dataset.sportsDiv;
+        state.sportsAll = false;
+        render();
+        root.querySelector(`[data-sports-div="${CSS.escape(state.sportsDiv)}"]`)?.focus({ preventScroll: true });
+        return;
+      }
+
+      // Follow / Following on a team's page (re-renders through
+      // onMyTeamChange, so focus goes back to the new button).
+      const follow = e.target.closest('[data-sports-follow]');
+      if (follow) {
+        toggleMyTeam(follow.dataset.sportsFollow);
+        root.querySelector('[data-sports-follow]')?.focus({ preventScroll: true });
+        return;
+      }
+
       const card = e.target.closest('[data-game-id]');
       if (card) { openGame(card.dataset.gameId); return; }
 
       const statusChip = e.target.closest('[data-status-id]');
       if (statusChip) { state.status = statusChip.dataset.statusId; render(); return; }
 
-      const sportChip = e.target.closest('[data-sport-id]');
-      if (sportChip) {
-        const id = sportChip.dataset.sportId;
-        state.sport = (state.sport === id || id === 'all') ? null : id;
+      if (e.target.closest('[data-cup-clear-filters]')) {
+        Object.assign(state, { status: defaultStatus(), matchVenue: null });
         render();
         return;
       }
 
-      const step = e.target.closest('[data-featured-step]');
-      if (step) { stepFeatured(Number(step.dataset.featuredStep)); return; }
+      if (e.target.closest('[data-cup-yours-more]')) {
+        state.yoursAll = !state.yoursAll;
+        render();
+        root.querySelector('[data-cup-yours-more]')?.focus({ preventScroll: true });
+        return;
+      }
+
+      const mode = e.target.closest('[data-cup-view-mode]');
+      if (mode) { state.view = mode.dataset.cupViewMode; render(); return; }
+
+      // A day on the strip: it becomes the chosen day (the featured
+      // match moves there) and the list scrolls to it.
+      // (Both re-render, so focus goes back to the new copy of the day.)
+      const stripDay = e.target.closest('[data-match-day]');
+      if (stripDay) {
+        pickDay(stripDay.dataset.matchDay);
+        root.querySelector(`[data-match-day="${state.day}"]`)?.focus({ preventScroll: true });
+        jumpToDay(state.day);
+        return;
+      }
 
       const calDay = e.target.closest('[data-cal-day]');
-      if (calDay) { state.calDay = calDay.dataset.calDay; render(); return; }
+      if (calDay) {
+        pickDay(calDay.dataset.calDay);
+        root.querySelector(`[data-cal-day="${state.day}"]`)?.focus({ preventScroll: true });
+        return;
+      }
 
       const calMonth = e.target.closest('[data-cal-month]');
       if (calMonth) { state.calMonth = keyToDate(calMonth.dataset.calMonth); render(); return; }
 
-      if (e.target.closest('[data-cal-today]')) {
-        const now = cupNow();
-        state.calDay = dayKey(now);
-        state.calMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        render();
-        return;
-      }
+      // Today, or the next day with a game when today has none.
+      if (e.target.closest('[data-cal-today]')) { pickDay(dayKey(cupNow())); return; }
 
       if (e.target.closest('[data-cup-clear-venue]')) { selectVenue(null); }
     });
@@ -196,6 +331,57 @@ export function initCup(root) {
   showTab(state.tab, { scroll: false });
   render();
   startClock();
+}
+
+/* ---------- Banner photos ----------
+   The slideshow behind the banner's title (data/xavier-cup.js →
+   CUP_PHOTOS). A slide without a photo yet shows a placeholder in
+   the same frame, so nothing jumps when the real pictures arrive.
+   Off, or with no slides, the banner is the plain one. */
+
+function mountHeroPhotos(root) {
+  const hero = root.querySelector('[data-cup-hero]');
+  const tile = hero?.querySelector('.cup-hero__tile');
+  const wrap = hero?.querySelector('[data-cup-photos]');
+  const slides = CUP_PHOTOS?.slides || [];
+  const on = Boolean(tile && wrap && CUP_CONFIG.showHeroPhotos && slides.length);
+  hero?.classList.toggle('has-photos', on);
+  if (wrap) wrap.hidden = !on;
+  if (!on) return;
+
+  const n = slides.length;
+  const camera = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>`;
+
+  const slide = (s, i) => {
+    const src = safeImage(s.src);
+    const label = `${i + 1} of ${n}${s.caption ? `: ${s.caption}` : ''}`;
+    const media = src
+      ? `<img class="cup-photo__img" src="${escapeAttr(src)}" alt="${escapeAttr(s.alt || '')}" decoding="async"${i ? ' loading="lazy"' : ''}>`
+      : `<span class="cup-photo__img news-ph news-ph--${i % 4} news-ph--hero" role="img"
+               aria-label="${escapeAttr(`Photo coming soon${s.alt ? `: ${s.alt}` : ''}`)}">
+           <span class="news-ph__mark" aria-hidden="true">${camera}<span>TXC photo</span></span>
+         </span>`;
+    return `
+      <figure class="cup-photo${i === 0 ? ' is-active' : ''}" data-hero-slide="${i}"
+              role="group" aria-roledescription="slide" aria-label="${escapeAttr(label)}"${i ? ' aria-hidden="true"' : ''}>
+        ${media}
+        ${s.caption ? `<figcaption class="cup-photo__caption">${escapeHtml(s.caption)}</figcaption>` : ''}
+      </figure>`;
+  };
+
+  wrap.innerHTML = `
+    ${slides.map(slide).join('')}
+    ${n > 1 ? `
+      <div class="news-hero__bars cup-photos__bars">
+        ${slides.map((s, i) => `
+          <button class="news-hero__bar${i === 0 ? ' is-active' : ''}" type="button" data-hero-go="${i}"
+                  aria-label="${escapeAttr(`Show photo ${i + 1}${s.caption ? `: ${s.caption}` : ''}`)}"${i === 0 ? ' aria-current="true"' : ''}>
+            <span class="news-hero__fill"></span>
+          </button>`).join('')}
+      </div>` : ''}`;
+
+  // The whole tile pauses on hover and focus, the title included.
+  wireHero(tile, { ms: Math.max(3, Number(CUP_PHOTOS.secondsPerSlide) || 6) * 1000 });
 }
 
 /* ---------- Tabs ---------- */
@@ -231,14 +417,15 @@ function wireTabs(root) {
 
 /**
  * showTab(id) — show one view, hide the rest, move the pill.
- * Scrolls back up to the tab bar when the page is scrolled past it,
- * so a new view always starts at its top, as in the TXC proposal.
+ * When the page is scrolled past the tab bar, scrolls back so the new
+ * view starts right under it; above that (reading the header) the
+ * page stays put.
  */
 function showTab(id, { scroll = true } = {}) {
   const root = rootEl;
   if (!root) return;
   const tabs = enabledTabs();
-  state.tab = tabs.includes(id) ? id : (tabs[0] || 'map');
+  state.tab = tabs.includes(id) ? id : (tabs[0] || 'matches');
 
   root.querySelectorAll('[data-cup-view]').forEach(view => {
     view.hidden = view.dataset.cupView !== state.tab;
@@ -250,23 +437,43 @@ function showTab(id, { scroll = true } = {}) {
   });
   movePill();
 
-  if (scroll) {
-    // Back to where the tab bar sits in the page, just under the
-    // sticky site nav, so nothing of the new view hides behind it.
-    const navH = document.querySelector('.site-nav')?.offsetHeight || 0;
-    const top = Math.max(0, root.getBoundingClientRect().top + window.scrollY - navH);
-    if (window.scrollY > top) window.scrollTo({ top, behavior: 'auto' });
-  }
+  const view = root.querySelector(`[data-cup-view="${state.tab}"]`);
+  if (scroll) scrollToView();
 
   // Revealed content in a view that was hidden needs watching again.
-  const view = root.querySelector(`[data-cup-view="${state.tab}"]`);
   if (view) watchReveals(view);
+  if (state.tab === 'matches') centreStrip();
   syncUrl();
 }
+
+/** When the page is scrolled past the open view's top, go back to it,
+    just under the sticky tab bar. */
+function scrollToView() {
+  const view = rootEl?.querySelector(`[data-cup-view="${state.tab}"]`);
+  if (!view) return;
+  const top = Math.max(0, view.getBoundingClientRect().top + window.scrollY - stuckHeight());
+  if (window.scrollY > top) window.scrollTo({ top, behavior: 'auto' });
+}
+
+/** Height of what sticks to the top of the window: the site nav and
+    the tab bar (plus the day strip when asked). */
+function stuckHeight({ strip = false } = {}) {
+  const navH = document.querySelector('.site-nav')?.offsetHeight || 0;
+  const tabsH = rootEl?.querySelector('[data-cup-tabs]')?.offsetHeight || 0;
+  const stripEl = strip ? rootEl?.querySelector('[data-cup-day-strip]') : null;
+  return navH + tabsH + (stripEl && !stripEl.hidden ? stripEl.offsetHeight : 0);
+}
+
+const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+  || document.documentElement.getAttribute('data-motion') === 'reduced';
 
 /** Slide the highlight behind the selected tab. */
 function movePill() {
   const root = rootEl;
+  // The day strip sticks just under the tab bar, whatever its height.
+  const bar = root?.querySelector('[data-cup-tabs]');
+  if (bar?.offsetHeight) root.style.setProperty('--cup-tabs-h', `${bar.offsetHeight}px`);
+
   const pill = root?.querySelector('[data-cup-tab-pill]');
   const active = root?.querySelector('[data-cup-tab][aria-selected="true"]');
   if (!pill || !active || !active.offsetParent) return;
@@ -315,14 +522,13 @@ function render() {
   if (!root) return;
 
   const games = allGames();
-  const myTeam = currentTeam();
+  const mine = myTeams();
 
   renderCounters(root, games);
-  renderTeamNote(root, games, myTeam);
-  renderFeatured(root, games, myTeam);
+  renderTeamNote(root, mine);
+  renderMatches(root, games, mine);
+  renderSports(root, games, mine);
   renderMap(root, games);
-  renderSchedule(root, games, myTeam);
-  renderCalendar(root, games, myTeam);
 
   syncUrl();
 }
@@ -339,77 +545,70 @@ function renderCounters(root, games) {
   for (const [key, value] of Object.entries(counts)) {
     setText(root, `[data-cup-count="${key}"]`, String(value));
   }
-  // A red dot on the Fixtures tab while anything is being played.
+  // A red dot on the Matches tab while anything is being played.
   const live = root.querySelector('[data-cup-tab-live]');
   if (live) live.hidden = counts.ongoing === 0;
 }
 
-/* --- The line under the team picker --- */
-function renderTeamNote(root, games, myTeam) {
+/* --- The line under the team picker: how to use it, nothing more
+       (their games already show first in Matches). --- */
+
+const isMine = (g, mine) => g.teamIds.some(id => mine.includes(id));
+
+function renderTeamNote(root, mine) {
   if (!CUP_CONFIG.showTeams) return;
-  const team = TEAM_BY_ID[myTeam];
-  if (!team) {
-    setText(root, '[data-cup-team-note]', 'Pick a team to ring its games in every list and fill the calendar with its schedule.');
-    return;
-  }
-  const theirs = games.filter(g => g.teamIds.includes(myTeam));
-  const next = theirs
-    .filter(g => g.status !== 'finished')
-    .sort((a, b) => a.start - b.start)[0];
-  const live = theirs.find(g => g.status === 'ongoing');
-  setText(root, '[data-cup-team-note]', live
-    ? `Following ${team.name}. They are playing now: ${live.sport} at ${live.venueName}.`
-    : next
-      ? `Following ${team.name}. Next up: ${next.sport}, ${formatDay(next.start, { withYear: false })} at ${formatTime(next.start)}.`
-      : `Following ${team.name}. ${theirs.length} game${theirs.length === 1 ? '' : 's'} this season, all played.`);
+  const n = mine.filter(id => TEAM_BY_ID[id]).length;
+  setText(root, '[data-cup-team-note]', n
+    ? `Following ${n} team${n === 1 ? '' : 's'}. Tap any team to add it, or tap again to remove it.`
+    : 'Choose any teams to follow. Their matches show first.');
 }
 
-/* --- Featured match with its day pager --- */
-function renderFeatured(root, games, myTeam) {
-  if (!CUP_CONFIG.showFeatured) return;
-  const slot = root.querySelector('[data-featured-slot]');
-  const label = root.querySelector('[data-featured-day]');
-  const more = root.querySelector('[data-featured-more]');
-  if (!slot || !label) return;
+/* --- Sports: the grid, a sport's page, or a team inside it --- */
 
-  const days = gameDays(games);
-  if (!days.length) {
-    slot.innerHTML = '<p class="filter-note filter-note--empty"><strong>No fixtures yet.</strong></p>';
-    return;
-  }
-  if (!days.includes(state.featuredDay)) state.featuredDay = initialDay(days, cupNow());
+let newsPosts = [];   // every post, once the news feed has loaded (renderNews)
 
-  const i = days.indexOf(state.featuredDay);
-  const date = keyToDate(state.featuredDay);
-  const today = dayKey(cupNow());
-  label.innerHTML = `
-    <span class="featured-match__count">Day ${i + 1} of ${days.length}${state.featuredDay === today ? ' · Today' : ''}</span>
-    <strong>${escapeHtml(formatDay(date, { withYear: false }))}</strong>`;
-
-  root.querySelector('[data-featured-step="-1"]')?.toggleAttribute('disabled', i <= 0);
-  root.querySelector('[data-featured-step="1"]')?.toggleAttribute('disabled', i >= days.length - 1);
-
-  const dayGames = gamesOn(games, state.featuredDay);
-  const pick = pickFeatured(dayGames, myTeam);
-  slot.innerHTML = pick ? matchCardHtml(pick, { myTeam, featured: true }) : '';
-  watchReveals(slot);
-
-  if (more) {
-    const rest = dayGames.length - 1;
-    more.textContent = rest > 0
-      ? `${rest} more game${rest === 1 ? '' : 's'} this day. They are in the fixture list and the calendar below.`
-      : 'The only game this day.';
-  }
+/** Is a post about this sport? Its own `sport`, or a hashtag in its text. */
+function isAbout(p, sport) {
+  if (p.sport) return [sport.id, sport.name.toLowerCase()].includes(p.sport.toLowerCase());
+  const tag = `#${sport.name.replace(/\s+/g, '')}`.toLowerCase();
+  return `${p.title} ${p.body}`.toLowerCase().split(/[^#\w]+/).includes(tag);
 }
 
-function stepFeatured(dir) {
-  const days = gameDays(allGames());
-  const i = days.indexOf(state.featuredDay);
-  const next = days[Math.min(days.length - 1, Math.max(0, i + dir))];
-  if (next && next !== state.featuredDay) {
-    state.featuredDay = next;
-    render();
+function renderSports(root, games, mine) {
+  const wrap = root.querySelector('[data-cup-sports]');
+  if (!wrap || !tabHasContent.sports()) return;
+
+  const sports = allSports();
+  const index = sports.findIndex(s => s.id === state.sportsSport);
+  const sport = sports[index];
+  if (!sport) {
+    state.sportsSport = '';
+    state.sportsTeam = '';
+    wrap.innerHTML = sportsIndexHtml({ sports, games, divisionsOf: divisionsFor });
+    watchReveals(wrap);
+    return;
   }
+
+  // The division asked for, if the sport has it; else its first.
+  const sportGames = games.filter(g => g.sport === sport.name);
+  const divisions = divisionsFor(sportGames);
+  const div = divisions.find(d => d.toLowerCase() === state.sportsDiv.toLowerCase()) || divisions[0] || 'Open';
+  state.sportsDiv = div;
+  const divGames = sportGames.filter(g => divisionOf(g) === div);
+
+  wrap.innerHTML = sportPageHtml({
+    sport, index, sportGames, divisions, div, divGames,
+    table: standings(divGames),
+    ko: knockouts(divGames),
+    news: newsPosts.filter(p => isAbout(p, sport)).slice(0, isPhone() ? 2 : 3),
+    team: TEAM_BY_ID[state.sportsTeam] || null,
+    mine,
+    // How many of the division's matches show before "Show all"
+    // (all of them in a swipe row).
+    matchesShown: (state.sportsAll || isSwipe()) ? Infinity : 6,
+    collapsible: !isSwipe(),
+  });
+  watchReveals(wrap);
 }
 
 /* --- The campus map + its venue panel --- */
@@ -462,7 +661,7 @@ function renderMap(root, games) {
     panel.innerHTML = `
       <div class="venue-panel__head">
         <p class="panel__kicker">All venues</p>
-        <h3 class="venue-panel__title">${CUP_MAP.venues.length} venues · ${games.length} fixtures</h3>
+        <h3 class="venue-panel__title">${CUP_MAP.venues.length} venues · ${games.length} matches</h3>
         <p class="venue-panel__hint">Tap a venue or a sport on the map, or pick a venue below, to see what is on there.</p>
       </div>
       <div class="venue-rows">${rows}</div>`;
@@ -509,11 +708,11 @@ function renderMap(root, games) {
     ${here.length ? `
       ${section('ongoing', 'Live')}
       ${section('upcoming', 'Upcoming')}
-      ${section('finished', 'Finished')}
+      ${section('finished', 'Results')}
     ` : `
       <p class="venue-panel__empty">${state.mapSport
-        ? `No ${escapeHtml(state.mapSport)} fixtures here yet.`
-        : 'No fixtures scheduled here yet.'}</p>
+        ? `No ${escapeHtml(state.mapSport)} matches here yet.`
+        : 'No matches scheduled here yet.'}</p>
     `}`;
 }
 
@@ -528,103 +727,263 @@ function miniGameHtml(g) {
     </button>`;
 }
 
-/* --- The full fixture list --- */
-function renderSchedule(root, games, myTeam) {
-  if (!CUP_CONFIG.showSchedule) return;
+/* --- Matches: the filters, then the list by day or the calendar --- */
 
+/** The venue dropdown is filled once; render() only sets its value,
+    so a re-render never closes it while it is open. Teams are not a
+    filter: the "Follow your teams" picker brings theirs to the top. */
+function mountFilters(root) {
+  const venue = root.querySelector('[data-cup-filter="venue"]');
+  if (venue) {
+    venue.innerHTML = `<option value="">All venues</option>${CUP_MAP.venues.map(v =>
+      `<option value="${escapeAttr(v.id)}">${escapeHtml(v.name)}</option>`).join('')}`;
+  }
+  root.addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-cup-filter]');
+    if (!sel) return;
+    if (sel.dataset.cupFilter === 'venue') state.matchVenue = VENUE_BY_ID[sel.value] ? sel.value : null;
+    render();
+  });
+}
+
+/** The venue filter; the status chips count what it leaves. (Sports
+    are not a filter here: each has its own page on Sports.) */
+const passesOthers = (g) => !state.matchVenue || g.venueId === state.matchVenue;
+
+const filtered = () => Boolean(state.status !== defaultStatus() || state.matchVenue);
+
+/** The visitor chose a day, on the strip or the calendar. */
+function pickDay(key) {
+  state.day = key;
+  state.dayPicked = true;
+  state.calMonth = null;       // the calendar follows the chosen day
+  render();
+}
+
+function renderMatches(root, games, mine) {
+  if (!tabHasContent.matches()) return;
+  renderFilters(root, games);
+
+  // allGames() order (live, upcoming, results) decides what a cap on
+  // the list keeps; the list itself then reads day by day.
+  let list = games.filter(g => passesOthers(g) && (state.status === 'all' || g.status === state.status));
+  if (CUP_CONFIG.maxGamesShown) list = list.slice(0, CUP_CONFIG.maxGamesShown);
+
+  renderYours(root, list, mine);
+
+  // The chosen day stands while it still has a game in the list;
+  // otherwise it is today, or the next day with a game.
+  const days = gameDays(list);
+  if (!days.includes(state.day)) {
+    state.day = initialDay(days, cupNow());
+    state.dayPicked = false;
+    state.calMonth = null;
+  }
+
+  // List or calendar; either one can be switched off in the config.
+  if (!CUP_CONFIG.showCalendar) state.view = 'list';
+  if (!CUP_CONFIG.showSchedule) state.view = 'calendar';
+  const switcher = root.querySelector('[data-cup-viewswitch]');
+  if (switcher) {
+    switcher.hidden = !(CUP_CONFIG.showCalendar && CUP_CONFIG.showSchedule);
+    switcher.querySelectorAll('[data-cup-view-mode]').forEach(btn => {
+      btn.setAttribute('aria-pressed', String(btn.dataset.cupViewMode === state.view));
+    });
+  }
+  toggle(root, '[data-cup-list]', state.view === 'list');
+  toggle(root, '[data-cup-calendar-wrap]', state.view === 'calendar');
+
+  if (state.view === 'list') renderMatchList(root, list, days, mine);
+  else renderMatchCalendar(root, games, list, mine);
+}
+
+/* --- Your teams: the followed teams' games, above everything else --- */
+const yoursShown = () => (isSwipe() ? Infinity : 6);
+
+function renderYours(root, list, mine) {
+  const wrap = root.querySelector('[data-cup-yours]');
+  if (!wrap) return;
+  const teams = mine.map(id => TEAM_BY_ID[id]).filter(Boolean);
+  // Live first, then the next to start, then the latest results.
+  const theirs = list
+    .filter(g => isMine(g, mine))
+    .sort((a, b) => (STATUS_ORDER[a.status] - STATUS_ORDER[b.status]) || byWhen(a, b, a.status));
+
+  wrap.hidden = !theirs.length;
+  if (!theirs.length) { wrap.innerHTML = ''; return; }
+
+  const shown = state.yoursAll ? theirs : theirs.slice(0, yoursShown());
+  const more = theirs.length - yoursShown();
+  wrap.innerHTML = `
+    <div class="cup-yours__head">
+      <h3 class="cup-yours__title" id="cup-yours-title">
+        <span class="cup-yours__crests" aria-hidden="true">${teams.map(t =>
+          `<img src="${escapeAttr(t.logo)}" alt="" loading="lazy" decoding="async">`).join('')}</span>
+        ${teams.length === 1 ? escapeHtml(teams[0].name) : 'Your teams'}
+      </h3>
+      <span class="browse-count">${theirs.length} match${theirs.length === 1 ? '' : 'es'}</span>
+    </div>
+    <div class="match-grid">${shown.map((g, i) => matchCardHtml(g, { i, myTeams: mine })).join('')}</div>
+    ${more > 0 ? `
+      <button class="btn btn--ghost btn--sm cup-yours__more" type="button" data-cup-yours-more
+              aria-expanded="${state.yoursAll}">
+        ${state.yoursAll ? 'Show fewer' : `Show all ${theirs.length}`}
+      </button>` : ''}`;
+  watchReveals(wrap);
+}
+
+/* All · Live · Upcoming · Results on one line, the venue dropdown,
+   Clear. */
+function renderFilters(root, games) {
   const statusRow = root.querySelector('[data-cup-status-chips]');
   if (statusRow) {
     statusRow.hidden = !CUP_CONFIG.showStatusFilter;
     if (CUP_CONFIG.showStatusFilter) {
+      const pool = games.filter(passesOthers);
       const counts = Object.fromEntries(STATUS_FILTERS.map(f => [
-        f.id, f.id === 'all' ? games.length : games.filter(g => g.status === f.id).length,
+        f.id, f.id === 'all' ? pool.length : pool.filter(g => g.status === f.id).length,
       ]));
       statusRow.innerHTML = STATUS_FILTERS.map(f => `
         <button class="chip" type="button" data-status-id="${f.id}"
                 aria-pressed="${state.status === f.id}"
                 style="--chip-accent: var(--${f.color});">
           <span class="chip__dot" aria-hidden="true"></span>
-          <svg class="chip__check" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="1,7 5,11 13,2"/>
-          </svg>
           <span>${escapeHtml(f.label)}</span>
           <span class="chip__count">${counts[f.id]}</span>
         </button>`).join('');
     }
   }
 
-  const sportRow = root.querySelector('[data-cup-sport-chips]');
-  if (sportRow) {
-    sportRow.hidden = !CUP_CONFIG.showSportFilter;
-    if (CUP_CONFIG.showSportFilter) {
-      const sports = sportsInPlay();
-      sportRow.innerHTML = [
-        `<button class="chip chip--plain" type="button" data-sport-id="all"
-                aria-pressed="${state.sport === null}">All sports</button>`,
-        ...sports.map(s => `
-          <button class="chip chip--plain" type="button" data-sport-id="${escapeAttr(s)}"
-                  aria-pressed="${state.sport === s}">${escapeHtml(s)}</button>`),
-      ].join('');
-    }
-  }
+  const venue = root.querySelector('[data-cup-filter="venue"]');
+  if (venue) venue.value = state.matchVenue || '';
 
-  let list = games
-    .filter(g => state.status === 'all' || g.status === state.status)
-    .filter(g => !state.sport || g.sport === state.sport);
-
-  if (CUP_CONFIG.maxGamesShown) list = list.slice(0, CUP_CONFIG.maxGamesShown);
-
-  const count = root.querySelector('[data-cup-schedule-count]');
-  if (count) count.textContent = `${list.length} fixture${list.length === 1 ? '' : 's'}`;
-
-  const grid = root.querySelector('[data-cup-grid]');
-  if (!grid) return;
-  grid.innerHTML = list.length
-    ? list.map((g, i) => matchCardHtml(g, { i, myTeam })).join('')
-    : `<div class="filter-note filter-note--empty" style="grid-column: 1 / -1;">
-        <strong>Nothing here yet.</strong>&nbsp;Try another status or sport.
-      </div>`;
-  watchReveals(grid);
+  const clear = root.querySelector('[data-cup-clear-filters]');
+  if (clear) clear.hidden = !filtered();
 }
 
-/* --- The season calendar --- */
-function renderCalendar(root, games, myTeam) {
-  if (!CUP_CONFIG.showCalendar) return;
+/** A day's games in time order, the followed teams' first; on the
+    chosen day the featured match (components/featured-match.js picks
+    it) leads, full width. */
+function dayCards(list, key, mine) {
+  const dayGames = gamesOn(list, key);
+  const pick = (CUP_CONFIG.showFeatured && key === state.day) ? pickFeatured(dayGames, mine) : null;
+  const rest = dayGames.filter(g => g !== pick);
+  const ordered = [
+    ...(pick ? [pick] : []),
+    ...rest.filter(g => isMine(g, mine)),
+    ...rest.filter(g => !isMine(g, mine)),
+  ];
+  return ordered.map((g, i) => matchCardHtml(g, { i, myTeams: mine, featured: g === pick })).join('');
+}
+
+const weekday = (date) => {
+  try { return new Intl.DateTimeFormat(SITE.locale || undefined, { weekday: 'short' }).format(date); }
+  catch { return ''; }
+};
+
+/* --- The list, one group per day, under the strip of days --- */
+function renderMatchList(root, list, days, mine) {
+  const strip = root.querySelector('[data-cup-day-strip]');
+  const wrap = root.querySelector('[data-cup-days]');
+  if (!wrap) return;
+  const today = dayKey(cupNow());
+  // Results read newest first; everything else in season order.
+  const order = state.status === 'finished' ? [...days].reverse() : days;
+
+  if (strip) {
+    strip.hidden = order.length < 2;
+    strip.innerHTML = order.map(key => {
+      const date = keyToDate(key);
+      const dayGames = gamesOn(list, key);
+      const n = dayGames.length;
+      const live = dayGames.some(g => g.status === 'ongoing');
+      const label = `${formatDay(date, { withYear: false })}${key === today ? ', today' : ''}: `
+        + `${n} match${n === 1 ? '' : 'es'}${live ? ', live now' : ''}`;
+      return `
+        <button class="day-strip__day${key === today ? ' is-today' : ''}" type="button"
+                data-match-day="${escapeAttr(key)}" aria-pressed="${key === state.day}"
+                aria-label="${escapeAttr(label)}">
+          <span class="day-strip__dow" aria-hidden="true">${key === today ? 'Today' : escapeHtml(weekday(date))}</span>
+          <span class="day-strip__num" aria-hidden="true">${date.getDate()}</span>
+          <span class="day-strip__count" aria-hidden="true">${live ? '<i class="day-strip__live"></i>' : ''}${n}</span>
+        </button>`;
+    }).join('');
+    centreStrip();
+  }
+
+  const heading = (key) => {
+    const date = keyToDate(key);
+    const season = seasonState(date);
+    return `
+      <span>${escapeHtml(formatDay(date, { withYear: false }))}</span>
+      ${season?.phase === 'during' ? `<span class="match-day__sub">Day ${season.day}</span>` : ''}
+      ${key === today ? '<span class="match-day__today">Today</span>' : ''}`;
+  };
+
+  // On a phone the strip picks the one day to show, so the list stays
+  // a screen or two long; wider screens list every day.
+  const shownDays = isPhone() ? order.filter(key => key === state.day) : order;
+  const undated = (isPhone() && shownDays.length) ? [] : list.filter(g => !g.start);
+  wrap.innerHTML = list.length ? `
+    ${shownDays.map(key => `
+      <section class="match-day" data-match-day-group="${escapeAttr(key)}" aria-labelledby="match-day-${escapeAttr(key)}">
+        <h3 class="match-day__title" id="match-day-${escapeAttr(key)}">${heading(key)}</h3>
+        <div class="match-grid">${dayCards(list, key, mine)}</div>
+      </section>`).join('')}
+    ${undated.length ? `
+      <section class="match-day" aria-labelledby="match-day-tba">
+        <h3 class="match-day__title" id="match-day-tba">Date to be announced</h3>
+        <div class="match-grid">${undated.map((g, i) => matchCardHtml(g, { i, myTeams: mine })).join('')}</div>
+      </section>` : ''}`
+    : `<div class="filter-note filter-note--empty">
+         <strong>No matches here.</strong>&nbsp;Try another status, sport or venue.
+       </div>`;
+  watchReveals(wrap);
+}
+
+/** Keep the chosen day in sight on the strip (sideways only, so the
+    page never jumps). Needs the strip on screen to measure. */
+function centreStrip() {
+  const strip = rootEl?.querySelector('[data-cup-day-strip]');
+  const on = strip?.querySelector('[aria-pressed="true"]');
+  if (!on || strip.scrollWidth <= strip.clientWidth) return;
+  strip.scrollLeft = on.offsetLeft - (strip.clientWidth - on.offsetWidth) / 2;
+}
+
+/** Scroll the list to a day, clear of the sticky nav, tabs and strip. */
+function jumpToDay(key) {
+  const group = rootEl?.querySelector(`[data-match-day-group="${key}"]`);
+  if (!group?.offsetParent) return;
+  const top = group.getBoundingClientRect().top + window.scrollY - stuckHeight({ strip: true }) - 12;
+  window.scrollTo({ top: Math.max(0, top), behavior: reducedMotion() ? 'auto' : 'smooth' });
+}
+
+/* --- The calendar: the same filtered games as a month --- */
+function renderMatchCalendar(root, games, list, mine) {
   const cal = root.querySelector('[data-cup-calendar]');
   const dayWrap = root.querySelector('[data-cup-calendar-day]');
-  const title = root.querySelector('[data-cup-calendar-title]');
   if (!cal) return;
 
-  const team = TEAM_BY_ID[myTeam];
-  const shown = team ? games.filter(g => g.teamIds.includes(myTeam)) : games;
-  const months = gameMonths(games);
   const now = cupNow();
-
-  if (!state.calDay) state.calDay = initialDay(gameDays(shown.length ? shown : games), now);
   if (!state.calMonth) {
-    const d = keyToDate(state.calDay) || now;
+    const d = keyToDate(state.day) || now;
     state.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
   }
 
-  if (title) title.textContent = team ? `${team.name} schedule` : 'Season calendar';
-
   cal.innerHTML = calendarHtml({
-    games: shown,
+    games: list,
     month: state.calMonth,
-    selected: state.calDay,
+    selected: state.day,
     today: dayKey(now),
-    months,
+    months: gameMonths(games),
   });
 
   if (!dayWrap) return;
-  const dayGames = gamesOn(shown, state.calDay);
-  const date = keyToDate(state.calDay);
-  const heading = date ? formatDay(date) : '';
-  dayWrap.innerHTML = `
-    <h3 class="cal-day__title">${escapeHtml(heading)}</h3>
-    ${dayGames.length
-      ? `<div class="match-grid">${dayGames.map((g, i) => matchCardHtml(g, { i, myTeam })).join('')}</div>`
-      : `<p class="filter-note filter-note--empty"><strong>No games${team ? ` for ${escapeHtml(team.name)}` : ''} this day.</strong>&nbsp;Pick a day with a game on it.</p>`}`;
+  const date = keyToDate(state.day);
+  dayWrap.innerHTML = date ? `
+    <h3 class="cal-day__title">${escapeHtml(formatDay(date))}</h3>
+    <div class="match-grid">${dayCards(list, state.day, mine)}</div>`
+    : `<p class="filter-note filter-note--empty"><strong>No matches here.</strong>&nbsp;Try another status, sport or venue.</p>`;
   watchReveals(dayWrap);
 }
 
@@ -647,6 +1006,7 @@ function normalisePost(p, i) {
   return {
     id: p.id || `post-${i}`,
     tag: plain(p.tag || p.source || ''),
+    sport: plain(p.sport || ''),
     title: plain(p.title),
     body: plain(p.body ?? p.snippet ?? ''),
     date: p.date || null,
@@ -715,7 +1075,11 @@ async function renderNews(root) {
   if (!wrap || !CUP_CONFIG.showNews || !CUP_NEWS.enabled) return;
 
   const page = safeUrl(CUP_NEWS.pageUrl);
-  const posts = (await loadPosts()).slice(0, CUP_NEWS.maxPosts || (HERO_COUNT + MORE_MAX));
+  const all = await loadPosts();
+  // Each sport's page shows its own posts from the same feed.
+  newsPosts = all;
+  if (state.sportsSport) render();
+  const posts = all.slice(0, CUP_NEWS.maxPosts || (HERO_COUNT + MORE_MAX));
   const heroPosts = posts.slice(0, HERO_COUNT);
    const rest = posts.slice(HERO_COUNT, HERO_COUNT + MORE_MAX);
 
@@ -902,19 +1266,21 @@ async function renderNews(root) {
 }
 
 /**
- * wireHero(el) — the hero's autoplay and its progress bars.
+ * wireHero(el, { ms }) — autoplay and progress bars for a set of
+ * [data-hero-slide] slides with [data-hero-go] bars: the news hero,
+ * and the photos in the banner.
  *
- * The active bar's fill is a CSS animation lasting HERO_MS; when it
+ * The active bar's fill is a CSS animation lasting `ms`; when it
  * ends, the next slide shows. Pausing is just pausing that animation,
  * so the bar always shows exactly how long is left.
  */
-function wireHero(el) {
+function wireHero(el, { ms = HERO_MS } = {}) {
   if (!el) return;
   const slides = [...el.querySelectorAll('[data-hero-slide]')];
   const bars = [...el.querySelectorAll('[data-hero-go]')];
   if (slides.length < 2) return;
 
-  el.style.setProperty('--hero-ms', `${HERO_MS}ms`);
+  el.style.setProperty('--hero-ms', `${ms}ms`);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
     || document.documentElement.getAttribute('data-motion') === 'reduced';
   el.classList.toggle('is-static', reduced);
@@ -1049,20 +1415,63 @@ function openGame(id) {
   renderGameDetail(id);
 }
 
-function syncUrl() {
-  if (currentQuery().screen !== 'cup') return;
+/* --- Sports: where it is, and moving about in it --- */
+
+/** The Sports view's place from a link: ?sport=<id>&div=<division>&team=<id>. */
+function readSports(q, tab = state.tab) {
+  const on = tab === 'sports';
+  state.sportsSport = on ? (findSport(q.sport)?.id || '') : state.sportsSport;
+  state.sportsDiv = on ? String(q.div || '') : state.sportsDiv;
+  state.sportsTeam = (on && state.sportsSport && TEAM_BY_ID[q.team]) ? q.team : (on ? '' : state.sportsTeam);
+}
+
+/**
+ * goSports({ sport, team }) — into a sport's page (or a team's
+ * inside it), or back to the grid with no sport. Each step is a
+ * history entry, so the browser's Back button walks back up.
+ */
+function goSports({ sport = '', team = '' } = {}) {
+  const next = findSport(sport)?.id || '';
+  if (next !== state.sportsSport) state.sportsDiv = '';
+  state.sportsSport = next;
+  state.sportsAll = false;
+  state.sportsTeam = (next && TEAM_BY_ID[team]) ? team : '';
+  history.pushState(null, '', urlFor());
+  render();
+  scrollToView();
+  rootEl?.querySelector('[data-sports-heading]')?.focus({ preventScroll: true });
+}
+
+/** The link always names the view, and carries only that view's
+    filters (?venue= means a filter on Matches, a pick on the Map). */
+function urlFor() {
   const q = new URLSearchParams();
   q.set('screen', 'cup');
-  // Always written, so a leftover ?status= can't pull a reload onto
-  // the Fixtures view when the visitor was on another one.
   q.set('tab', state.tab);
-  if (state.status !== 'all') q.set('status', state.status);
-  if (state.sport) q.set('sport', state.sport);
-  if (state.venue) q.set('venue', state.venue);
-  if (state.mapSport) q.set('mapsport', state.mapSport);
+  if (state.tab === 'matches') {
+    if (state.view === 'calendar') q.set('view', 'calendar');
+    if (state.status !== defaultStatus()) q.set('status', state.status);
+    if (state.matchVenue) q.set('venue', state.matchVenue);
+    // Only a day someone chose: the default follows the clock.
+    if (state.dayPicked && state.day) q.set('day', state.day);
+  }
+  if (state.tab === 'sports' && state.sportsSport) {
+    q.set('sport', state.sportsSport);
+    if (state.sportsDiv) q.set('div', state.sportsDiv.toLowerCase());
+    if (state.sportsTeam) q.set('team', state.sportsTeam);
+  }
+  if (state.tab === 'map') {
+    if (state.venue) q.set('venue', state.venue);
+    if (state.mapSport) q.set('mapsport', state.mapSport);
+  }
   const open = new URLSearchParams(location.search).get('game');
   if (open) q.set('game', open);
-  history.replaceState(null, '', `?${q.toString()}`);
+  return `?${q.toString()}`;
+}
+
+function syncUrl() {
+  if (currentQuery().screen !== 'cup') return;
+  history.replaceState(null, '', urlFor());
 }
 
 /* ---------- Detail modal ---------- */

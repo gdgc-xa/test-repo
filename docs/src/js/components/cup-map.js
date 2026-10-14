@@ -25,7 +25,7 @@
    data/campus-map.js. Nothing here needs editing to move anything.
    ============================================================ */
 
-import { CUP_MAP, VENUE_BY_ID } from '../data/xavier-cup.js';
+import { CUP_MAP, VENUE_BY_ID, SPORT_BY_NAME } from '../data/xavier-cup.js';
 import {
   CAMPUS_DRAWING, CAMPUS_OUTLINE, CAMPUS_ROAD, CAMPUS_WALKWAYS,
   CAMPUS_FOOTPRINTS, CAMPUS_MARKINGS, CAMPUS_LANDMARKS,
@@ -94,7 +94,7 @@ export function venueIcons(venue, stat) {
 
 /** The picture for a sport, or null (the marker falls back to a letter). */
 export function sportIcon(sport) {
-  return CUP_MAP.sportIcons?.[sport] || null;
+  return SPORT_BY_NAME[sport]?.icon || null;
 }
 
 /* ============================================================

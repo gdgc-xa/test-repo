@@ -109,7 +109,8 @@ campus-compass/
 │   │   ├── settings.js              # the gear panel
 │   │   ├── lib/dates.js             # every date the site prints + the status logic
 │   │   ├── lib/html.js              # escaping + link safety for the newer templates
-│   │   ├── lib/my-team.js           # the team a visitor follows (saved per device)
+│   │   ├── lib/my-team.js           # the teams a visitor follows (saved per device)
+│   │   ├── lib/standings.js         # results → standings + knockout bracket, per sport
 │   │   ├── reveal-observer.js       # shared IntersectionObserver + watchReveals()
 │   │   │
 │   │   ├── footprints.js            # delight #1 — footprints in the sand footer
@@ -140,7 +141,8 @@ campus-compass/
 │   │   │   ├── game-card.js         # one fixture as a card, sport glyphs, scoreline
 │   │   │   ├── game-detail.js       # the fixture modal's contents
 │   │   │   ├── cup-map.js           # the consolidated venue map + pins
-│   │   │   ├── match-card.js        # one fixture as a match card
+│   │   │   ├── match-card.js        # one match as a match card
+│   │   │   ├── sports.js            # the Sports view: sport grid, sport page, team page
 │   │   │   ├── team-strip.js        # team picker
 │   │   │   ├── featured-match.js    # which game to feature on a day
 │   │   │   ├── cup-calendar.js      # the season as a month
@@ -152,7 +154,7 @@ campus-compass/
 │   │       ├── landing.js           # tag cloud hydration + hero search wiring
 │   │       ├── browse.js            # filter state + intersect + grid render
 │   │       ├── events.js            # date ordering, status filter, search, detail
-│   │       ├── cup.js               # counters, search, map, venue panel, fixtures, news
+│   │       ├── cup.js               # header, matches (list + calendar), map, venue panel, news
 │   │       └── booth.js             # renderBooth(id) — opens booth-modal
 │   │
 │   └── html/                        # (unused — screens are hydrated by JS, no partials)
@@ -216,9 +218,12 @@ match the source exactly.
 - `?screen=browse&q=<text>` → browse w/ search query
 - `?…&org=<id>` → open the booth modal (independent of screen)
 - `?screen=events` → events; `&event=<id>` opens one; `&status=…&q=…` filter the list
-- `?screen=cup` → the Xavier Cup; `&game=<id>` opens a fixture;
-  `&venue=<id>` selects a venue on the map; `&status=…&sport=…` filter the list;
-  `&tab=map|fixtures|calendar|news` opens one of its four views
+- `?screen=cup` → the Xavier Cup; `&game=<id>` opens a match;
+  `&tab=matches|sports|map|news` opens one of its views (Matches is the default; old
+  `tab=fixtures` and `tab=calendar` links still land on Matches);
+  on Matches, `&status=…&sport=…&venue=…&day=YYYY-MM-DD&view=calendar` filter it;
+  on Sports, `&sport=<id>&div=<division>&team=<id>` opens a sport's page or a team in it;
+  on the Map, `&venue=<id>` selects a venue
 
 A tab switched off in `data/site.js` is refused by the router — an old link to it
 lands on Discover rather than an empty screen, and its nav entry is removed from the
@@ -288,12 +293,16 @@ section reads. Setup: add a Page access token as the repository secret `FB_PAGE_
 It reads the TXC test page by default; set the repository variable `FB_PAGE_ID` to point
 it at the real CSG page. Until the file has posts, the hand-written `CUP_NEWS.posts` show.
 
-**Layout.** The tab is four views under a sticky tab bar, as in the TXC proposal:
-**Map** (banner, counters, venue map), **Fixtures** (follow your team, featured match,
-the full list with status and sport filters), **Calendar** (team picker and the season
-month) and **News & Updates** (the newest post as a wide tile, the rest in a looping
-carousel with a "See all" grid, then the Upcoming Events cards from `CUP_EVENTS`). The open view is kept in `?tab=map|fixtures|calendar|news`.
-The fixture search box was removed; the sport and status chips cover filtering.
+**Layout.** A shared header (a photo slideshow from `CUP_PHOTOS`, counters and the one
+"Follow your teams" picker), then four views under a sticky tab bar: **Matches** (your
+teams' games first, then every game grouped by day under a sticky strip of days, the
+featured match first on the chosen day, All · Live · Upcoming · Results and a venue filter, and a
+List / Calendar switch), **Sports** (a tile per sport from `SPORTS`; each sport's page
+has its news, standings and knockout bracket worked out from the scores in
+`lib/standings.js`, and its matches, per division; a team in the standings opens that
+team's games), **Map** (the venue map) and **News & Updates** (the newest post as a wide
+tile, the rest in a looping carousel with a "See all" grid, then the Upcoming Events
+cards from `CUP_EVENTS`). The open view is kept in `?tab=matches|sports|map|news`.
 
 There is a wireframe pack for this tab (`xavier-cup-wireframes.pdf`) covering the
 desktop and mobile layouts, component anatomy, states and URLs.
