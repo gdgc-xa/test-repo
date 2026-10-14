@@ -315,14 +315,7 @@
   .cup-tabs { margin-top: var(--space-3); }
   .cup-section { padding-top: 20px; }
 
-  /* --- Matches: just the title beside List / Calendar (the toolbar
-         itself is laid out in cup.css) --- */
-  .cup-matches__head .cup-section__hint { display: none; }
-  .screen--cup .cup-matches__head { margin-bottom: 10px; }
-
-  .cup-yours { margin-bottom: 16px; padding: 10px; border-radius: 18px; }
-  .cup-yours .match-grid { --swipe-bleed: 10px; }   /* its swipe row runs to the box's edges */
-  .cup-yours__title { font-size: 17px; }
-  .cup-yours__crests img { width: 24px; height: 24px; }
-  .match-day__title { margin-bottom: 0; font-size: 17px; }
+  /* --- Matches: the title and its one-line description --- */
+  .screen--cup .cup-matches__head { margin-bottom: 12px; }
+  .cup-matches__head .cup-section__hint { margin-top: 2px; font-size: 14px; }
 }

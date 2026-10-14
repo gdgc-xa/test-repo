@@ -293,11 +293,11 @@ section reads. Setup: add a Page access token as the repository secret `FB_PAGE_
 It reads the TXC test page by default; set the repository variable `FB_PAGE_ID` to point
 it at the real CSG page. Until the file has posts, the hand-written `CUP_NEWS.posts` show.
 
-**Layout.** A shared header (a full-screen photo slideshow from `CUP_PHOTOS` and the one
-"Follow your teams" picker), then four views under a sticky tab bar: **Matches** (your
-teams' games first, then every game grouped by day under a sticky strip of days, the
-featured match first on the chosen day, All · Live · Upcoming · Results and a venue filter, and a
-List / Calendar switch), **Sports** (a tile per sport from `SPORTS`; each sport's page
+**Layout.** A shared header (a full-screen photo slideshow from `CUP_PHOTOS`), then
+four views under a sticky tab bar: **Matches** (a win counter, the one "Follow your
+teams" picker, one Filter button whose panel holds day, status, venue and sport, a
+List / Calendar switch, then three rows you swipe or step with arrows: Live now,
+Upcoming, Finished recently, with followed teams' games first), **Sports** (a tile per sport from `SPORTS`; each sport's page
 has its news, standings and knockout bracket worked out from the scores in
 `lib/standings.js`, and its matches, per division; a team in the standings opens that
 team's games), **Map** (the venue map) and **News & Updates** (the newest post as a wide

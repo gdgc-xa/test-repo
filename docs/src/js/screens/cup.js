@@ -5,13 +5,13 @@
   view is shown at a time and the choice is kept in ?tab=…
 
     HEADER     on every view: the banner (a full-screen slideshow of
-                photos) and the one "Follow your teams" picker.
-                Followed teams' games get a lime ring and go first.
-    MATCHES    your teams' games on top, then every game grouped by
-                day under a sticky strip of days, with the featured
-                match first on the chosen day. All · Live · Upcoming ·
-                Results on one line, a venue filter, and a List /
-                Calendar switch. All of it is in the URL.
+                photos).
+    MATCHES    the win counter, the one "Follow your teams" picker
+                (followed teams' games get a lime ring and go first),
+                one Filter button (day, status, venue, sport — in a
+                panel it opens) and a List / Calendar switch; then three
+                rows you swipe: Live now, Upcoming, Finished recently.
+                Filters and the view are kept in the URL.
     SPORTS     a tile per sport (data SPORTS); a sport's page has its
                 news, standings, knockouts and matches per division,
                 and a team in its standings opens that team's games
@@ -38,7 +38,7 @@
 
 import {
   CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, CUP_PHOTOS, GAMES, VENUE_BY_ID,
-  allSports, findSport, cupNow, isPreviewClock, seasonState,
+  allSports, findSport, cupNow, isPreviewClock,
 } from '../data/xavier-cup.js';
 import { TEAM_BY_ID, teamFor } from '../data/teams.js';
 import { SITE } from '../data/site.js';
@@ -54,7 +54,7 @@ import { calendarHtml, gameMonths } from '../components/cup-calendar.js';
 import { openDetail, closeDetail } from '../components/detail-modal.js';
 import { sportsIndexHtml, sportPageHtml } from '../components/sports.js';
 import { myTeams, toggleMyTeam, onMyTeamChange } from '../lib/my-team.js';
-import { divisionOf, divisionsFor, standings, knockouts } from '../lib/standings.js';
+import { divisionOf, divisionsFor, standings, knockouts, winnerOf } from '../lib/standings.js';
 import { watchReveals } from '../reveal-observer.js';
 import { currentQuery } from '../router.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
@@ -101,10 +101,11 @@ const state = {
   tab: 'matches',
   // Matches
   status: 'all',
+  sport: null,        // a filter: a sport's name as in GAMES
   matchVenue: null,   // a filter; the map's own pick is `venue`
-  yoursAll: false,    // "Your teams" block opened past its first few
-  day: '',            // the chosen day, shared by the list and the calendar
-  dayPicked: false,   // chosen by the visitor (kept in the URL) or the default
+  day: '',            // a filter: one day ('' = all days); the calendar's chosen day
+  dayPicked: false,   // a day chosen by the visitor (kept in the URL)
+  filtersOpen: false, // the Filter panel is open
   view: 'list',       // 'list' | 'calendar'
   calMonth: null,
   // Sports
@@ -130,21 +131,19 @@ export function initCup(root) {
 
   // Which view to open: the one named in the link (an old Fixtures or
   // Calendar link opens Matches), a bare ?venue= opens the Map as it
-  // always did, and otherwise the first view. A Matches or Fixtures
-  // link from when Matches filtered by sport (?sport=…) opens that
-  // sport's page instead.
+  // always did, and otherwise the first view.
   const tabs = enabledTabs();
   const asked = OLD_TABS[q.tab] || q.tab;
   const implied = (!q.tab && q.venue) ? 'map' : '';
-  const sportLink = (!asked || asked === 'matches') && findSport(q.sport) && tabs.includes('sports');
-  state.tab = sportLink ? 'sports'
-    : ([asked, implied].find(t => tabs.includes(t)) || tabs[0] || 'matches');
+  state.tab = [asked, implied].find(t => tabs.includes(t)) || tabs[0] || 'matches';
 
   // Each view reads only its own filters from the link: ?venue= is a
   // filter on Matches and the picked venue on the Map.
   const onMatches = state.tab === 'matches';
   const status = STATUS_ALIAS[q.status] || q.status;
   state.status = (onMatches && STATUS_FILTERS.some(f => f.id === status)) ? status : defaultStatus();
+  state.sport = onMatches ? (findSport(q.sport)?.name || null) : null;
+  state.filtersOpen = false;
   state.matchVenue = (onMatches && VENUE_BY_ID[q.venue]) ? q.venue : null;
   state.dayPicked = onMatches && /^\d{4}-\d{2}-\d{2}$/.test(q.day);
   state.day = state.dayPicked ? q.day : '';
@@ -186,7 +185,6 @@ export function initCup(root) {
       root.querySelectorAll('[data-cup-teams]').forEach(el => mountTeamStrip(el));
     }
     onMyTeamChange(() => {
-      state.yoursAll = false;
       if (currentQuery().screen === 'cup') render();
     });
 
@@ -281,29 +279,40 @@ export function initCup(root) {
       if (statusChip) { state.status = statusChip.dataset.statusId; render(); return; }
 
       if (e.target.closest('[data-cup-clear-filters]')) {
-        Object.assign(state, { status: defaultStatus(), matchVenue: null });
+        Object.assign(state, { status: defaultStatus(), sport: null, matchVenue: null, day: '', dayPicked: false });
         render();
         return;
       }
 
-      if (e.target.closest('[data-cup-yours-more]')) {
-        state.yoursAll = !state.yoursAll;
+      // The Filter button opens and shuts its panel.
+      if (e.target.closest('[data-cup-filter-toggle]')) {
+        state.filtersOpen = !state.filtersOpen;
         render();
-        root.querySelector('[data-cup-yours-more]')?.focus({ preventScroll: true });
+        return;
+      }
+
+      // An arrow on a row of matches: one card along.
+      const railStep = e.target.closest('[data-rail-step]');
+      if (railStep) { stepRail(railStep); return; }
+
+      // "Try the map" and other links to another view of the tab.
+      const goto = e.target.closest('[data-cup-goto]');
+      if (goto) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+        e.preventDefault();
+        showTab(goto.dataset.cupGoto);
         return;
       }
 
       const mode = e.target.closest('[data-cup-view-mode]');
       if (mode) { state.view = mode.dataset.cupViewMode; render(); return; }
 
-      // A day on the strip: it becomes the chosen day (the featured
-      // match moves there) and the list scrolls to it.
-      // (Both re-render, so focus goes back to the new copy of the day.)
-      const stripDay = e.target.closest('[data-match-day]');
-      if (stripDay) {
-        pickDay(stripDay.dataset.matchDay);
+      // A day in the Filter panel ('' = all days). It re-renders, so
+      // focus goes back to the new copy of the chip.
+      const dayChip = e.target.closest('[data-match-day]');
+      if (dayChip) {
+        pickDay(dayChip.dataset.matchDay);
         root.querySelector(`[data-match-day="${state.day}"]`)?.focus({ preventScroll: true });
-        jumpToDay(state.day);
         return;
       }
 
@@ -440,7 +449,6 @@ function showTab(id, { scroll = true } = {}) {
 
   // Revealed content in a view that was hidden needs watching again.
   if (view) watchReveals(view);
-  if (state.tab === 'matches') centreStrip();
   syncUrl();
 }
 
@@ -454,12 +462,11 @@ function scrollToView() {
 }
 
 /** Height of what sticks to the top of the window: the site nav and
-    the tab bar (plus the day strip when asked). */
-function stuckHeight({ strip = false } = {}) {
+    the tab bar. */
+function stuckHeight() {
   const navH = document.querySelector('.site-nav')?.offsetHeight || 0;
   const tabsH = rootEl?.querySelector('[data-cup-tabs]')?.offsetHeight || 0;
-  const stripEl = strip ? rootEl?.querySelector('[data-cup-day-strip]') : null;
-  return navH + tabsH + (stripEl && !stripEl.hidden ? stripEl.offsetHeight : 0);
+  return navH + tabsH;
 }
 
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -468,10 +475,6 @@ const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').match
 /** Slide the highlight behind the selected tab. */
 function movePill() {
   const root = rootEl;
-  // The day strip sticks just under the tab bar, whatever its height.
-  const bar = root?.querySelector('[data-cup-tabs]');
-  if (bar?.offsetHeight) root.style.setProperty('--cup-tabs-h', `${bar.offsetHeight}px`);
-
   const pill = root?.querySelector('[data-cup-tab-pill]');
   const active = root?.querySelector('[data-cup-tab][aria-selected="true"]');
   if (!pill || !active || !active.offsetParent) return;
@@ -714,58 +717,64 @@ function miniGameHtml(g) {
     </button>`;
 }
 
-/* --- Matches: the filters, then the list by day or the calendar --- */
+/* --- Matches: win counter, team picker, one Filter button, then
+       three rows you swipe (Live now · Upcoming · Finished recently)
+       or the calendar --- */
 
-/** The venue dropdown is filled once; render() only sets its value,
-    so a re-render never closes it while it is open. Teams are not a
-    filter: the "Follow your teams" picker brings theirs to the top. */
+/** The two dropdowns are filled once; render() only sets their value,
+    so a re-render never closes one while it is open. */
 function mountFilters(root) {
   const venue = root.querySelector('[data-cup-filter="venue"]');
   if (venue) {
     venue.innerHTML = `<option value="">All venues</option>${CUP_MAP.venues.map(v =>
       `<option value="${escapeAttr(v.id)}">${escapeHtml(v.name)}</option>`).join('')}`;
   }
+  const sport = root.querySelector('[data-cup-filter="sport"]');
+  if (sport) {
+    sport.innerHTML = `<option value="">All sports</option>${allSports().map(s =>
+      `<option value="${escapeAttr(s.name)}">${escapeHtml(s.name)}</option>`).join('')}`;
+  }
   root.addEventListener('change', (e) => {
     const sel = e.target.closest('[data-cup-filter]');
     if (!sel) return;
     if (sel.dataset.cupFilter === 'venue') state.matchVenue = VENUE_BY_ID[sel.value] ? sel.value : null;
+    if (sel.dataset.cupFilter === 'sport') state.sport = findSport(sel.value)?.name || null;
     render();
   });
 }
 
-/** The venue filter; the status chips count what it leaves. (Sports
-    are not a filter here: each has its own page on Sports.) */
-const passesOthers = (g) => !state.matchVenue || g.venueId === state.matchVenue;
+/** Does a game pass the filters? `ignore` leaves one out (the day
+    chips are built from what the other filters leave). */
+function passes(g, { ignoreDay = false, ignoreStatus = false } = {}) {
+  return (ignoreStatus || state.status === 'all' || g.status === state.status)
+    && (!state.sport || g.sport === state.sport)
+    && (!state.matchVenue || g.venueId === state.matchVenue)
+    && (ignoreDay || !state.day || dayKey(g.start) === state.day);
+}
 
-const filtered = () => Boolean(state.status !== defaultStatus() || state.matchVenue);
+const activeFilters = () =>
+  [state.day, state.status !== defaultStatus(), state.sport, state.matchVenue].filter(Boolean).length;
 
-/** The visitor chose a day, on the strip or the calendar. */
+/** A day from the filter's day chips or the calendar ('' = all days). */
 function pickDay(key) {
-  state.day = key;
-  state.dayPicked = true;
+  state.day = key || '';
+  state.dayPicked = Boolean(key);
   state.calMonth = null;       // the calendar follows the chosen day
   render();
 }
 
 function renderMatches(root, games, mine) {
   if (!tabHasContent.matches()) return;
-  renderFilters(root, games);
+  renderWins(root, games);
 
-  // allGames() order (live, upcoming, results) decides what a cap on
-  // the list keeps; the list itself then reads day by day.
-  let list = games.filter(g => passesOthers(g) && (state.status === 'all' || g.status === state.status));
-  if (CUP_CONFIG.maxGamesShown) list = list.slice(0, CUP_CONFIG.maxGamesShown);
-
-  renderYours(root, list, mine);
-
-  // The chosen day stands while it still has a game in the list;
-  // otherwise it is today, or the next day with a game.
-  const days = gameDays(list);
-  if (!days.includes(state.day)) {
-    state.day = initialDay(days, cupNow());
+  // A chosen day stands while it still has a game under the other filters.
+  const days = gameDays(games.filter(g => passes(g, { ignoreDay: true, ignoreStatus: true })));
+  if (state.day && !days.includes(state.day)) {
+    state.day = '';
     state.dayPicked = false;
     state.calMonth = null;
   }
+  renderFilters(root, days);
 
   // List or calendar; either one can be switched off in the config.
   if (!CUP_CONFIG.showCalendar) state.view = 'list';
@@ -780,80 +789,207 @@ function renderMatches(root, games, mine) {
   toggle(root, '[data-cup-list]', state.view === 'list');
   toggle(root, '[data-cup-calendar-wrap]', state.view === 'calendar');
 
-  if (state.view === 'list') renderMatchList(root, list, days, mine);
-  else renderMatchCalendar(root, games, list, mine);
+  if (state.view === 'list') {
+    let list = games.filter(g => passes(g));
+    if (CUP_CONFIG.maxGamesShown) list = list.slice(0, CUP_CONFIG.maxGamesShown);
+    renderRails(root, list, mine);
+  } else {
+    renderMatchCalendar(root, games, games.filter(g => passes(g, { ignoreDay: true })), mine);
+  }
 }
 
-/* --- Your teams: the followed teams' games, above everything else --- */
-const yoursShown = () => (isSwipe() ? Infinity : 6);
+/* --- The win counter: which teams have won the most games so far,
+       worked out from the results (lib/standings.js) --- */
+function renderWins(root, games) {
+  const box = root.querySelector('[data-cup-wins]');
+  if (!box) return;
+  const wins = new Map();
+  for (const g of games) {
+    const id = winnerOf(g);
+    if (id) wins.set(id, (wins.get(id) || 0) + 1);
+  }
+  const top = [...wins]
+    .map(([id, n]) => ({ team: TEAM_BY_ID[id], n }))
+    .filter(x => x.team)
+    .sort((a, b) => (b.n - a.n) || a.team.name.localeCompare(b.team.name))
+    .slice(0, 4);
 
-function renderYours(root, list, mine) {
-  const wrap = root.querySelector('[data-cup-yours]');
-  if (!wrap) return;
-  const teams = mine.map(id => TEAM_BY_ID[id]).filter(Boolean);
-  // Live first, then the next to start, then the latest results.
-  const theirs = list
-    .filter(g => isMine(g, mine))
-    .sort((a, b) => (STATUS_ORDER[a.status] - STATUS_ORDER[b.status]) || byWhen(a, b, a.status));
-
-  wrap.hidden = !theirs.length;
-  if (!theirs.length) { wrap.innerHTML = ''; return; }
-
-  const shown = state.yoursAll ? theirs : theirs.slice(0, yoursShown());
-  const more = theirs.length - yoursShown();
-  wrap.innerHTML = `
-    <div class="cup-yours__head">
-      <h3 class="cup-yours__title" id="cup-yours-title">
-        <span class="cup-yours__crests" aria-hidden="true">${teams.map(t =>
-          `<img src="${escapeAttr(t.logo)}" alt="" loading="lazy" decoding="async">`).join('')}</span>
-        ${teams.length === 1 ? escapeHtml(teams[0].name) : 'Your teams'}
-      </h3>
-      <span class="browse-count">${theirs.length} match${theirs.length === 1 ? '' : 'es'}</span>
-    </div>
-    <div class="match-grid">${shown.map((g, i) => matchCardHtml(g, { i, myTeams: mine })).join('')}</div>
-    ${more > 0 ? `
-      <button class="btn btn--ghost btn--sm cup-yours__more" type="button" data-cup-yours-more
-              aria-expanded="${state.yoursAll}">
-        ${state.yoursAll ? 'Show fewer' : `Show all ${theirs.length}`}
-      </button>` : ''}`;
-  watchReveals(wrap);
+  box.innerHTML = `
+    <span class="cup-wins__icon" aria-hidden="true">
+      <img src="assets/illustrations/hero-trophy.svg" alt="">
+    </span>
+    <div class="cup-wins__text">
+      <p class="cup-wins__label">Most wins so far</p>
+      ${top.length ? `
+        <ol class="cup-wins__list">
+          ${top.map(x => `
+            <li class="cup-wins__team" title="${escapeAttr(x.team.name)}">
+              <img src="${escapeAttr(x.team.logo)}" alt="" loading="lazy" decoding="async">
+              <span>${escapeHtml(x.team.short)}</span>
+              <b aria-label="${escapeAttr(`${x.n} win${x.n === 1 ? '' : 's'}`)}">${x.n}</b>
+            </li>`).join('')}
+        </ol>`
+        : '<p class="cup-wins__none">No results yet. The first wins land soon.</p>'}
+    </div>`;
 }
 
-/* All · Live · Upcoming · Results on one line, the venue dropdown,
-   Clear. */
-function renderFilters(root, games) {
+const weekday = (date) => {
+  try { return new Intl.DateTimeFormat(SITE.locale || undefined, { weekday: 'short' }).format(date); }
+  catch { return ''; }
+};
+
+/* --- The Filter button and the panel it opens --- */
+function renderFilters(root, days) {
+  const n = activeFilters();
+  const toggleBtn = root.querySelector('[data-cup-filter-toggle]');
+  const panel = root.querySelector('[data-cup-filter-panel]');
+  if (toggleBtn) toggleBtn.setAttribute('aria-expanded', String(state.filtersOpen));
+  if (panel) panel.hidden = !state.filtersOpen;
+
+  const count = root.querySelector('[data-cup-filter-count]');
+  if (count) { count.textContent = String(n); count.hidden = !n; }
+
+  // What is filtered, in words, beside the button while the panel is shut.
+  const today = dayKey(cupNow());
+  const summary = root.querySelector('[data-cup-filter-summary]');
+  if (summary) {
+    const parts = [
+      state.day ? (state.day === today ? 'Today' : formatDay(keyToDate(state.day), { withYear: false })) : '',
+      state.status !== 'all' ? STATUS_FILTERS.find(f => f.id === state.status)?.label : '',
+      state.sport || '',
+      state.matchVenue ? VENUE_BY_ID[state.matchVenue]?.short : '',
+    ].filter(Boolean);
+    summary.textContent = parts.join(' · ');
+    summary.hidden = !parts.length || state.filtersOpen;
+  }
+
+  const dayRow = root.querySelector('[data-cup-day-chips]');
+  if (dayRow) {
+    const chip = (key, label, aria) => `
+      <button class="cup-daychip${key === today ? ' is-today' : ''}" type="button" data-match-day="${escapeAttr(key)}"
+              aria-pressed="${state.day === key}"${aria ? ` aria-label="${escapeAttr(aria)}"` : ''}>${escapeHtml(label)}</button>`;
+    dayRow.innerHTML = chip('', 'All days') + days.map(key => {
+      const date = keyToDate(key);
+      return chip(key, key === today ? 'Today' : `${weekday(date)} ${date.getDate()}`,
+        formatDay(date, { withYear: false }) + (key === today ? ', today' : ''));
+    }).join('');
+  }
+
   const statusRow = root.querySelector('[data-cup-status-chips]');
   if (statusRow) {
-    statusRow.hidden = !CUP_CONFIG.showStatusFilter;
-    if (CUP_CONFIG.showStatusFilter) {
-      const pool = games.filter(passesOthers);
-      const counts = Object.fromEntries(STATUS_FILTERS.map(f => [
-        f.id, f.id === 'all' ? pool.length : pool.filter(g => g.status === f.id).length,
-      ]));
-      statusRow.innerHTML = STATUS_FILTERS.map(f => `
-        <button class="chip" type="button" data-status-id="${f.id}"
-                aria-pressed="${state.status === f.id}"
-                style="--chip-accent: var(--${f.color});">
-          <span class="chip__dot" aria-hidden="true"></span>
-          <span>${escapeHtml(f.label)}</span>
-          <span class="chip__count">${counts[f.id]}</span>
-        </button>`).join('');
-    }
+    statusRow.closest('.cup-filterpanel__row')?.toggleAttribute('hidden', !CUP_CONFIG.showStatusFilter);
+    statusRow.innerHTML = STATUS_FILTERS.map(f => `
+      <button class="chip" type="button" data-status-id="${f.id}"
+              aria-pressed="${state.status === f.id}"
+              style="--chip-accent: var(--${f.color});">
+        <span class="chip__dot" aria-hidden="true"></span>
+        <span>${escapeHtml(f.label)}</span>
+      </button>`).join('');
   }
 
   const venue = root.querySelector('[data-cup-filter="venue"]');
   if (venue) venue.value = state.matchVenue || '';
+  const sport = root.querySelector('[data-cup-filter="sport"]');
+  if (sport) sport.value = state.sport || '';
 
   const clear = root.querySelector('[data-cup-clear-filters]');
-  if (clear) clear.hidden = !filtered();
+  if (clear) clear.hidden = !n;
 }
 
-/** A day's games in time order, the followed teams' first; on the
-    chosen day the featured match (components/featured-match.js picks
-    it) leads, full width. */
+/* --- Three rows you swipe: Live now · Upcoming · Finished recently.
+       Followed teams' games go first in each. --- */
+const RAIL_ARROW = (dir) => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="${dir < 0 ? '10,3 5,8 10,13' : '6,3 11,8 6,13'}"/></svg>`;
+
+function renderRails(root, list, mine) {
+  const wrap = root.querySelector('[data-cup-rails]');
+  if (!wrap) return;
+
+  // Keep where each row was swiped to: the page repaints every minute.
+  const kept = Object.fromEntries([...wrap.querySelectorAll('[data-rail]')]
+    .map(r => [r.dataset.rail, r.querySelector('[data-rail-track]')?.scrollLeft || 0]));
+
+  const today = dayKey(cupNow());
+  const dayName = state.day && state.day !== today ? formatDay(keyToDate(state.day), { withYear: false }) : '';
+  const byStart = (a, b) => (a.start?.getTime() ?? Infinity) - (b.start?.getTime() ?? Infinity);
+  const mineFirst = (games) => [...games.filter(g => isMine(g, mine)), ...games.filter(g => !isMine(g, mine))];
+  const of = (status) => list.filter(g => g.status === status);
+
+  const rails = [
+    { id: 'live', status: 'ongoing', title: 'Live now',
+      games: mineFirst(of('ongoing').sort(byStart)),
+      empty: 'Nothing live right now.',
+      // A day that is not today has nothing live to show.
+      shown: !state.day || state.day === today },
+    { id: 'upcoming', status: 'upcoming',
+      title: !state.day ? 'Coming up' : (dayName ? `Upcoming · ${dayName}` : 'Upcoming today'),
+      games: mineFirst(of('upcoming').sort(byStart)),
+      empty: dayName ? `Nothing still to come on ${dayName}.` : 'Nothing still to come.',
+      shown: true },
+    { id: 'finished', status: 'finished',
+      title: !state.day ? 'Finished recently' : (dayName ? `Results · ${dayName}` : 'Finished today'),
+      games: mineFirst(of('finished').sort((a, b) => byStart(b, a))),
+      empty: 'No results yet.',
+      shown: true },
+  ].filter(r => r.shown && (state.status === 'all' || state.status === r.status));
+
+  wrap.innerHTML = rails.map(r => `
+    <section class="cup-rail cup-rail--${r.id}" data-rail="${r.id}" aria-labelledby="cup-rail-${r.id}">
+      <div class="cup-rail__head">
+        <h3 class="cup-rail__title" id="cup-rail-${r.id}">
+          ${r.id === 'live' && r.games.length ? '<i class="cup-rail__live" aria-hidden="true"></i>' : ''}${escapeHtml(r.title)}
+        </h3>
+        ${r.games.length ? `<span class="cup-rail__count">${r.games.length}</span>` : ''}
+      </div>
+      ${r.games.length ? `
+        <div class="cup-rail__body">
+          <button class="cup-rail__arrow cup-rail__arrow--prev" type="button" data-rail-step="-1"
+                  aria-label="${escapeAttr(`${r.title}: back`)}">${RAIL_ARROW(-1)}</button>
+          <div class="cup-rail__track" data-rail-track>
+            ${r.games.map((g, i) => matchCardHtml(g, { i, myTeams: mine })).join('')}
+          </div>
+          <button class="cup-rail__arrow cup-rail__arrow--next" type="button" data-rail-step="1"
+                  aria-label="${escapeAttr(`${r.title}: more`)}">${RAIL_ARROW(1)}</button>
+        </div>`
+        : `<p class="cup-rail__empty">${escapeHtml(r.empty)}</p>`}
+    </section>`).join('');
+
+  wrap.querySelectorAll('[data-rail]').forEach(rail => {
+    const track = rail.querySelector('[data-rail-track]');
+    if (!track) return;
+    track.scrollLeft = kept[rail.dataset.rail] || 0;
+    const sync = () => railArrows(rail);
+    track.addEventListener('scroll', sync, { passive: true });
+    sync();
+  });
+}
+
+/** Hide an arrow when there is nothing more that way. */
+function railArrows(rail) {
+  const track = rail.querySelector('[data-rail-track]');
+  if (!track) return;
+  const max = track.scrollWidth - track.clientWidth;
+  rail.querySelector('[data-rail-step="-1"]')?.toggleAttribute('disabled', track.scrollLeft <= 2);
+  rail.querySelector('[data-rail-step="1"]')?.toggleAttribute('disabled', track.scrollLeft >= max - 2);
+}
+
+/** An arrow: one card along. */
+function stepRail(btn) {
+  const track = btn.closest('[data-rail]')?.querySelector('[data-rail-track]');
+  const card = track?.querySelector('.match');
+  if (!track || !card) return;
+  const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+  track.scrollBy({
+    left: Number(btn.dataset.railStep) * (card.offsetWidth + gap),
+    behavior: reducedMotion() ? 'auto' : 'smooth',
+  });
+}
+
+/** A day's games in time order, the followed teams' first; the
+    featured match (components/featured-match.js picks it) leads, full
+    width. Used by the calendar's day. */
 function dayCards(list, key, mine) {
   const dayGames = gamesOn(list, key);
-  const pick = (CUP_CONFIG.showFeatured && key === state.day) ? pickFeatured(dayGames, mine) : null;
+  const pick = CUP_CONFIG.showFeatured ? pickFeatured(dayGames, mine) : null;
   const rest = dayGames.filter(g => g !== pick);
   const ordered = [
     ...(pick ? [pick] : []),
@@ -863,114 +999,34 @@ function dayCards(list, key, mine) {
   return ordered.map((g, i) => matchCardHtml(g, { i, myTeams: mine, featured: g === pick })).join('');
 }
 
-const weekday = (date) => {
-  try { return new Intl.DateTimeFormat(SITE.locale || undefined, { weekday: 'short' }).format(date); }
-  catch { return ''; }
-};
-
-/* --- The list, one group per day, under the strip of days --- */
-function renderMatchList(root, list, days, mine) {
-  const strip = root.querySelector('[data-cup-day-strip]');
-  const wrap = root.querySelector('[data-cup-days]');
-  if (!wrap) return;
-  const today = dayKey(cupNow());
-  // Results read newest first; everything else in season order.
-  const order = state.status === 'finished' ? [...days].reverse() : days;
-
-  if (strip) {
-    strip.hidden = order.length < 2;
-    strip.innerHTML = order.map(key => {
-      const date = keyToDate(key);
-      const dayGames = gamesOn(list, key);
-      const n = dayGames.length;
-      const live = dayGames.some(g => g.status === 'ongoing');
-      const label = `${formatDay(date, { withYear: false })}${key === today ? ', today' : ''}: `
-        + `${n} match${n === 1 ? '' : 'es'}${live ? ', live now' : ''}`;
-      return `
-        <button class="day-strip__day${key === today ? ' is-today' : ''}" type="button"
-                data-match-day="${escapeAttr(key)}" aria-pressed="${key === state.day}"
-                aria-label="${escapeAttr(label)}">
-          <span class="day-strip__dow" aria-hidden="true">${key === today ? 'Today' : escapeHtml(weekday(date))}</span>
-          <span class="day-strip__num" aria-hidden="true">${date.getDate()}</span>
-          <span class="day-strip__count" aria-hidden="true">${live ? '<i class="day-strip__live"></i>' : ''}${n}</span>
-        </button>`;
-    }).join('');
-    centreStrip();
-  }
-
-  const heading = (key) => {
-    const date = keyToDate(key);
-    const season = seasonState(date);
-    return `
-      <span>${escapeHtml(formatDay(date, { withYear: false }))}</span>
-      ${season?.phase === 'during' ? `<span class="match-day__sub">Day ${season.day}</span>` : ''}
-      ${key === today ? '<span class="match-day__today">Today</span>' : ''}`;
-  };
-
-  // On a phone the strip picks the one day to show, so the list stays
-  // a screen or two long; wider screens list every day.
-  const shownDays = isPhone() ? order.filter(key => key === state.day) : order;
-  const undated = (isPhone() && shownDays.length) ? [] : list.filter(g => !g.start);
-  wrap.innerHTML = list.length ? `
-    ${shownDays.map(key => `
-      <section class="match-day" data-match-day-group="${escapeAttr(key)}" aria-labelledby="match-day-${escapeAttr(key)}">
-        <h3 class="match-day__title" id="match-day-${escapeAttr(key)}">${heading(key)}</h3>
-        <div class="match-grid">${dayCards(list, key, mine)}</div>
-      </section>`).join('')}
-    ${undated.length ? `
-      <section class="match-day" aria-labelledby="match-day-tba">
-        <h3 class="match-day__title" id="match-day-tba">Date to be announced</h3>
-        <div class="match-grid">${undated.map((g, i) => matchCardHtml(g, { i, myTeams: mine })).join('')}</div>
-      </section>` : ''}`
-    : `<div class="filter-note filter-note--empty">
-         <strong>No matches here.</strong>&nbsp;Try another status, sport or venue.
-       </div>`;
-  watchReveals(wrap);
-}
-
-/** Keep the chosen day in sight on the strip (sideways only, so the
-    page never jumps). Needs the strip on screen to measure. */
-function centreStrip() {
-  const strip = rootEl?.querySelector('[data-cup-day-strip]');
-  const on = strip?.querySelector('[aria-pressed="true"]');
-  if (!on || strip.scrollWidth <= strip.clientWidth) return;
-  strip.scrollLeft = on.offsetLeft - (strip.clientWidth - on.offsetWidth) / 2;
-}
-
-/** Scroll the list to a day, clear of the sticky nav, tabs and strip. */
-function jumpToDay(key) {
-  const group = rootEl?.querySelector(`[data-match-day-group="${key}"]`);
-  if (!group?.offsetParent) return;
-  const top = group.getBoundingClientRect().top + window.scrollY - stuckHeight({ strip: true }) - 12;
-  window.scrollTo({ top: Math.max(0, top), behavior: reducedMotion() ? 'auto' : 'smooth' });
-}
-
-/* --- The calendar: the same filtered games as a month --- */
+/* --- The calendar: the filtered games as a month, the chosen day's
+       games (or today's, or the next day with games) underneath --- */
 function renderMatchCalendar(root, games, list, mine) {
   const cal = root.querySelector('[data-cup-calendar]');
   const dayWrap = root.querySelector('[data-cup-calendar-day]');
   if (!cal) return;
 
   const now = cupNow();
+  const day = state.day || initialDay(gameDays(list), now);
   if (!state.calMonth) {
-    const d = keyToDate(state.day) || now;
+    const d = keyToDate(day) || now;
     state.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
   }
 
   cal.innerHTML = calendarHtml({
     games: list,
     month: state.calMonth,
-    selected: state.day,
+    selected: day,
     today: dayKey(now),
     months: gameMonths(games),
   });
 
   if (!dayWrap) return;
-  const date = keyToDate(state.day);
+  const date = keyToDate(day);
   dayWrap.innerHTML = date ? `
     <h3 class="cal-day__title">${escapeHtml(formatDay(date))}</h3>
-    <div class="match-grid">${dayCards(list, state.day, mine)}</div>`
-    : `<p class="filter-note filter-note--empty"><strong>No matches here.</strong>&nbsp;Try another status, sport or venue.</p>`;
+    <div class="match-grid">${dayCards(list, day, mine)}</div>`
+    : `<p class="filter-note filter-note--empty"><strong>No matches here.</strong>&nbsp;Try other filters.</p>`;
   watchReveals(dayWrap);
 }
 
@@ -1438,6 +1494,7 @@ function urlFor() {
   if (state.tab === 'matches') {
     if (state.view === 'calendar') q.set('view', 'calendar');
     if (state.status !== defaultStatus()) q.set('status', state.status);
+    if (state.sport) q.set('sport', findSport(state.sport)?.id || state.sport);
     if (state.matchVenue) q.set('venue', state.matchVenue);
     // Only a day someone chose: the default follows the clock.
     if (state.dayPicked && state.day) q.set('day', state.day);

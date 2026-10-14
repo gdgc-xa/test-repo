@@ -178,76 +178,220 @@
 .cup-map-panel__legend { margin-top: var(--space-4); }
 
 /* ============================================================
-   SHARED HEADER — the team picker under the banner
+   MATCHES — calm by default: a title, the win counter, the team
+   picker, ONE Filter button (everything else lives in the panel it
+   opens), then three rows you swipe: Live now · Upcoming ·
+   Finished recently. Markup: index.html; screens/cup.js paints it.
    ============================================================ */
+.screen--cup .cup-matches__head {
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+/* ---------- Win counter: the trophy, then the teams with the most wins ---------- */
+.cup-wins {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 14px 18px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.cup-wins__icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--tx-tile);
+}
+.cup-wins__icon img { width: 34px; height: 34px; object-fit: contain; }
+.cup-wins__text { flex: 1 1 auto; min-width: 0; }
+.cup-wins__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cup-wins__list {
+  display: flex;
+  gap: var(--space-4);
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cup-wins__list::-webkit-scrollbar { display: none; }
+.cup-wins__team {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.cup-wins__team img { width: 26px; height: 26px; object-fit: contain; }
+.cup-wins__team b {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.cup-wins__none { margin-top: 4px; font-size: 13.5px; color: var(--muted); }
+
+/* ---------- Follow your teams ---------- */
 .cup-follow { padding-top: var(--space-5); }
 .cup-follow__head { margin-bottom: var(--space-3); }
 .cup-follow .cup-section__hint { margin-top: 4px; }
 .cup-section__title--sm { font-size: 19px; letter-spacing: -0.3px; }
 
-/* ============================================================
-   MATCHES
-   ============================================================ */
-/* Title on the left, a small List / Calendar switch on the right,
-   on every screen size. */
-.screen--cup .cup-matches__head {
-  flex-direction: row;
+/* ---------- The Filter button and List / Calendar ----------
+   Always one line: Filter on the left, List / Calendar on the right,
+   and the summary of what is filtered shrinks (with "…") between them. */
+.cup-filterbar {
+  display: flex;
   align-items: center;
-  margin-bottom: var(--space-3);
+  flex-wrap: nowrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
 }
-.seg.cup-viewswitch { display: inline-flex; width: auto; flex: 0 0 auto; }
+.cup-filterbtn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: border-color 160ms, background 160ms;
+}
+.cup-filterbtn:hover { border-color: var(--border-strong); }
+.cup-filterbtn[aria-expanded="true"] { border-color: var(--border-strong); background: var(--surface-2); }
+.cup-filterbtn__icon { width: 15px; height: 15px; }
+.cup-filterbtn__chev { width: 13px; height: 13px; color: var(--muted); transition: transform 180ms; }
+.cup-filterbtn[aria-expanded="true"] .cup-filterbtn__chev { transform: rotate(180deg); }
+.cup-filterbtn__count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--tx-accent);
+  color: var(--tx-on-accent);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+.cup-filterbtn__count[hidden] { display: none; }
+.cup-filterbar__summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cup-filterbar__summary[hidden] { display: none; }
+
+.seg.cup-viewswitch { display: inline-flex; width: auto; flex: 0 0 auto; margin-left: auto; }
 .seg.cup-viewswitch[hidden] { display: none; }
 .cup-viewswitch .seg__btn {
   flex: 0 0 auto;
-  min-height: 34px;
-  padding: 5px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 5px 13px;
   font-size: 13px;
 }
+.cup-viewswitch .seg__icon { width: 14px; height: 14px; flex: 0 0 auto; }
 
-/* The toolbar: the status chips on one line, the venue beside them
-   (under them on a phone), then Clear. */
-.cup-toolbar {
+/* ---------- The panel the Filter button opens ---------- */
+.cup-filterpanel {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.cup-filterpanel[hidden] { display: none; }
+.cup-filterpanel__row { display: grid; gap: 6px; min-width: 0; }
+.cup-filterpanel__row[hidden] { display: none; }
+.cup-filterpanel__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cup-filterpanel__row--selects {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-3);
-  margin-bottom: var(--space-5);
+  gap: var(--space-2);
 }
+.cup-filterpanel [data-cup-clear-filters][hidden] { display: none; }
 
-/* All · Live · Upcoming · Results — small chips, never wrapping. A
-   phone too narrow for all four scrolls them sideways instead. */
+/* Days: one row of small pills that scrolls sideways. */
+.cup-daychips,
 .cup-status {
   display: flex;
   flex-wrap: nowrap;
   gap: 6px;
   min-width: 0;
-  max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
 }
-.cup-status[hidden] { display: none; }
+.cup-daychips::-webkit-scrollbar,
 .cup-status::-webkit-scrollbar { display: none; }
+.cup-daychip {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 160ms, border-color 160ms, color 160ms;
+}
+.cup-daychip:hover { border-color: var(--border-strong); color: var(--ink); }
+.cup-daychip.is-today { font-weight: 800; }
+.cup-daychip[aria-pressed="true"] {
+  background: var(--tx-primary);
+  border-color: var(--tx-primary);
+  color: var(--tx-on-primary-hi);
+}
+
+/* All · Live · Upcoming · Results */
 .cup-status .chip {
   flex: 0 0 auto;
   gap: 6px;
   min-height: 34px;
-  padding: 5px 11px;
+  padding: 5px 12px;
   font-size: 12.5px;
 }
 .cup-status .chip:hover,
 .cup-status .chip[aria-pressed="true"] { transform: none; }
 .cup-status .chip[aria-pressed="true"] .chip__dot { display: block; background: currentColor; }
-.cup-status .chip__count { margin-left: 0; padding: 0 6px; font-size: 10.5px; }
 
-.cup-filters {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-.cup-filters [data-cup-clear-filters][hidden] { display: none; }
-.cup-select { display: block; min-width: 170px; }
-/* "All venues" says what the dropdown is; the label is for screen readers. */
+.cup-select { display: block; flex: 1 1 170px; min-width: 0; }
+/* "All venues" / "All sports" say what each dropdown is; the label is for screen readers. */
 .cup-select__label {
   position: absolute;
   width: 1px;
@@ -259,8 +403,8 @@
 .cup-select__field { position: relative; display: block; }
 .cup-select select {
   width: 100%;
-  min-height: 34px;
-  padding: 5px 34px 5px 14px;
+  min-height: 36px;
+  padding: 6px 34px 6px 14px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border);
   background: var(--surface);
@@ -285,147 +429,99 @@
   pointer-events: none;
 }
 
-/* The strip of days. Sticks under the tab bar (--cup-tabs-h is set
-   by screens/cup.js) for as long as the list is on screen. */
-.day-strip {
-  position: sticky;
-  top: calc(var(--nav-h) + var(--cup-tabs-h, 64px));
-  z-index: 20;
-  display: flex;
-  gap: 6px;
-  margin-bottom: var(--space-4);
-  padding-block: var(--space-2);
-  overflow-x: auto;
-  scrollbar-width: none;
-  background: color-mix(in srgb, var(--ground) 92%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-}
-.day-strip::-webkit-scrollbar { display: none; }
-.day-strip[hidden] { display: none; }
-.day-strip__day {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  min-width: 58px;
-  padding: 6px 10px;
-  border-radius: 14px;
+/* ---------- Three rows you swipe (or step with the arrows) ---------- */
+.cup-matches__calendar[hidden],
+.cup-matches__list[hidden] { display: none; }
+.cup-matches__list,
+.cup-matches__calendar { margin-top: var(--space-5); }
+.cup-rails { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+.cup-rail {
+  min-width: 0;
+  padding: var(--space-4);
+  border-radius: 24px;
   border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--ink-2);
-  transition: background 160ms, border-color 160ms, color 160ms;
+  background: var(--surface-2);
 }
-.day-strip__day:hover { border-color: var(--border-strong); color: var(--ink); }
-.day-strip__dow {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.day-strip__day.is-today .day-strip__dow { color: var(--tx-live); }
-.day-strip__num {
-  font-family: var(--font-serif);
-  font-size: 20px;
-  font-weight: 800;
-  line-height: 1.1;
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-}
-.day-strip__count {
+.cup-rail__head { display: flex; align-items: center; gap: var(--space-2); margin-bottom: 2px; }
+.cup-rail__title {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: var(--muted);
+  gap: 8px;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--ink);
 }
-.day-strip__live {
-  width: 6px;
-  height: 6px;
+.cup-rail__live {
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: var(--tx-live);
   animation: livePulse 1.8s ease-in-out infinite;
 }
-.day-strip__day[aria-pressed="true"] {
-  background: var(--tx-primary);
-  border-color: var(--tx-primary);
-  color: var(--tx-on-primary-hi);
-}
-.day-strip__day[aria-pressed="true"] :is(.day-strip__dow, .day-strip__num, .day-strip__count) { color: inherit; }
-.day-strip__day[aria-pressed="true"] .day-strip__live { background: currentColor; }
-
-/* One group per day; the featured match spans the row. */
-/* minmax(0, 1fr): a swipe row inside must scroll, not widen the column. */
-.match-days { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
-.match-day__title {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px var(--space-3);
-  margin-bottom: var(--space-3);
-  font-family: var(--font-serif);
-  font-size: 19px;
-  font-weight: 800;
-  color: var(--ink);
-}
-.match-day__sub {
-  font-family: var(--font-body);
-  font-size: 11.5px;
+.cup-rail__count {
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.cup-rail__body { position: relative; }
+.cup-rail__track {
+  display: flex;
+  gap: 12px;
+  margin: 0 -4px;
+  padding: 12px 4px 6px;          /* room for the "Your team" badge and the rings */
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 4px;
+  scrollbar-width: none;
+}
+.cup-rail__track::-webkit-scrollbar { display: none; }
+/* No fade-in in a row: a card arrives from the side, not from below. */
+.cup-rail__track > .match {
+  flex: 0 0 min(330px, 86%);
+  scroll-snap-align: start;
+  opacity: 1;
+  transform: none;
+  transition: box-shadow 180ms, border-color 180ms;
+}
+.cup-rail__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-50%);
+  transition: opacity 160ms;
+}
+.cup-rail__arrow svg { width: 16px; height: 16px; }
+.cup-rail__arrow--prev { left: -12px; }
+.cup-rail__arrow--next { right: -12px; }
+.cup-rail__arrow[disabled] { opacity: 0; pointer-events: none; }
+.cup-rail__empty { padding: var(--space-2) 0 2px; font-size: 14px; color: var(--muted); }
+
+/* The calendar's day list keeps the featured match full width. */
+.match-grid > .match--featured { grid-column: 1 / -1; }
+
+.cup-matches__more {
+  margin-top: var(--space-6);
+  text-align: center;
+  font-size: 14px;
   color: var(--muted);
 }
-.match-day__today {
-  align-self: center;
-  padding: 2px 9px;
-  border-radius: var(--radius-pill);
-  background: var(--tx-accent);
-  color: var(--tx-on-accent);
-  font-family: var(--font-body);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.match-grid > .match--featured { grid-column: 1 / -1; }
-.cup-matches__calendar[hidden],
-.cup-matches__list[hidden] { display: none; }
-
-/* Your teams: the followed teams' games, in a panel above the list. */
-.cup-yours {
-  margin-bottom: var(--space-6);
-  padding: var(--space-4);
-  border-radius: 24px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-}
-.cup-yours[hidden] { display: none; }
-.cup-yours__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
-}
-.cup-yours__title {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  font-family: var(--font-serif);
-  font-size: 19px;
-  font-weight: 800;
-  color: var(--ink);
-}
-.cup-yours__crests { display: inline-flex; gap: 2px; }
-.cup-yours__crests img { width: 28px; height: 28px; object-fit: contain; }
-.cup-yours__more { margin-top: var(--space-3); }
-/* Every card here is a followed team's: the ring says so, the badge
-   would only repeat it. */
-.cup-yours .match__mine { display: none; }
+.cup-matches__more a { font-weight: 700; color: var(--ink); }
+.cup-matches__more a:hover { text-decoration: underline; }
 
 /* ============================================================
    BANNER PHOTOS — a slideshow in the banner (screens/cup.js →
@@ -461,14 +557,16 @@
   display: grid;
   grid-template: 1fr / 1fr;
 }
-/* The fade the title is read against. */
+/* The fade the title is read against, over a light tint of the whole
+   photo so a bright picture never swallows the lime kicker. */
 .cup-photos::after {
   content: "";
   position: absolute;
   inset: 0;
   background:
     linear-gradient(0deg, rgba(4, 12, 28, 0.9) 0%, rgba(4, 12, 28, 0.5) 45%, transparent 75%),
-    linear-gradient(90deg, rgba(4, 12, 28, 0.6) 0%, transparent 65%);
+    linear-gradient(90deg, rgba(4, 12, 28, 0.6) 0%, transparent 65%),
+    rgba(4, 12, 28, 0.3);
   pointer-events: none;
 }
 .cup-photo {
@@ -545,8 +643,11 @@
   background: var(--tx-tile);
 }
 .cup-hero.has-photos .cup-hero__scene { display: none; }
-/* The tile only holds the words now; the photos (absolutely placed)
-   size themselves to the banner section around it. */
+/* The wrap and the tile only hold the words now. Neither may be a
+   positioned box, or the photos (absolutely placed) would size
+   themselves to it (at most --content-max wide) instead of to the
+   whole banner section. */
+:root[data-skin] .cup-hero.has-photos .cup-hero__wrap { position: static; z-index: auto; }
 :root[data-skin] .cup-hero.has-photos .cup-hero__tile {
   position: static;
   isolation: auto;
@@ -775,7 +876,6 @@
 
 @media (max-width: 820px) {
   .cup-tabs { top: var(--nav-h-mob); padding-block: var(--space-2); }
-  .day-strip { top: calc(var(--nav-h-mob) + var(--cup-tabs-h, 56px)); }
 }
 @media (max-width: 480px) {
   .cup-tabs__nav { display: flex; width: 100%; }
@@ -1233,12 +1333,12 @@
 }
 
 /* ============================================================
-   SWIPE ROWS — on narrow screens every list of matches on the Cup
-   tab (Your teams, each day, the calendar's day, a sport's and a
-   team's matches) is one row of cards you swipe, so a list is one
-   card tall however many it holds. The next card peeks in at the
-   edge to say there is more. The 720px matches isSwipe() in
-   screens/cup.js, which then puts every card in the row.
+   SWIPE ROWS — on narrow screens the other lists of matches on the
+   Cup tab (the calendar's day, a sport's and a team's matches) are
+   one row of cards you swipe too, like the rows on Matches, so a
+   list is one card tall however many it holds. The next card peeks
+   in at the edge to say there is more. The 720px matches isSwipe()
+   in screens/cup.js, which then puts every card in the row.
    ============================================================ */
 @media (max-width: 720px) {
   .screen--cup .match-grid {
@@ -1264,9 +1364,6 @@
     transition: box-shadow 180ms, border-color 180ms;
   }
   .screen--cup .match-grid > .match:only-child { flex-basis: 100%; }
-  .cup-yours .match-grid { --swipe-bleed: var(--space-4); }
-  .cup-yours__head { margin-bottom: 0; }
-  .match-day__title { margin-bottom: 0; }
 }
 
 /* ============================================================
@@ -1294,20 +1391,38 @@
   /* The placeholder's label would crowd the caption: icon only. */
   .cup-photo .news-ph__mark > span { display: none; }
   .cup-photo__caption { max-width: calc(100% - 90px); }
-  .cup-yours { padding: var(--space-3); }
-  /* The strip is the day picker on a phone: smaller days. */
-  .day-strip { gap: 5px; margin-bottom: var(--space-3); padding-block: 6px; }
-  .day-strip__day { min-width: 50px; padding: 4px 8px; border-radius: 12px; }
-  .day-strip__num { font-size: 17px; }
-  /* The four status chips share the width; the venue goes under them. */
-  .cup-toolbar { margin-bottom: var(--space-4); }
-  .cup-status { flex: 1 1 100%; }
+  /* Matches on a phone: a slimmer win counter and rows. */
+  .cup-wins { gap: var(--space-3); padding: 10px 14px; border-radius: 18px; }
+  .cup-wins__icon { width: 44px; height: 44px; }
+  .cup-wins__icon img { width: 28px; height: 28px; }
+  .cup-wins__list { gap: var(--space-3); }
+  .cup-wins__team:nth-child(n + 4) { display: none; }   /* the top three fit a phone */
+  .cup-rail { padding: var(--space-3); border-radius: 20px; }
+  .cup-rail__title { font-size: 17px; }
+  .cup-rail__arrow { width: 34px; height: 34px; }
+  .cup-rail__arrow--prev { left: -8px; }
+  .cup-rail__arrow--next { right: -8px; }
+  .cup-filterpanel { padding: var(--space-3); }
+  /* The Filter row on a phone: a smaller button, a smaller summary,
+     and List / Calendar as two small icons (their words stay for
+     screen readers). */
+  .cup-filterbar { gap: var(--space-2); margin-top: var(--space-4); }
+  .cup-filterbtn { min-height: 34px; padding: 5px 11px; gap: 6px; font-size: 13px; }
+  .cup-filterbar__summary { font-size: 12px; }
+  .cup-viewswitch .seg__btn { min-height: 30px; padding: 4px 10px; }
+  .cup-viewswitch .seg__icon { width: 15px; height: 15px; }
+  .cup-viewswitch .seg__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  /* The four status chips share the width. */
   .cup-status .chip { flex: 1 0 auto; justify-content: center; gap: 5px; padding: 5px 8px; }
   .cup-status .chip__dot { display: none; }
   .cup-status .chip[aria-pressed="true"] .chip__dot { display: none; }
-  .cup-filters { flex: 1 1 100%; }
-  .cup-select { flex: 1 1 auto; min-width: 0; }
-  .match-days { gap: var(--space-5); }
   .news-head { flex-direction: column; }
   .cup-results { padding: var(--space-4); }
   .cup-results__head { flex-direction: column; align-items: flex-start; }

@@ -902,7 +902,7 @@
        Content comes from src/js/data/xavier-cup.js; screens/cup.js
        fills every [data-cup-*] slot below.
 
-       A shared header (the full-screen banner, the one team picker) and
+       A shared header (the full-screen banner) and
        then the views under one sticky tab bar:
          Matches · Map · News & Updates
        Exactly one view is shown; the choice is kept in ?tab=… so a
@@ -949,20 +949,6 @@
         </div>
 
       </section>
-
-      <!-- FOLLOW YOUR TEAMS — the one place to choose teams. Tap any
-           number of them; the picks are saved on this device and
-           shared with Discover (lib/my-team.js). Their games go to the
-           top of Matches and get a lime ring everywhere. -->
-      <div class="wrap">
-        <section class="cup-follow" data-cup-teams-section>
-          <div class="cup-follow__head">
-            <h2 class="cup-section__title cup-section__title--sm">Follow your teams</h2>
-            <p class="cup-section__hint" data-cup-team-note>Choose any teams to follow. Their matches show first.</p>
-          </div>
-          <div data-cup-teams aria-label="Pick the teams you follow"></div>
-        </section>
-      </div>
     </div>
 
     <!-- STICKY TAB BAR — sits under the site nav while you scroll. -->
@@ -993,20 +979,59 @@
           <div class="cup-section__head cup-matches__head">
             <div>
               <h2 class="cup-section__title">Matches</h2>
-              <p class="cup-section__hint">Every game of the season, day by day: live, upcoming and results. Your teams come first. Each sport's own page is on Sports.</p>
-            </div>
-            <!-- List / Calendar. Hidden when CUP_CONFIG.showCalendar is off. -->
-            <div class="seg cup-viewswitch" role="group" aria-label="Show matches as" data-cup-viewswitch>
-              <button class="seg__btn" type="button" data-cup-view-mode="list" aria-pressed="true">List</button>
-              <button class="seg__btn" type="button" data-cup-view-mode="calendar" aria-pressed="false">Calendar</button>
+              <p class="cup-section__hint">What's live, what's next and the latest results.</p>
             </div>
           </div>
 
-          <!-- One toolbar: All · Live · Upcoming · Results on one line
-               (with their counts), then the venue. -->
-          <div class="cup-toolbar">
-            <div class="cup-status" data-cup-status-chips role="group" aria-label="Show"></div>
-            <div class="cup-filters">
+          <!-- WIN COUNTER — the teams with the most wins so far, worked
+               out from the results (screens/cup.js → renderWins). -->
+          <div class="cup-wins" data-cup-wins></div>
+
+          <!-- FOLLOW YOUR TEAMS — the one place to choose teams. Tap any
+               number of them; the picks are saved on this device and
+               shared with Discover (lib/my-team.js). Their games go first
+               in every row below and get a lime ring everywhere. -->
+          <section class="cup-follow" data-cup-teams-section>
+            <div class="cup-follow__head">
+              <h3 class="cup-section__title cup-section__title--sm">Follow your teams</h3>
+              <p class="cup-section__hint" data-cup-team-note>Choose any teams to follow. Their matches show first.</p>
+            </div>
+            <div data-cup-teams aria-label="Pick the teams you follow"></div>
+          </section>
+
+          <!-- One Filter button (the panel opens under it) and List / Calendar. -->
+          <div class="cup-filterbar">
+            <button class="cup-filterbtn" type="button" data-cup-filter-toggle
+                    aria-expanded="false" aria-controls="cup-filter-panel">
+              <svg class="cup-filterbtn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="2" y1="4" x2="14" y2="4"/><line x1="4" y1="8" x2="12" y2="8"/><line x1="6.5" y1="12" x2="9.5" y2="12"/></svg>
+              <span>Filter</span>
+              <span class="cup-filterbtn__count" data-cup-filter-count hidden>0</span>
+              <svg class="cup-filterbtn__chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3,6 8,11 13,6"/></svg>
+            </button>
+            <span class="cup-filterbar__summary" data-cup-filter-summary hidden></span>
+            <!-- List / Calendar. Hidden when CUP_CONFIG.showCalendar is off. -->
+            <div class="seg cup-viewswitch" role="group" aria-label="Show matches as" data-cup-viewswitch>
+              <button class="seg__btn" type="button" data-cup-view-mode="list" aria-pressed="true">
+                <svg class="seg__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="5.5" y1="4" x2="14" y2="4"/><line x1="5.5" y1="8" x2="14" y2="8"/><line x1="5.5" y1="12" x2="14" y2="12"/><line x1="2" y1="4" x2="2.2" y2="4"/><line x1="2" y1="8" x2="2.2" y2="8"/><line x1="2" y1="12" x2="2.2" y2="12"/></svg>
+                <span class="seg__label">List</span>
+              </button>
+              <button class="seg__btn" type="button" data-cup-view-mode="calendar" aria-pressed="false">
+                <svg class="seg__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2"/><line x1="2" y1="6.5" x2="14" y2="6.5"/><line x1="5.5" y1="1.5" x2="5.5" y2="4"/><line x1="10.5" y1="1.5" x2="10.5" y2="4"/></svg>
+                <span class="seg__label">Calendar</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="cup-filterpanel" id="cup-filter-panel" data-cup-filter-panel hidden>
+            <div class="cup-filterpanel__row">
+              <p class="cup-filterpanel__label">Day</p>
+              <div class="cup-daychips" data-cup-day-chips role="group" aria-label="Day"></div>
+            </div>
+            <div class="cup-filterpanel__row">
+              <p class="cup-filterpanel__label">Show</p>
+              <div class="cup-status" data-cup-status-chips role="group" aria-label="Show"></div>
+            </div>
+            <div class="cup-filterpanel__row cup-filterpanel__row--selects">
               <label class="cup-select">
                 <span class="cup-select__label">Venue</span>
                 <span class="cup-select__field">
@@ -1014,27 +1039,34 @@
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3,6 8,11 13,6"/></svg>
                 </span>
               </label>
+              <label class="cup-select">
+                <span class="cup-select__label">Sport</span>
+                <span class="cup-select__field">
+                  <select data-cup-filter="sport"></select>
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3,6 8,11 13,6"/></svg>
+                </span>
+              </label>
               <button class="btn btn--ghost btn--sm" type="button" data-cup-clear-filters hidden>Clear</button>
             </div>
           </div>
 
-          <!-- YOUR TEAMS — the followed teams' games, before the rest.
-               Hidden until a team is followed. -->
-          <section class="cup-yours" data-cup-yours aria-labelledby="cup-yours-title" hidden></section>
-
-          <!-- LIST — grouped by day, with a strip of days that sticks
-               under the tab bar. -->
+          <!-- LIST — three rows you swipe (or step with the arrows):
+               Live now · Upcoming · Finished recently. -->
           <div class="cup-matches__list" data-cup-list>
-            <div class="day-strip" data-cup-day-strip role="group" aria-label="Jump to a day"></div>
-            <div class="match-days" data-cup-days></div>
+            <div class="cup-rails" data-cup-rails></div>
           </div>
 
-          <!-- CALENDAR — the same filtered games as a month; the chosen
-               day's games underneath. -->
+          <!-- CALENDAR — the filtered games as a month; the chosen day's
+               games underneath. -->
           <div class="cup-matches__calendar" data-cup-calendar-wrap hidden>
             <div class="cal" data-cup-calendar></div>
             <div class="cal-day" data-cup-calendar-day aria-live="polite"></div>
           </div>
+
+          <p class="cup-matches__more">
+            Looking for something?
+            <a href="?screen=cup&amp;tab=map" data-cup-goto="map">Try the map →</a>
+          </p>
         </section>
       </div>
     </div>
