@@ -1,7 +1,7 @@
 /* ============================================================
    components/discover-updates.js — the Latest Updates slideshow
    on Discover. Same posts as the Xavier Cup > News tab
-   (data/cup-posts.json, falling back to CUP_NEWS.posts), same
+   (CUP_NEWS.feed, the news Worker, falling back to CUP_NEWS.posts), same
    look (.news-hero__* in cup.css), plus arrows and a counter.
    Put in: docs/src/js/components/discover-updates.js
    Load it with one line in main.js:
@@ -28,7 +28,11 @@ async function loadPosts() {
     const fallback = (CUP_NEWS.posts || []).map(norm);
     if (!CUP_NEWS.feed) return fallback;
     try {
-        const res = await fetch(new URL(`../data/${CUP_NEWS.feed}`, import.meta.url), { cache: 'no-cache' });
+        // A full https:// address (the news Worker) is used as is; anything
+        // else is a file name inside ../data/ (same rule as screens/cup.js).
+        const feed = String(CUP_NEWS.feed);
+        const url = /^https:\/\//i.test(feed) ? new URL(feed) : new URL(`../data/${feed}`, import.meta.url);
+        const res = await fetch(url, { cache: 'no-cache' });
         const data = res.ok ? await res.json() : null;
         return Array.isArray(data) && data.length ? data.map(norm) : fallback;
     } catch { return fallback; }
@@ -72,7 +76,7 @@ function wire(el, total) {
     slides.forEach((s, i) => {
       const on = i === index;
       s.classList.toggle('is-active', on);
-      s.toggleAttribute('aria-hidden', !on);
+      if (on) s.removeAttribute('aria-hidden'); else s.setAttribute('aria-hidden', 'true');
       s.querySelectorAll('a').forEach(a => { a.tabIndex = on ? 0 : -1; });
     });
     bars.forEach((b, i) => {

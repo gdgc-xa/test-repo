@@ -15,7 +15,7 @@
                 chips
     CALENDAR   the team picker again, and the season as a month with
                 the chosen day's games below
-    NEWS       the CSG Facebook page via data/cup-posts.json: the
+    NEWS       the TXC Compass Facebook page via the news Worker: the
                 newest post large, the rest in a looping carousel
                 that "See all" swaps for a grid
 
@@ -686,7 +686,7 @@ async function loadPosts() {
  *
  * The hero advances by itself (paused on hover, on focus, in a
  * background tab, and for anyone who asks for reduced motion); the
- * bars under it are buttons. Everything after the newest post scrolls
+ * bars under it are buttons. Everything after the hero's posts scrolls
  * in a carousel that loops (TXC's behaviour: the cards are laid out
  * three times and the scroll position jumps by one set at either
  * end). "See all" swaps the carousel for a plain grid.
@@ -716,7 +716,7 @@ async function renderNews(root) {
   const page = safeUrl(CUP_NEWS.pageUrl);
   const posts = (await loadPosts()).slice(0, CUP_NEWS.maxPosts || 6);
   const heroPosts = posts.slice(0, HERO_COUNT);
-  const rest = posts.slice(1);
+  const rest = posts.slice(HERO_COUNT);
 
   const when = (p) => (parseDate(p.date) ? formatRange(p.date) : '');
   const linkFor = (p) => safeUrl(p.link) || page;
@@ -924,7 +924,7 @@ function wireHero(el) {
     slides.forEach((s, i) => {
       const on = i === index;
       s.classList.toggle('is-active', on);
-      s.toggleAttribute('aria-hidden', !on);
+      if (on) s.removeAttribute('aria-hidden'); else s.setAttribute('aria-hidden', 'true');
       s.querySelectorAll('a').forEach(a => { a.tabIndex = on ? 0 : -1; });
     });
     bars.forEach((b, i) => {
