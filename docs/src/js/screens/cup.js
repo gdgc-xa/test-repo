@@ -695,6 +695,7 @@ async function loadPosts() {
  * slot, so layouts never jump when real pictures arrive.
  */
 const HERO_COUNT = 3;
+const MORE_MAX = 15;
 const HERO_MS = 7000;
 const NEW_FOR_DAYS = 7;
 
@@ -714,9 +715,9 @@ async function renderNews(root) {
   if (!wrap || !CUP_CONFIG.showNews || !CUP_NEWS.enabled) return;
 
   const page = safeUrl(CUP_NEWS.pageUrl);
-  const posts = (await loadPosts()).slice(0, CUP_NEWS.maxPosts || 6);
+  const posts = (await loadPosts()).slice(0, CUP_NEWS.maxPosts || (HERO_COUNT + MORE_MAX));
   const heroPosts = posts.slice(0, HERO_COUNT);
-  const rest = posts.slice(HERO_COUNT);
+   const rest = posts.slice(HERO_COUNT, HERO_COUNT + MORE_MAX);
 
   const when = (p) => (parseDate(p.date) ? formatRange(p.date) : '');
   const linkFor = (p) => safeUrl(p.link) || page;
