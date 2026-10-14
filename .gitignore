@@ -1,0 +1,11 @@
+# Wrangler local state (contains account info and local KV/D1 data)
+worker/.wrangler/
+.wrangler/
+node_modules/
+.dev.vars
+.DS_Store
+
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example

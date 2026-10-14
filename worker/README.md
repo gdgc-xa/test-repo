@@ -401,7 +401,7 @@ How each case is handled:
 
 - **Missing text:** falls back to the original post's text, then the Page's story line, then a default title.
 - **Missing picture:** the site shows its own placeholder graphic.
-- **Pictures:** each is downloaded once, limited to 4 MB, and removed when the post is no longer in the latest 6.
+- **Pictures:** each is downloaded once, limited to 4 MB, and removed when the post is no longer in the latest 15.
 - **Special letters:** Facebook's styled Unicode letters (bold or italic) are converted to plain letters.
 - **Deleted or unavailable posts:** these simply drop out of the list on the next refresh.
 
@@ -460,7 +460,7 @@ The list order is always by **share date**, so the most recently shared post com
 | The News tab shows the old sample posts | The site fell back. Check that `feed` is the full `https://…/posts.json` address, that `cup.js` has the D1 change, that `/posts.json` itself works, and hard-refresh. |
 | Browser console shows a CORS error | The Worker already allows any origin. Check that the address is exactly the Worker's address and uses `https`. |
 | Cards show a placeholder instead of a picture | The post has no picture, the picture is over 4 MB, or the download failed. Check the Worker log for `Could not save the picture`. |
-| `/img/<name>` returns 404 | The picture is no longer in the latest 6 posts and was removed. Refresh the site. |
+| `/img/<name>` returns 404 | The picture is no longer in the latest 15 posts and was removed. Refresh the site. |
 | A new department badge looks unstyled | If the site's CSS styles badges by value (it used to say `CSG`), new names get the default style. Edit the CSS if needed. |
 | Posts take up to 15 minutes to appear | This is the refresh interval. Change `crons` in `wrangler.toml` if needed (see [Maintenance](#14-maintenance)). |
 | Browser keeps showing old content | Hard-refresh. The Worker tells browsers to reuse `/posts.json` for 5 minutes. |
@@ -505,7 +505,7 @@ Always check Cloudflare's pricing page for the current numbers. At the time of w
 
 **Change the badge for the Page's own posts.** Uncomment and edit `FB_DEFAULT_TAG` in `wrangler.toml`, then deploy.
 
-**Change how many posts are kept.** `POST_COUNT` at the top of `worker/src/index.js` (default 6). Also check `maxPosts` in `CUP_NEWS` in `xavier-cup.js`, which limits how many the site shows.
+**Change how many posts are kept.** `POST_COUNT` at the top of `worker/src/index.js` (default 15: 3 in the hero + 12 in More updates). Also check `maxPosts` in `CUP_NEWS` in `xavier-cup.js`, which limits how many the site shows.
 
 **Show posts from more than one Page.** Not supported as written. It would need one token per Page (from an admin of each Page) and an edit to the Worker so it loops over several Pages. Reshared posts could then appear twice and would have to be de-duplicated by `parent_id`.
 

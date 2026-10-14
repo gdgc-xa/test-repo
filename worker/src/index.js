@@ -21,7 +21,9 @@
  */
 
 const GRAPH_VERSION = 'v26.0';
-const POST_COUNT = 6;
+const POST_COUNT = 15;          // 3 hero + 12 in "More updates"
+const ALWAYS_REFRESH = 3;       // the newest posts are rebuilt every run; older ones are reused
+const BUILD_MAX = 8;            // posts rebuilt per run: ~5 subrequests each, free plan allows 50
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const POSTS_KEY = 'posts';
 const IMG_PREFIX = 'img:';
@@ -149,7 +151,7 @@ export async function refresh(env) {
   if (!env.FB_PAGE_TOKEN) throw new Error('FB_PAGE_TOKEN secret is not set.');
 
   let r = await graph(env, `${env.FB_PAGE_ID}/posts`, { fields: FIELDS_RICH, limit: String(POST_COUNT) });
-  if (!r.ok && [100, 10].includes(r.body.error?.code)) {
+  if (!r.ok && [100, 10, 1].includes(r.body.error?.code)) {
     console.log(`Facebook rejected the reshare fields (${r.body.error.message}); retrying without them.`);
     r = await graph(env, `${env.FB_PAGE_ID}/posts`, { fields: FIELDS_BASIC, limit: String(POST_COUNT) });
   }
@@ -162,8 +164,22 @@ export async function refresh(env) {
   const latest = r.body.data
     .sort((a, b) => b.created_time.localeCompare(a.created_time))
     .slice(0, POST_COUNT);
+  // Each post costs several subrequests (reshare lookups, picture, KV).
+  // The free plan allows 50 per run, so posts already stored are reused
+  // and only the newest few and any new post are rebuilt.
+  const previous = (await env.NEWS.get(POSTS_KEY, 'json')) ?? [];
+  const known = new Map(previous.map(p => [p.id, p]));
+  // A cold start (nothing stored yet) therefore fills in over a few runs:
+  // BUILD_MAX posts per run, newest first, until all are stored.
   const items = [];
-  for (const post of latest) items.push(await toPost(env, post));
+  let built = 0;
+  for (const [i, post] of latest.entries()) {
+    const old = known.get(post.id);
+    if (old && i >= ALWAYS_REFRESH) { items.push(old); continue; }
+    if (built >= BUILD_MAX) continue;
+    items.push(await toPost(env, post));
+    built++;
+  }
 
   await env.NEWS.put(POSTS_KEY, JSON.stringify(items));
 

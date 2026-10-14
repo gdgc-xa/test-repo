@@ -1,0 +1,448 @@
+/* ============================================================
+   discover-grid.css — Discover tab layout (UI only, static content)
+   Put in: docs/src/css/components/discover-grid.css
+   Wireframe:  [ Latest Updates                ]
+               [ Map Hub    ][ Ongoing Game    ]
+               [            ][ Program Flow    ]
+               [ Teams -> fixtures             ]
+   Shown only under data-skin="txc"; replaces .bento-hero there.
+   ============================================================ */
+.discover { display: none; position: relative; z-index: 7; padding-block: var(--space-5) var(--space-6); }
+:root[data-skin="txc"] .screen--landing .discover { display: block; }
+:root[data-skin="txc"] .screen--landing .bento-hero { display: none; }
+
+.dgrid {
+  --dg-r: 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "updates updates"
+    "map     game"
+    "map     flow"
+    "teams   teams";
+  gap: var(--space-3);
+}
+.dtile {
+  position: relative; display: flex; flex-direction: column; gap: var(--space-2);
+  min-width: 0; padding: clamp(22px, 3vw, 36px);
+  border-radius: var(--dg-r); text-decoration: none; color: inherit;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+a.dtile:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(9, 32, 64, .16); }
+a.dtile:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 3px; }
+
+.dtile__eyebrow { margin: 0; font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.dtile__title { margin: 0; font-family: var(--font-serif); font-stretch: 125%; font-weight: 800; line-height: 1; letter-spacing: -.02em; text-wrap: balance; }
+.dtile__meta { margin: 0; font-size: 15px; }
+.dtile__cta { margin-top: auto; align-self: flex-end; font-weight: 700; font-size: 14px; }
+
+/* Latest Updates — wide navy */
+.dtile--updates { grid-area: updates; min-height: clamp(190px, 26vw, 270px); color: var(--tx-tile-ink);
+  background: radial-gradient(circle at 90% 0%, var(--tx-glow), transparent 45%), var(--tx-tile); }
+.dtile--updates .dtile__eyebrow, .dtile--updates .dtile__cta { color: var(--tx-accent); }
+.dtile--updates .dtile__title { font-size: clamp(34px, 6vw, 68px); }
+.dtile--updates .dtile__meta { color: var(--tx-tile-muted); max-width: 52ch; }
+
+/* Map Hub — tall, painted like a mini campus map */
+.dtile--map { grid-area: map; min-height: 360px; background: var(--surface); border: 1px solid var(--border); }
+.dtile--map .dtile__title { font-size: clamp(30px, 4vw, 48px); }
+.dtile--map .dtile__eyebrow { color: var(--tx-primary); }
+.dtile__mapart { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; z-index: 0;
+  background:
+    radial-gradient(circle at 70% 28%, var(--tx-accent) 0 7px, transparent 8px),
+    radial-gradient(circle at 32% 62%, var(--tx-primary) 0 7px, transparent 8px),
+    radial-gradient(circle at 62% 78%, var(--tx-live) 0 7px, transparent 8px),
+    repeating-linear-gradient(0deg,  transparent 0 39px, var(--border) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, var(--border) 39px 40px),
+    var(--surface-2);
+  opacity: .9; }
+.dtile--map > :not(.dtile__mapart) { position: relative; z-index: 1; }
+.dtile--map .dtile__cta { padding: 9px 16px; border-radius: var(--radius-pill); background: var(--tx-primary); color: var(--tx-on-primary); }
+
+/* Latest Ongoing Game — lime */
+.dtile--game { grid-area: game; background: var(--tx-accent); color: var(--tx-on-accent); }
+.dtile--game .dtile__title { font-size: clamp(24px, 3vw, 36px); }
+.dtile__live { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: var(--radius-pill);
+  background: var(--tx-live); color: var(--tx-on-live); font-size: 11.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.dtile__live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.dtile--game .dtile__cta { color: var(--tx-on-accent); }
+
+/* Program Flow — cream */
+.dtile--flow { grid-area: flow; background: var(--tx-scorebox); color: var(--ink); flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.dtile--flow .dtile__title { font-size: clamp(22px, 2.6vw, 30px); }
+.dtile--flow .dtile__cta { margin: 0; }
+
+/* Teams — wide strip */
+.dtile--teams { grid-area: teams; background: var(--surface); border: 1px solid var(--border); }
+.dtile__teamhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+.dtile--teams .dtile__title { font-size: clamp(26px, 3.4vw, 40px); }
+.dtile__teams { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: var(--space-2); }
+.dteam { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 8px; border-radius: 22px;
+  background: var(--surface-2); font-size: 12.5px; font-weight: 700; text-align: center; }
+.dteam__logo { width: 44px; height: 44px; border-radius: 50%; background: var(--tx-tile); }
+
+@media (max-width: 820px) {
+  .dgrid { --dg-r: 28px; grid-template-columns: 1fr;
+    grid-template-areas: "updates" "game" "map" "flow" "teams"; }
+  .dtile--map { min-height: 300px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dtile { transition: none; }
+  a.dtile:hover { transform: none; }
+}
+:root[data-motion="reduced"] .dtile { transition: none; }
+:root[data-motion="reduced"] a.dtile:hover { transform: none; }
+
+/* ============================================================
+   Latest Updates — the slideshow tile (reuses .news-hero__* and
+   .news-ph from screens/cup.css; this only resizes and frames it)
+   ============================================================ */
+.dtile--updates.news-hero { margin: 0; padding: 0; gap: 0; border-radius: var(--dg-r); overflow: hidden; min-height: 0; }
+.dtile--updates .news-hero__slide { min-height: clamp(420px, 46vw, 580px); }
+.dtile--updates .news-hero__panel { max-width: 760px; padding-bottom: 76px; }
+.dtile--updates .news-hero__title { font-size: clamp(28px, 4.4vw, 56px); }
+.dtile--updates .news-hero__bars { bottom: 28px; right: clamp(150px, 16vw, 210px); }
+
+.du-top { position: absolute; z-index: 3; inset: 0 0 auto 0; display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-2); padding: clamp(18px, 2.6vw, 30px) clamp(24px, 4vw, 48px); pointer-events: none; }
+.du-top > * { pointer-events: auto; }
+.du-eyebrow { margin: 0; padding: 6px 14px; border-radius: var(--radius-pill); background: rgba(4, 12, 28, .55);
+  backdrop-filter: blur(6px); color: var(--tx-accent); font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.du-more { padding: 9px 18px; border-radius: var(--radius-pill); background: var(--tx-accent); color: var(--tx-on-accent);
+  font-size: 14px; font-weight: 700; text-decoration: none; transition: transform .16s; }
+.du-more:hover { transform: translateY(-2px); color: var(--tx-on-accent); }
+
+.du-nav { position: absolute; z-index: 3; right: clamp(24px, 4vw, 48px); bottom: 18px; display: flex; align-items: center; gap: 10px; color: #fff; }
+.du-count { font-size: 13px; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.du-step { width: 38px; height: 38px; display: grid; place-items: center; padding: 0; border-radius: 50%; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .4); background: rgba(4, 12, 28, .45); color: #fff; transition: background .16s, color .16s; }
+.du-step:hover { background: var(--tx-accent); color: var(--tx-on-accent); }
+.du-step svg { width: 16px; height: 16px; }
+.dtile--updates.is-single .du-nav { display: none; }
+
+@media (max-width: 820px) {
+  .dtile--updates .news-hero__slide { min-height: 440px; }
+  .dtile--updates .news-hero__panel { padding-bottom: 116px; }
+  .dtile--updates .news-hero__cta { margin-bottom: 6px; }
+  .dtile--updates .news-hero__bars { right: clamp(24px, 4vw, 48px); bottom: 66px; }
+  .du-nav { left: clamp(24px, 4vw, 48px); right: auto; }
+  .du-step { width: 34px; height: 34px; }
+  .du-eyebrow { display: none; }
+  .du-top { justify-content: flex-end; }
+}
+
+/* ============================================================
+   Ongoing Games — one-chip infinite carousel. No frame: the chip
+   IS the tile. Arrows sit on the chip's sides and appear only
+   while the visitor swipes sideways; the dots share the
+   "Know more" line, centred.
+   ============================================================ */
+.dtile--game { position: relative; padding: 0; gap: 0; background: none; color: inherit; border-radius: var(--dg-r); }
+.dtile--game:hover { transform: none; box-shadow: none; }
+
+.dgames__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; border-radius: var(--dg-r); cursor: grab; }
+.dgames__track::-webkit-scrollbar { display: none; }
+.dgames__track.is-drag { scroll-snap-type: none; scroll-behavior: auto; cursor: grabbing; user-select: none; }
+
+.dchip { flex: 0 0 100%; scroll-snap-align: center; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; min-height: 270px;
+  padding: 22px 24px 20px; border: 0; border-radius: var(--dg-r); text-align: left; font: inherit; cursor: pointer; text-decoration: none;
+  background: var(--tx-tile); color: var(--tx-tile-ink); transition: box-shadow .18s; }
+.dchip:hover { box-shadow: 0 12px 26px rgba(9, 32, 64, .28); }
+.dchip:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: -3px; }
+.dchip__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.dchip__status { display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px; border-radius: var(--radius-pill);
+  background: var(--tx-tile-wash); color: var(--tx-accent); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.dchip__status.is-live { background: var(--tx-live); color: var(--tx-on-live); }
+.dchip__status.is-live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: dchipPulse 1.4s ease-in-out infinite; }
+@keyframes dchipPulse { 50% { opacity: .25; } }
+.dchip__sport { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--tx-tile-muted); }
+.dchip__sport .sport-glyph { width: 18px; height: 18px; }
+
+.dchip__match { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex: 1; padding-inline: 18px; }
+.dchip__side { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1 1 0; min-width: 0; text-align: center;
+  font-weight: 700; font-size: 14px; line-height: 1.2; overflow-wrap: anywhere; }
+.dchip__crest { width: 56px; height: 56px; object-fit: contain; border-radius: 50%; background: var(--tx-tile-wash); }
+.dchip__crest--blank { display: block; }
+.dchip__vs { font-family: var(--font-serif); font-stretch: 125%; font-size: 22px; color: var(--tx-accent); white-space: nowrap; }
+.dchip__solo { font-family: var(--font-serif); font-weight: 800; font-size: 22px; line-height: 1.15; }
+
+.dchip__info { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--tx-tile-muted); }
+.dchip__info span:first-child { color: var(--tx-tile-ink); font-weight: 600; }
+/* One 20px line: "Know more" at the right, the dots centred on it (below). */
+.dchip__cta { align-self: flex-end; height: 20px; line-height: 20px; font-weight: 700; font-size: 14px; color: var(--tx-accent); }
+.dchip--empty { justify-content: center; }
+
+.dgames__dots { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); height: 20px; display: flex; align-items: center; gap: 7px; color: var(--tx-tile-ink); }
+.dgames__dots i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .35; cursor: pointer; transition: opacity .16s, transform .16s; }
+.dgames__dots i.is-on { opacity: 1; background: var(--tx-accent); transform: scale(1.25); }
+
+.dgames__btn { position: absolute; top: 50%; z-index: 2; width: 38px; height: 38px; display: grid; place-items: center; padding: 0; margin-top: -19px;
+  border: 0; border-radius: 50%; cursor: pointer; background: var(--tx-accent); color: var(--tx-on-accent);
+  box-shadow: 0 4px 12px rgba(4, 12, 28, .35); opacity: 0; pointer-events: none; transition: opacity .2s, transform .16s; }
+.dgames__btn--prev { left: 8px; }
+.dgames__btn--next { right: 8px; }
+.dgames__btn svg { width: 16px; height: 16px; }
+.dtile--game.show-arrows .dgames__btn { opacity: 1; pointer-events: auto; }
+.dgames__btn:hover { transform: scale(1.08); }
+.dtile--game.is-single .dgames__btn, .dtile--game.is-single .dgames__dots { display: none; }
+
+/* "See More Games" under the game popup */
+.dgame-more { display: flex; justify-content: center; padding: var(--space-4) var(--space-4) var(--space-5); }
+
+@media (prefers-reduced-motion: reduce) { .dchip__status.is-live::before { animation: none; } }
+:root[data-motion="reduced"] .dchip__status.is-live::before { animation: none; }
+
+/* ============================================================
+   Program Flow — the tile (now a button) and its popup
+   ============================================================ */
+button.dtile { border: 0; font: inherit; text-align: left; cursor: pointer; width: 100%; }
+button.dtile:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(9, 32, 64, .16); }
+button.dtile:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 3px; }
+.dtile--flow .dflow__txt { display: flex; flex-direction: column; gap: 10px; }
+.dflow__dots { display: flex; align-items: center; gap: 6px; }
+.dflow__dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--dot); }
+.dflow__dots i:not(:last-child)::after { content: ""; display: block; width: 8px; height: 2px; margin: 5px 0 0 12px; background: var(--border); }
+
+/* ============================================================
+   Teams — the border stays; the logo tiles come from team-strip.css
+   ============================================================ */
+.dtile--teams .dtile__cta { margin: 0; align-self: auto; color: var(--tx-primary); text-decoration: none; }
+.dtile--teams .dtile__cta:hover { text-decoration: underline; }
+.dtile--teams .team-strip { margin-top: var(--space-2); }
+.dtile--teams .team-tile { background: var(--surface-2); }
+.dtile--teams .team-tile:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 2px; }
+
+/* ============================================================
+   Landing hero — compass, search, four shortcuts, stats strip
+   Xavier Cup 2026 design only. The navy panel is the same in light
+   and dark; everything under it uses the theme tokens.
+   ============================================================ */
+.dhero { display: none; position: relative; z-index: 9; padding-block: var(--space-5) var(--space-2); }
+:root[data-skin="txc"] .screen--landing .dhero { display: block; }
+.dhero + .discover { padding-top: var(--space-3); }
+
+.dhero__panel { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); align-items: center; gap: var(--space-4);
+  min-height: clamp(440px, 58vh, 580px); padding: clamp(28px, 5vw, 64px); border-radius: 40px; color: var(--tx-tile-ink);
+  background: radial-gradient(circle at 88% 12%, var(--tx-glow), transparent 48%), var(--tx-tile); }
+.dhero__copy { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+.dhero__eyebrow { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--tx-accent); }
+.dhero__title { margin: 0; font-family: var(--font-serif); font-stretch: 125%; font-weight: 800; font-size: clamp(38px, 6.2vw, 84px); line-height: .96; letter-spacing: -.025em; text-wrap: balance; }
+.dhero__title em { font-style: normal; color: var(--tx-accent); }
+/* An <h1> picks up the page's dark ink in light mode, which vanishes on the navy panel.
+   Colour everything on the panel explicitly. */
+.dhero .dhero__title { color: var(--tx-tile-ink); }
+.dhero .dhero__title em { color: var(--tx-accent); }
+.dhero__lede { margin: 0; max-width: 46ch; font-size: clamp(16px, 1.6vw, 19px); line-height: 1.5; color: var(--tx-tile-muted); }
+
+.dhero .dhero__search { width: 100%; max-width: 560px; background: var(--surface); color: var(--ink); border: 0; border-radius: var(--radius-pill); box-shadow: 0 10px 28px rgba(4, 12, 28, .3); }
+.dhero .dhero__search .search-shell__input { color: var(--ink); }
+.dhero .dhero__search .search-shell__icon { color: var(--muted); }
+
+.dhero__live { display: inline-flex; align-items: center; gap: 9px; padding: 8px 16px; border-radius: var(--radius-pill); text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, .3); background: rgba(255, 255, 255, .08); color: var(--tx-tile-ink); font-size: 14px; font-weight: 700; transition: background .16s, transform .16s; }
+.dhero__live[hidden] { display: none; }
+.dhero__live:hover { background: rgba(255, 255, 255, .16); transform: translateY(-2px); }
+.dhero__pulse { width: 9px; height: 9px; border-radius: 50%; background: #FF5B4D; animation: dheroPulse 1.4s ease-in-out infinite; }
+@keyframes dheroPulse { 50% { opacity: .3; transform: scale(.8); } }
+
+.dhero__compass { position: relative; justify-self: center; width: min(100%, 420px); color: var(--tx-accent); }
+.dhero__compass svg { display: block; width: 100%; height: auto; overflow: visible; }
+.dc-ring, .dc-needle { transform-origin: 100px 100px; transform-box: view-box; }
+.dc-ring { animation: dcSpin 120s linear infinite; }
+.dc-needle { animation: dcSway 9s ease-in-out infinite alternate; }
+@keyframes dcSpin { to { transform: rotate(360deg); } }
+@keyframes dcSway { from { transform: rotate(-9deg); } to { transform: rotate(14deg); } }
+
+
+.dhero__stats { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: var(--space-3) 0 0; padding: 14px 0; border-block: 1px solid var(--border); }
+.dhero__stats li { display: flex; flex-direction: column; align-items: center; gap: 2px; padding-inline: 8px; }
+.dhero__stats li + li { border-left: 1px solid var(--border); }
+.dhero__stats b { font-family: var(--font-serif); font-stretch: 125%; font-weight: 800; font-size: clamp(24px, 3.2vw, 38px); line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); }
+.dhero__stats span { font-size: 11.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+@media (max-width: 820px) {
+  .dhero__panel { grid-template-columns: 1fr; border-radius: 28px; min-height: 0; }
+  .dhero__compass { position: absolute; right: -18%; top: -6%; width: 78%; opacity: .16; pointer-events: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dc-ring, .dc-needle, .dhero__pulse { animation: none; }
+}
+:root[data-motion="reduced"] .dc-ring, :root[data-motion="reduced"] .dc-needle, :root[data-motion="reduced"] .dhero__pulse { animation: none; }
+
+/* ---- Hero: interest chips + org-logo ticker ---- */
+.dhero__browse { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-4); }
+.dhero__h { margin: 0; font-family: var(--font-serif); font-stretch: 125%; font-weight: 800; font-size: clamp(22px, 2.8vw, 32px); letter-spacing: -.02em; color: var(--ink); }
+/* Left-aligned under the heading. The extra selectors beat the skin layer's centred .tag-cloud. */
+:root[data-skin="txc"] .dhero .dhero__chips.tag-cloud { justify-content: flex-start; align-items: flex-start; text-align: left; width: 100%; max-width: none; margin: 0; padding-inline: 0; }
+
+/* A scrollable strip: swipe or drag it, or leave it and discover-hero.js keeps it drifting. */
+.dhero__ticker { margin-top: var(--space-3); padding-block: 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; cursor: grab;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+.dhero__ticker::-webkit-scrollbar { display: none; }
+.dhero__ticker.is-drag { cursor: grabbing; user-select: none; }
+.dhero__track { display: flex; width: max-content; }
+.dlogo { position: relative; overflow: hidden; flex: none; width: 64px; height: 64px; margin-right: 14px; padding: 8px; display: grid; place-items: center; border-radius: 50%;
+  border: 1px solid var(--border); background: #fff; cursor: pointer; transition: transform .16s, border-color .16s; }
+.dlogo img { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); object-fit: contain; border-radius: 50%; -webkit-user-drag: none; }
+/* Logos that are not round (e.g. XU-JPAMA) fill a round frame (with a white ring) instead of floating inside it. */
+.dlogo--fill img { inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); object-fit: cover; }
+.dlogo__t { font-size: 11px; font-weight: 800; color: #1b2a4a; text-align: center; line-height: 1; }
+.dlogo:hover { transform: scale(1.14); border-color: var(--tx-primary); }
+.dlogo:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 2px; }
+
+/* Game chip: the status badge sits between the two teams, where the score was. */
+.dchip__match .dchip__status { flex: none; align-self: center; }
+.dchip__match .dchip__solo { flex: 1; }
+.dtile--flow[aria-disabled="true"] { cursor: default; }
+
+/* ============================================================
+   FULL-SCREEN HERO  (switch: class "dhero--full" on <section class="dhero">)
+   The navy fills the whole screen edge to edge; the content stays
+   lined up with the grid below. To go back to the old BOXED hero,
+   remove "dhero--full" from the <section> in index.html. Nothing
+   else needs to change (the boxed rules above are untouched).
+   ============================================================ */
+.screen--landing { overflow-x: clip; }              /* the full-width background must never add a sideways scrollbar */
+/* Every .screen has padding-top: var(--space-4) (layout.css); pull the hero up over it so no strip shows under the nav. */
+.dhero--full { margin-top: calc(-1 * var(--space-4)); padding: 0 0 var(--space-2); }
+.dhero--full .dhero__panel { position: relative; isolation: isolate; overflow: visible; border-radius: 0; background: none;
+  padding: clamp(36px, 8vh, 96px) 0 clamp(80px, 13vh, 128px); min-height: calc(100vh - var(--nav-h, 76px)); min-height: calc(100svh - var(--nav-h, 76px)); }
+.dhero--full .dhero__panel::before { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: 50%; width: 100vw; transform: translateX(-50%);
+  background: radial-gradient(circle at 80% 18%, var(--tx-glow), transparent 55%), var(--tx-tile); }
+.dhero--full .dhero__title { font-size: clamp(44px, 8vw, 116px); }
+.dhero--full .dhero__lede { max-width: 52ch; font-size: clamp(17px, 1.8vw, 22px); }
+.dhero--full .dhero__compass { width: min(100%, 540px); }
+
+/* A small bouncing chevron: there is more below. */
+.dhero--full .dhero__panel::after { content: ""; position: absolute; left: 50%; bottom: 28px; width: 14px; height: 14px;
+  border-right: 3px solid var(--tx-accent); border-bottom: 3px solid var(--tx-accent); transform: translateX(-50%) rotate(45deg);
+  animation: dheroBob 1.8s ease-in-out infinite; }
+@keyframes dheroBob { 50% { transform: translateX(-50%) translateY(9px) rotate(45deg); } }
+
+@media (max-width: 820px) {
+  .dhero--full .dhero__panel { min-height: calc(100vh - 64px); min-height: calc(100svh - 64px); padding-top: 28px; }
+  .dhero--full .dhero__compass { width: 78%; }
+  .dhero--full .dhero__title { font-size: clamp(40px, 12vw, 64px); }
+}
+@media (prefers-reduced-motion: reduce) { .dhero--full .dhero__panel::after { animation: none; } }
+:root[data-motion="reduced"] .dhero--full .dhero__panel::after { animation: none; }
+
+/* ---- Full-screen hero: tuning (content higher, headline fits the screen, phone layout) ---- */
+.dhero--full .dhero__panel { grid-template-columns: minmax(0, 1.4fr) minmax(0, .6fr); align-content: center;
+  padding: clamp(12px, 2.5vh, 32px) 0 clamp(72px, 15vh, 150px); }       /* less on top than below: lifts the content */
+.dhero--full .dhero__title { font-size: clamp(40px, min(7.4vw, 12.5vh), 100px); }   /* never taller than the screen allows */
+.dhero--full .dhero__copy { gap: clamp(12px, 2.4vh, 24px); }
+.dhero--full .dhero__compass { width: min(100%, 460px); }
+
+@media (max-width: 820px) {
+  .dhero--full .dhero__panel { grid-template-columns: 1fr; align-content: start; min-height: calc(100vh - var(--nav-h-mob, 60px)); min-height: calc(100svh - var(--nav-h-mob, 60px));
+    padding: 20px 0 76px; }
+  .dhero--full .dhero__title { font-size: clamp(38px, 11.5vw, 60px); }
+  .dhero--full .dhero__lede { font-size: 16px; }
+  .dhero--full .dhero__compass { width: 86%; right: -26%; top: 4%; opacity: .14; }
+}
+@media (max-width: 480px) {
+  .dhero--full .dhero__eyebrow { font-size: 11px; letter-spacing: .14em; }
+  .dhero .dhero__search .search-shell__submit { padding-inline: 16px; }
+  .dhero__live { font-size: 13px; padding: 7px 14px; }
+}
+
+/* ---- Full-screen hero: PHONE layout (replaces the faint-compass-behind-the-text idea).
+        Text on top; the compass sits centred in the space that is left, as a real graphic. ---- */
+@media (max-width: 820px) {
+  .dhero--full .dhero__panel { display: flex; flex-direction: column; padding: 22px 0 64px;
+    min-height: calc(100vh - var(--nav-h-mob, 60px)); min-height: calc(100svh - var(--nav-h-mob, 60px)); }
+  .dhero--full .dhero__copy { gap: 14px; width: 100%; }
+  .dhero--full .dhero__title { font-size: clamp(40px, 13.2vw, 64px); line-height: .98; }
+  .dhero--full .dhero__lede { font-size: 16px; line-height: 1.45; }
+  .dhero--full .dhero__compass { position: static; inset: auto; opacity: 1; pointer-events: auto; flex: none;
+    width: clamp(190px, 62vw, 300px); margin: auto; padding-top: 28px; }
+  .dhero .dhero__search { max-width: 100%; }
+  .dhero .dhero__search .search-shell__input { min-width: 0; font-size: 15px; text-overflow: ellipsis; }
+}
+
+/* ============================================================
+   PHONES USE THE BOXED HERO  (screens up to 820px wide)
+   Desktop keeps the full-screen hero; on a phone the same markup
+   falls back to the navy box. To make phones full-screen too,
+   delete this whole block. To change what counts as a "phone",
+   change 820px (it matches the rest of the site's mobile rules).
+   ============================================================ */
+@media (max-width: 820px) {
+  .dhero--full { margin-top: 0; padding: var(--space-5) 0 var(--space-2); }
+  .dhero--full .dhero__panel { display: grid; grid-template-columns: 1fr; align-content: normal; isolation: auto; overflow: hidden;
+    min-height: 0; padding: 28px 24px 32px; border-radius: 28px;
+    background: radial-gradient(circle at 88% 12%, var(--tx-glow), transparent 48%), var(--tx-tile); }
+  .dhero--full .dhero__panel::before, .dhero--full .dhero__panel::after { display: none; }
+  .dhero--full .dhero__copy { gap: var(--space-3); width: auto; }
+  .dhero--full .dhero__title { font-size: clamp(36px, 10.5vw, 56px); line-height: .98; }
+  .dhero--full .dhero__lede { font-size: 16px; }
+  .dhero--full .dhero__compass { position: absolute; right: -18%; top: -6%; width: 78%; margin: 0; padding: 0; opacity: .16; pointer-events: none; }
+}
+
+/* ---- Phones: the cluster chips collapse into one themed dropdown (built by discover-hero.js) ---- */
+.cdrop { display: none; position: relative; z-index: 20; }
+.cdrop__btn { width: 100%; height: 54px; display: flex; align-items: center; gap: 12px; padding: 0 18px; text-align: left;
+  border: 1px solid rgba(255, 255, 255, .18); border-radius: var(--radius-pill); background: var(--tx-tile); color: var(--tx-tile-ink);
+  font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; transition: border-color .16s; }
+.cdrop.is-open .cdrop__btn { border-color: var(--tx-accent); }
+.cdrop__btn:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 2px; }
+.cdrop__dots { display: flex; gap: 4px; }
+.cdrop__dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--dot); }
+.cdrop__label { flex: 1; }
+.cdrop__chev { flex: none; width: 16px; height: 16px; color: var(--tx-accent); transition: transform .2s; }
+.cdrop.is-open .cdrop__chev { transform: rotate(180deg); }
+
+.cdrop__list { position: absolute; left: 0; right: 0; top: calc(100% + 8px); margin: 0; padding: 8px; list-style: none;
+  max-height: min(52vh, 380px); overflow-y: auto; overscroll-behavior: contain;
+  border: 1px solid rgba(255, 255, 255, .16); border-radius: 24px; background: var(--tx-tile); box-shadow: 0 18px 40px rgba(4, 12, 28, .45); }
+.cdrop__list[hidden] { display: none; }
+.cdrop__opt { display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 14px; border-radius: 16px;
+  color: var(--tx-tile-ink); font-size: 16px; font-weight: 500; cursor: pointer; }
+.cdrop__opt:active, .cdrop__opt.is-active { background: rgba(255, 255, 255, .1); }
+.cdrop__dot { flex: none; width: 12px; height: 12px; border-radius: 50%; background: var(--tx-tile-muted); }
+
+@media (max-width: 820px) {
+  .cdrop { display: block; }
+  :root[data-skin="txc"] .dhero .dhero__chips.tag-cloud { position: absolute; top: 0; left: 0; width: 1px; height: 1px; overflow: hidden; visibility: hidden; pointer-events: none; }
+}
+
+/* ============================================================
+   Latest Updates on a PHONE: the picture leads, the words sit on it.
+   (cup.css stacks picture-then-panel under 560px, which let the headline
+   take over. Here the picture fills the card and a short headline lies on
+   a dark fade at the bottom, like the desktop version.)
+   ============================================================ */
+@media (max-width: 820px) {
+  .dtile--updates .news-hero__slide { min-height: clamp(440px, 116vw, 540px); grid-template-rows: none; }
+  .dtile--updates .news-hero__media { grid-area: 1 / 1; aspect-ratio: auto; }
+  .dtile--updates .news-hero__slide::after { display: block; }            /* bring the dark fade back */
+  .dtile--updates .news-hero__panel { grid-area: 1 / 1; align-self: end; max-width: none; gap: 8px; padding: 20px 20px 104px; }
+  .dtile--updates .news-hero__title { font-size: clamp(20px, 5.6vw, 26px); line-height: 1.15;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+  .dtile--updates .news-hero__body { display: none; }                      /* the headline is enough on a phone */
+  .dtile--updates .news-hero__cta { min-height: 40px; margin-top: 4px; padding: 0 20px; font-size: 14px; }
+  .dtile--updates .news-hero__bars { left: 20px; right: 20px; bottom: 54px; }
+  .dtile--updates .du-nav { left: 20px; bottom: 12px; }
+  .dtile--updates .news-ph--hero .news-ph__mark { display: none; }         /* it collided with "View more" */
+  .du-top { padding: 14px 20px; }
+}
+
+/* ============================================================
+   The three tile links ("Know more", "See schedule", "Go to fixtures"):
+   plain text, one size, one colour, and the same distance from the
+   right edge, so they line up with each other.
+   Dark mode: lime on all three. Light mode: the Program Flow and Teams
+   tiles are cream/white, so those two use the theme's navy instead.
+   ============================================================ */
+:root { --cta-inset: 24px; }
+.dchip__cta, .dtile--flow .dtile__cta, .dtile--teams .dtile__cta {
+  display: inline-block; height: auto; margin: 0; padding: 0; border-radius: 0; background: none;
+  color: var(--tx-accent); font-size: 15px; font-weight: 700; line-height: 20px; text-decoration: none; }
+:root[data-theme="light"] .dtile--flow .dtile__cta, :root[data-theme="light"] .dtile--teams .dtile__cta { color: var(--tx-primary); }
+.dchip:hover .dchip__cta, a.dtile:hover .dtile__cta, .dtile--teams .dtile__cta:hover { text-decoration: underline; text-underline-offset: 3px; }
+.dchip { padding-right: var(--cta-inset); }
+.dtile--flow { padding-right: var(--cta-inset); }
+.dtile--teams { padding-right: calc(var(--cta-inset) - 1px); }   /* the Teams tile's 1px border counts too */
+.dgames__dots { height: 20px; }                                   /* centred on the "Know more" line */

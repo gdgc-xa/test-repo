@@ -336,16 +336,16 @@ export const GAMES = [
    including departmental posts the page has reshared. Each
    reshared post carries its department's name as `tag`.
 
-   They arrive through `feed`: a GitHub Action
-   (.github/workflows/facebook-news.yml) runs every hour, reads the
-   page through the Graph API with a token kept in the repository's
-   secrets, and writes the latest posts to data/cup-posts.json
-   (scripts/fetch-facebook-posts.mjs).
-   The browser only ever reads that file, so no token ships with
-   the site.
+   They arrive through `feed`: the news Worker (worker/, see
+   worker/README.md) reads the page through the Graph API every 15
+   minutes with a token kept as a Cloudflare secret, and serves the
+   latest posts as JSON. The browser only ever reads that address, so
+   no token ships with the site. A bare file name instead of an https
+   address is read from the data/ folder.
 
-   Until the Action has run, or if the file is empty or missing,
-   the hand-written `posts` below show instead.
+   If the feed is empty or unreachable, the hand-written `posts`
+   below show instead. They are placeholders: keep them current or
+   empty them.
 
    If you want Facebook's own page widget as well, set
    embed.enabled = true. It needs no token, but it will not render
@@ -361,12 +361,12 @@ export const CUP_NEWS = {
   pageHandle: 'XUCSG',
   followLabel: 'Open the Facebook page',
 
-  /** The file the Action writes, relative to this data folder.
+  /** The Worker's posts.json address (https://…) or a file in this data folder.
       null = use the hand-written posts only. */
   feed: 'https://txc-compass-news.gdsc-0c0.workers.dev/posts.json',
 
   /** How many posts to show. The first one is featured. */
-  maxPosts: 6,
+  maxPosts: 15,
 
   /** Facebook's own page plugin. Off by default — see the note above. */
   embed: {

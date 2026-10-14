@@ -1,32 +1,32 @@
 /* ============================================================
-   screens/cup.js — The Xavier Cup tab.
+  screens/cup.js — The Xavier Cup tab.
 
-   Four views under a sticky tab bar, as in the TXC proposal. One
-   is shown at a time and the choice is kept in ?tab=…
+  Four views under a sticky tab bar, as in the TXC proposal. One
+  is shown at a time and the choice is kept in ?tab=…
 
-     MAP        hero + counters (how many fixtures are upcoming /
+    MAP        hero + counters (how many fixtures are upcoming /
                 live / done), and the campus map. Tapping a venue
                 fills the panel beside it with what is live, upcoming
                 and finished there; tapping a sport's icon narrows
                 that to the one sport.
-     FIXTURES   pick the team you follow (its games get a lime ring
+    FIXTURES   pick the team you follow (its games get a lime ring
                 everywhere), one featured match per day under a
                 ‹ day › pager, and the full list with status + sport
                 chips
-     CALENDAR   the team picker again, and the season as a month with
+    CALENDAR   the team picker again, and the season as a month with
                 the chosen day's games below
-     NEWS       the CSG Facebook page via data/cup-posts.json: the
+    NEWS       the TXC Compass Facebook page via the news Worker: the
                 newest post large, the rest in a looping carousel
                 that "See all" swaps for a grid
 
-   Each piece can still be switched off in data/xavier-cup.js
-   (CUP_CONFIG.show*); a view with nothing left in it loses its tab.
+  Each piece can still be switched off in data/xavier-cup.js
+  (CUP_CONFIG.show*); a view with nothing left in it loses its tab.
 
-   The clock decides Upcoming / Ongoing / Finished (lib/dates.js),
-   read through cupNow() so a preview clock can stand in for it,
-   and the tab re-checks on a timer so a match flips to live while
-   the page is open rather than on the next reload.
-   ============================================================ */
+  The clock decides Upcoming / Ongoing / Finished (lib/dates.js),
+  read through cupNow() so a preview clock can stand in for it,
+  and the tab re-checks on a timer so a match flips to live while
+  the page is open rather than on the next reload.
+  ============================================================ */
 
 import {
   CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, GAMES, VENUE_BY_ID, sportsInPlay,
@@ -560,7 +560,7 @@ function renderSchedule(root, games, myTeam) {
       const sports = sportsInPlay();
       sportRow.innerHTML = [
         `<button class="chip chip--plain" type="button" data-sport-id="all"
-                 aria-pressed="${state.sport === null}">All sports</button>`,
+                aria-pressed="${state.sport === null}">All sports</button>`,
         ...sports.map(s => `
           <button class="chip chip--plain" type="button" data-sport-id="${escapeAttr(s)}"
                   aria-pressed="${state.sport === s}">${escapeHtml(s)}</button>`),
@@ -582,8 +582,8 @@ function renderSchedule(root, games, myTeam) {
   grid.innerHTML = list.length
     ? list.map((g, i) => matchCardHtml(g, { i, myTeam })).join('')
     : `<div class="filter-note filter-note--empty" style="grid-column: 1 / -1;">
-         <strong>Nothing here yet.</strong>&nbsp;Try another status or sport.
-       </div>`;
+        <strong>Nothing here yet.</strong>&nbsp;Try another status or sport.
+      </div>`;
   watchReveals(grid);
 }
 
@@ -686,7 +686,7 @@ async function loadPosts() {
  *
  * The hero advances by itself (paused on hover, on focus, in a
  * background tab, and for anyone who asks for reduced motion); the
- * bars under it are buttons. Everything after the newest post scrolls
+ * bars under it are buttons. Everything after the hero's posts scrolls
  * in a carousel that loops (TXC's behaviour: the cards are laid out
  * three times and the scroll position jumps by one set at either
  * end). "See all" swaps the carousel for a plain grid.
@@ -695,6 +695,7 @@ async function loadPosts() {
  * slot, so layouts never jump when real pictures arrive.
  */
 const HERO_COUNT = 3;
+const MORE_MAX = 12;
 const HERO_MS = 7000;
 const NEW_FOR_DAYS = 7;
 
@@ -714,9 +715,9 @@ async function renderNews(root) {
   if (!wrap || !CUP_CONFIG.showNews || !CUP_NEWS.enabled) return;
 
   const page = safeUrl(CUP_NEWS.pageUrl);
-  const posts = (await loadPosts()).slice(0, CUP_NEWS.maxPosts || 6);
+  const posts = (await loadPosts()).slice(0, CUP_NEWS.maxPosts || (HERO_COUNT + MORE_MAX));
   const heroPosts = posts.slice(0, HERO_COUNT);
-  const rest = posts.slice(1);
+   const rest = posts.slice(HERO_COUNT, HERO_COUNT + MORE_MAX);
 
   const when = (p) => (parseDate(p.date) ? formatRange(p.date) : '');
   const linkFor = (p) => safeUrl(p.link) || page;
@@ -736,7 +737,7 @@ async function renderNews(root) {
       : newsPlaceholder(p, i, { hero: true });
     return `
       <article class="news-hero__slide${i === 0 ? ' is-active' : ''}" data-hero-slide="${i}"
-               aria-roledescription="slide" aria-label="${i + 1} of ${heroPosts.length}"${i ? ' aria-hidden="true"' : ''}>
+              aria-roledescription="slide" aria-label="${i + 1} of ${heroPosts.length}"${i ? ' aria-hidden="true"' : ''}>
         <div class="news-hero__media">${media}</div>
         <div class="news-hero__panel">
           <p class="news-hero__kicker">
@@ -924,7 +925,7 @@ function wireHero(el) {
     slides.forEach((s, i) => {
       const on = i === index;
       s.classList.toggle('is-active', on);
-      s.toggleAttribute('aria-hidden', !on);
+      if (on) s.removeAttribute('aria-hidden'); else s.setAttribute('aria-hidden', 'true');
       s.querySelectorAll('a').forEach(a => { a.tabIndex = on ? 0 : -1; });
     });
     bars.forEach((b, i) => {

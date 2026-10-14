@@ -57,7 +57,7 @@ function hydrateSearch(shell) {
   attachSearchShell(shell, (query) => {
     if (!query) return;
     navigate({ screen: 'browse', q: query });
-  });
+  }, { live: false });
 }
 
 /**
