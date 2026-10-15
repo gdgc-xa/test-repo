@@ -143,6 +143,7 @@ campus-compass/
 │   │   │   ├── cup-map.js           # the consolidated venue map + pins
 │   │   │   ├── match-card.js        # one match as a match card
 │   │   │   ├── sports.js            # the Sports view: sport grid, sport page, team page
+│   │   │   ├── sport-pictograms.js  # a pictogram per sport (CC0 SVGs from svgrepo.com)
 │   │   │   ├── team-strip.js        # team picker
 │   │   │   ├── featured-match.js    # which game to feature on a day
 │   │   │   ├── cup-calendar.js      # the season as a month

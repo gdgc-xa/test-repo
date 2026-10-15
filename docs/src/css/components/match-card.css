@@ -65,6 +65,7 @@
 .match__sport { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
 .match__sport .sport-glyph { width: 15px; height: 15px; flex: 0 0 auto; color: var(--ink-2); }
 .match__icon { width: 18px; height: 18px; flex: 0 0 auto; object-fit: contain; }
+.match__sport .sport-picto { width: 20px; height: 20px; color: var(--ink); }
 .match__what { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .match__note {
   padding: 2px 8px;

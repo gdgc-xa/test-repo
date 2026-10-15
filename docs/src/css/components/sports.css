@@ -23,9 +23,12 @@
 /* ============================================================
    THE GRID OF SPORTS
    ============================================================ */
+/* Like the Olympics' list of sports: a card per sport, A to Z, its
+   pictogram (sport-pictograms.js) large in the brand colour and the
+   name under it. */
 .sport-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 1fr));
   gap: var(--space-3);
 }
 .sport-tile {
@@ -49,23 +52,26 @@
 .sport-tile__icon {
   display: grid;
   place-items: center;
-  width: 84px;
-  height: 84px;
+  width: 72px;
+  height: 72px;
   margin-bottom: var(--space-2);
-  border-radius: 50%;
-  background: var(--surface-2);
+  color: var(--tx-primary);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+.sport-tile:hover .sport-tile__icon { transform: scale(1.06); }
+.sport-tile__icon .sport-picto { width: 68px; height: 68px; }
 .sport-tile__icon img { width: 60px; height: 60px; object-fit: contain; }
+/* A sport with no pictogram or picture: its first letter. */
 .sport-tile__letter {
   font-family: var(--font-serif);
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 800;
-  color: var(--ink-2);
 }
 .sport-tile__name {
   font-family: var(--font-serif);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
+  line-height: 1.2;
 }
 .sport-tile__divs {
   font-size: 11px;
@@ -135,6 +141,7 @@
   transform: translateY(-50%);
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
 }
+.sport-head__mark.sport-picto { aspect-ratio: 1; color: rgba(255, 255, 255, 0.92); }
 .sport-head__text {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -143,11 +150,25 @@
 }
 .sport-head__icon {
   grid-row: span 2;
-  width: 48px;
-  height: 48px;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  color: #FFFFFF;
+}
+.sport-head__icon .sport-picto { width: 100%; height: 100%; }
+/* A picture or a letter instead of a pictogram: on a white disc. */
+.sport-head__icon img,
+.sport-head__icon .sport-tile__letter {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
   padding: 6px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.92);
+  color: var(--tx-tile);
+  font-size: 24px;
   object-fit: contain;
 }
 .sport-head__name {
@@ -160,6 +181,16 @@
 .sport-head__stats { font-size: 14px; color: rgba(255, 255, 255, 0.86); }
 
 .sport-divs-row { margin-top: var(--space-4); }
+/* Many categories (Athletics' events, Esports' games): one row of
+   small chips that scrolls sideways (the chips are .cup-daychip). */
+.sport-cats {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.sport-cats::-webkit-scrollbar { display: none; }
 
 /* Sections down the page */
 .sport-sec { margin-top: var(--space-7); }
@@ -390,27 +421,22 @@ button.kobox:hover { border-color: var(--border-strong); box-shadow: var(--shado
    few screens rather than many.
    ============================================================ */
 @media (max-width: 560px) {
-  /* The sports as a list: picture left, words right. */
-  .sport-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
-  .sport-tile {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    column-gap: var(--space-3);
-    row-gap: 0;
-    padding: 10px 14px;
-    border-radius: 16px;
-    text-align: left;
-  }
-  .sport-tile__icon { grid-column: 1; grid-row: 1 / 4; width: 52px; height: 52px; margin: 0; }
+  /* The sports three across, pictogram over name, like the
+     Olympics app; the event count waits for the sport's page. */
+  .sport-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .sport-tile { gap: 2px; padding: 14px 6px 10px; border-radius: 16px; }
+  .sport-tile__icon { width: 50px; height: 50px; margin-bottom: 4px; }
+  .sport-tile__icon .sport-picto { width: 48px; height: 48px; }
   .sport-tile__icon img { width: 38px; height: 38px; }
-  .sport-tile__name { font-size: 16px; }
-  .sport-tile__stats { margin-top: 0; font-size: 12.5px; }
+  .sport-tile__letter { font-size: 28px; }
+  .sport-tile__name { font-size: 13.5px; overflow-wrap: anywhere; }
+  .sport-tile__divs { display: none; }
+  .sport-tile__stats { margin-top: 0; font-size: 11px; line-height: 1.3; color: var(--muted); }
 
   .sports-crumbs { margin-bottom: var(--space-2); font-size: 13px; }
   .sport-head { min-height: 140px; padding: 14px 16px; border-radius: var(--radius-lg); }
   .sport-head__mark { width: 84px; right: 4%; }
-  .sport-head__icon { width: 38px; height: 38px; padding: 4px; }
+  .sport-head__icon { width: 40px; height: 40px; }
   .sport-head__name { font-size: 26px; }
   .sport-head__stats { font-size: 12.5px; }
   .sport-divs-row { margin-top: var(--space-3); }

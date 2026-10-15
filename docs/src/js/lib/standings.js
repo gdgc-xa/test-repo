@@ -11,13 +11,30 @@ import { TEAM_BY_ID } from '../data/teams.js';
 
 const DIVISION_ORDER = ['Men', 'Women', 'Mixed', 'Open'];
 
-/** A game with no division is an Open one. */
-export const divisionOf = (g) => g.division || 'Open';
+/**
+ * categoryOf(g) — what a game counts towards within its sport:
+ *   its division ('Men'; none = 'Open'), or with an event, the event
+ *   and its division ('100m · Men'; 'ML' when the event has no
+ *   division or an Open one).
+ */
+export function categoryOf(g) {
+  const div = g.division && g.division !== 'Open' ? g.division : '';
+  if (g.event) return div ? `${g.event} · ${div}` : g.event;
+  return g.division || 'Open';
+}
 
-/** The divisions these games are played in: Men, Women, Mixed, Open, then any other. */
-export function divisionsFor(games) {
+/**
+ * categoriesFor(sport, games) — a sport's categories in page order:
+ * the ones listed in SPORTS first, then any its games use that the
+ * list leaves out (Men, Women, Mixed, Open first among those).
+ */
+export function categoriesFor(sport, games) {
+  const listed = sport?.categories || [];
   const rank = (d) => { const i = DIVISION_ORDER.indexOf(d); return i < 0 ? DIVISION_ORDER.length : i; };
-  return [...new Set(games.map(divisionOf))].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+  const extra = [...new Set(games.map(categoryOf))]
+    .filter(c => !listed.includes(c))
+    .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+  return [...listed, ...extra];
 }
 
 /**

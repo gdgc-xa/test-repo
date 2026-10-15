@@ -54,7 +54,7 @@ import { calendarHtml, gameMonths } from '../components/cup-calendar.js';
 import { openDetail, closeDetail } from '../components/detail-modal.js';
 import { sportsIndexHtml, sportPageHtml } from '../components/sports.js';
 import { myTeams, toggleMyTeam, onMyTeamChange } from '../lib/my-team.js';
-import { divisionOf, divisionsFor, standings, knockouts, winnerOf } from '../lib/standings.js';
+import { categoryOf, categoriesFor, standings, knockouts, winnerOf } from '../lib/standings.js';
 import { watchReveals } from '../reveal-observer.js';
 import { currentQuery } from '../router.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
@@ -564,6 +564,9 @@ function isAbout(p, sport) {
   return `${p.title} ${p.body}`.toLowerCase().split(/[^#\w]+/).includes(tag);
 }
 
+/** A category as it goes in a link: "100m · Men" → "100m-men". */
+const catSlug = (c) => String(c || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
 function renderSports(root, games, mine) {
   const wrap = root.querySelector('[data-cup-sports]');
   if (!wrap || !tabHasContent.sports()) return;
@@ -574,17 +577,18 @@ function renderSports(root, games, mine) {
   if (!sport) {
     state.sportsSport = '';
     state.sportsTeam = '';
-    wrap.innerHTML = sportsIndexHtml({ sports, games, divisionsOf: divisionsFor });
+    wrap.innerHTML = sportsIndexHtml({ sports, games, categoriesOf: categoriesFor });
     watchReveals(wrap);
     return;
   }
 
-  // The division asked for, if the sport has it; else its first.
+  // The category asked for (by its link form, "100m-men"), if the
+  // sport has it; else its first.
   const sportGames = games.filter(g => g.sport === sport.name);
-  const divisions = divisionsFor(sportGames);
-  const div = divisions.find(d => d.toLowerCase() === state.sportsDiv.toLowerCase()) || divisions[0] || 'Open';
+  const divisions = categoriesFor(sport, sportGames);
+  const div = divisions.find(d => catSlug(d) === catSlug(state.sportsDiv)) || divisions[0] || 'Open';
   state.sportsDiv = div;
-  const divGames = sportGames.filter(g => divisionOf(g) === div);
+  const divGames = sportGames.filter(g => categoryOf(g) === div);
 
   wrap.innerHTML = sportPageHtml({
     sport, index, sportGames, divisions, div, divGames,
@@ -599,6 +603,15 @@ function renderSports(root, games, mine) {
     collapsible: !isSwipe(),
   });
   watchReveals(wrap);
+
+  // A long row of categories starts back at its first chip once
+  // redrawn; bring the chosen one to the middle of the row instead.
+  const cats = wrap.querySelector('.sport-cats');
+  const on = cats?.querySelector('[aria-pressed="true"]');
+  if (on) {
+    const left = on.getBoundingClientRect().left - cats.getBoundingClientRect().left;
+    cats.scrollLeft = left - (cats.clientWidth - on.offsetWidth) / 2;
+  }
 }
 
 /* --- The campus map + its venue panel --- */
@@ -1501,7 +1514,7 @@ function urlFor() {
   }
   if (state.tab === 'sports' && state.sportsSport) {
     q.set('sport', state.sportsSport);
-    if (state.sportsDiv) q.set('div', state.sportsDiv.toLowerCase());
+    if (state.sportsDiv) q.set('div', catSlug(state.sportsDiv));
     if (state.sportsTeam) q.set('team', state.sportsTeam);
   }
   if (state.tab === 'map') {

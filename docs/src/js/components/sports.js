@@ -18,6 +18,7 @@
    ============================================================ */
 
 import { matchCardHtml } from './match-card.js';
+import { sportPictogram } from './sport-pictograms.js';
 import { outcome } from '../lib/standings.js';
 import { parseDate, formatDay, formatTime, formatRange } from '../lib/dates.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
@@ -40,7 +41,7 @@ function tally(games) {
   const parts = [];
   if (live) parts.push(`${live} live`);
   if (next) parts.push(`${next} upcoming`);
-  if (!live && !next) parts.push(count(done, 'result'));
+  if (!live && !next && done) parts.push(count(done, 'result'));   // none at all: '' ("No games yet")
   return { live, next, done, text: parts.join(' · ') };
 }
 
@@ -54,38 +55,48 @@ function photoHtml(sport, i = 0) {
   if (sport.photo) {
     return `<img class="sport-head__img" src="${escapeAttr(sport.photo)}" alt="" decoding="async">`;
   }
+  const mark = sportPictogram(sport.name, { cls: 'sport-head__mark' })
+    || (sport.icon ? `<img class="sport-head__mark" src="${escapeAttr(sport.icon)}" alt="">` : '');
   return `
-    <span class="sport-head__img news-ph news-ph--${i % 4}" aria-hidden="true">
-      ${sport.icon ? `<img class="sport-head__mark" src="${escapeAttr(sport.icon)}" alt="">` : ''}
-    </span>`;
+    <span class="sport-head__img news-ph news-ph--${i % 4}" aria-hidden="true">${mark}</span>`;
 }
 
 /* ============================================================
    INDEX
    ============================================================ */
 
+/** The sport's pictogram, else its picture, else its first letter. */
+function sportIconHtml(s) {
+  return sportPictogram(s.name)
+    || (s.icon ? `<img src="${escapeAttr(s.icon)}" alt="" loading="lazy" decoding="async">` : '')
+    || `<span class="sport-tile__letter">${escapeHtml(s.name.slice(0, 1))}</span>`;
+}
+
+/** "Men · Women"; "Men · Women · 3x3" for events with divisions
+    ("3x3 · Men"); "13 events" when a sport has too many to list. */
+function categoriesText(cats) {
+  if (cats.length > 4) return `${cats.length} events`;
+  return [...new Set(cats.flatMap(c => c.split(' · ')))].join(' · ');
+}
+
 /**
- * sportsIndexHtml({ sports, games, divisionsOf })
- *   sports        allSports(), in order
- *   games         every resolved game
- *   divisionsOf   (games) => ['Men', 'Women', …]
+ * sportsIndexHtml({ sports, games, categoriesOf })
+ *   sports         allSports(), in order
+ *   games          every resolved game
+ *   categoriesOf   (sport, games) => ['Men', 'Women', …]
  */
-export function sportsIndexHtml({ sports, games, divisionsOf }) {
+export function sportsIndexHtml({ sports, games, categoriesOf }) {
   const tiles = sports.map((s, i) => {
     const theirs = games.filter(g => g.sport === s.name);
     const t = tally(theirs);
-    const divs = divisionsOf(theirs);
-    const label = `${s.name}. ${divs.join(', ')}. ${t.text || 'No games yet'}.`;
+    const cats = categoriesOf(s, theirs).filter(c => c !== 'Open');
+    const label = `${[s.name, categoriesText(cats), t.text || 'No games yet'].filter(Boolean).join('. ')}.`;
     return `
       <button class="sport-tile reveal" type="button" data-sports-open="${escapeAttr(s.id)}"
               style="--reveal-delay: ${Math.min(i * 50, 300)}ms;" aria-label="${escapeAttr(label)}">
-        <span class="sport-tile__icon" aria-hidden="true">
-          ${s.icon
-            ? `<img src="${escapeAttr(s.icon)}" alt="" loading="lazy" decoding="async">`
-            : `<span class="sport-tile__letter">${escapeHtml(s.name.slice(0, 1))}</span>`}
-        </span>
+        <span class="sport-tile__icon" aria-hidden="true">${sportIconHtml(s)}</span>
         <span class="sport-tile__name" aria-hidden="true">${escapeHtml(s.name)}</span>
-        ${divs.length ? `<span class="sport-tile__divs" aria-hidden="true">${escapeHtml(divs.join(' · '))}</span>` : ''}
+        ${cats.length ? `<span class="sport-tile__divs" aria-hidden="true">${escapeHtml(categoriesText(cats))}</span>` : ''}
         <span class="sport-tile__stats" aria-hidden="true">
           ${t.live ? '<i class="sport-tile__live"></i>' : ''}${escapeHtml(t.text || 'No games yet')}
         </span>
@@ -119,10 +130,22 @@ function crumbsHtml(sport, team) {
     </nav>`;
 }
 
+/* The categories to switch between: a two- or three-way switch (Men /
+   Women), or for a sport with many (Athletics' events, Esports'
+   games) a row of small chips that scrolls sideways. */
 function divisionsHtml(divisions, div, sport) {
   if (divisions.length < 2) return '';
+  const label = escapeAttr(`${sport.name} category`);
+  if (divisions.length > 3) {
+    return `
+      <div class="sport-cats" role="group" aria-label="${label}">
+        ${divisions.map(d => `
+          <button class="cup-daychip" type="button" data-sports-div="${escapeAttr(d)}"
+                  aria-pressed="${d === div}">${escapeHtml(d)}</button>`).join('')}
+      </div>`;
+  }
   return `
-    <div class="seg sport-divs" role="group" aria-label="${escapeAttr(`${sport.name} division`)}">
+    <div class="seg sport-divs" role="group" aria-label="${label}">
       ${divisions.map(d => `
         <button class="seg__btn" type="button" data-sports-div="${escapeAttr(d)}"
                 aria-pressed="${d === div}">${escapeHtml(d)}</button>`).join('')}
@@ -135,10 +158,10 @@ function headHtml(sport, sportGames, index) {
     <header class="sport-head">
       <div class="sport-head__media">${photoHtml(sport, index)}</div>
       <div class="sport-head__text">
-        ${sport.icon ? `<img class="sport-head__icon" src="${escapeAttr(sport.icon)}" alt="">` : ''}
+        <span class="sport-head__icon" aria-hidden="true">${sportIconHtml(sport)}</span>
         <h2 class="sport-head__name" tabindex="-1" data-sports-heading>${escapeHtml(sport.name)}</h2>
         <p class="sport-head__stats">
-          ${t.live ? '<i class="sport-tile__live"></i>' : ''}${escapeHtml(`${count(sportGames.length, 'match')} · ${t.text}`)}
+          ${t.live ? '<i class="sport-tile__live"></i>' : ''}${escapeHtml(sportGames.length ? [count(sportGames.length, 'match'), t.text].filter(Boolean).join(' · ') : 'No games yet')}
         </p>
       </div>
     </header>`;
@@ -338,16 +361,19 @@ export function sportPageHtml({
       ${divs ? `<div class="sport-divs-row">${divs}</div>` : ''}`;
   }
 
+  // Every college at once (races, routines): no table, no bracket.
+  const versus = sport.format !== 'field';
+  const named = div && div !== 'Open';
   return `
     ${head}
     ${headHtml(sport, sportGames, index)}
     ${divs ? `<div class="sport-divs-row">${divs}</div>` : ''}
     ${sectionHtml('Latest news', newsHtml(news, sport), { id: 'sport-news' })}
     ${sport.photos?.length ? sectionHtml('Photos', photosHtml(sport.photos), { id: 'sport-photos' }) : ''}
-    ${sectionHtml('Standings', standingsHtml(table, { sport, div, mine }), {
-      id: 'sport-standings', extra: `<span class="browse-count">${escapeHtml(div)}</span>` })}
-    ${sectionHtml('Knockouts', knockoutsHtml(ko, mine), { id: 'sport-ko' })}
-    ${sectionHtml(`${div} matches`, divGames.length
+    ${versus ? sectionHtml('Standings', standingsHtml(table, { sport, div, mine }), {
+      id: 'sport-standings', extra: named ? `<span class="browse-count">${escapeHtml(div)}</span>` : '' }) : ''}
+    ${versus ? sectionHtml('Knockouts', knockoutsHtml(ko, mine), { id: 'sport-ko' }) : ''}
+    ${sectionHtml(named ? `${div} matches` : 'Matches', divGames.length
       ? matchListHtml([...divGames].sort(byInterest), mine, matchesShown, collapsible)
       : '<p class="sport-empty">No matches yet.</p>', {
       id: 'sport-matches', extra: `<span class="browse-count">${count(divGames.length, 'match')}</span>` })}`;

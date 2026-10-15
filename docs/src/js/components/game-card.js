@@ -87,7 +87,7 @@ export function resolveGame(g, now = new Date()) {
     dayLabel: start ? formatDay(start, { withYear: false }) : '',
     timeLabel: start ? formatTime(start) : '',
     relative: start ? relativeLabel(start, now) : '',
-    meta: [g.sport, g.division, g.round].filter(Boolean).join(' · '),
+    meta: [g.sport, g.event, g.division, g.round].filter(Boolean).join(' · '),
   };
 }
 
@@ -179,7 +179,7 @@ export function gameMatches(g, query) {
   if (!query) return true;
   const q = query.toLowerCase();
   const hay = [
-    g.title, g.sport, g.division, g.round, g.description,
+    g.title, g.sport, g.event, g.division, g.round, g.description,
     g.venueName, g.venue?.short, g.when, g.note, ...(g.teams || []),
     ...(g.sides || []).flatMap(t => [t.college, t.mascot, t.short]),
   ];

@@ -121,8 +121,8 @@ export const CUP_MAP = {
       indoor: false,
       note: 'Behind Loyola House and Haggerty, across the walkway from the SBM Building.',
       icons: {
-        Soccer:   { at: [203, 202] },
-        Frisbee:  { at: [225, 218], gps: [124.64828633923103, 8.476343007092051] },
+        Football: { at: [203, 202] },
+        'Ultimate Frisbee': { at: [225, 218], gps: [124.64828633923103, 8.476343007092051] },
         Softball: { at: [260, 202], gps: [124.64746719564286, 8.475821935655013] },
       },
     },
@@ -177,9 +177,14 @@ export const CUP_MAP = {
    3. THE FIXTURES
    ------------------------------------------------------------
    id        unique, url-safe (used in the ?game=… link)
-   sport     free text — the sport chips are built from these, and
-             the same spelling finds it in SPORTS (its page, its icon)
-   division  optional ('Men', 'Women', 'Mixed', 'Open')
+   sport     the sport's name exactly as in SPORTS below ('Football',
+             'Athletics', 'Esports') — that finds its page and icon
+   event     optional: the event within the sport, for sports that
+             have them ('100m', 'Javelin', 'Relay' in Athletics; 'ML',
+             'CODM', 'Valorant', 'Dota 2' in Esports)
+   division  optional ('Men', 'Women', 'Mixed', 'Open'). With `event`
+             it makes the category: event '100m' + division 'Men' is
+             "100m · Men"; an Esports game needs only its event.
    round     optional ('Elimination', 'Semifinal', 'Final', 'Bronze').
              Finished Elimination games make the standings on the
              Sports tab; the others make its bracket.
@@ -215,13 +220,13 @@ export const GAMES = [
     teams: ['nsg', 'med'], venue: 'covered-court', start: '2026-10-10T10:30', end: '2026-10-10T12:00',
     score: { home: 3, away: 1 },
     description: 'Women’s volleyball elimination, taken in four sets.' },
-  { id: 'd1-sc-sbm-cas', sport: 'Soccer', division: 'Open', round: 'Elimination',
+  { id: 'd1-sc-sbm-cas', sport: 'Football', division: 'Men', round: 'Elimination',
     teams: ['sbm', 'cas'], venue: 'soccer-field', start: '2026-10-10T16:30', end: '2026-10-10T18:00',
     score: { home: 2, away: 2 },
-    description: 'First soccer fixture after the opening parade. A late equaliser split the points.' },
+    description: 'First men’s football game after the opening parade. A late equaliser split the points.' },
 
   /* ---- Day 2 · Sun, Oct 11 ---- */
-  { id: 'd2-fr-mx-law-agsoe', sport: 'Frisbee', division: 'Mixed', round: 'Elimination',
+  { id: 'd2-fr-mx-law-agsoe', sport: 'Ultimate Frisbee', division: 'Mixed', round: 'Elimination',
     teams: ['law', 'agsoe'], venue: 'soccer-field', start: '2026-10-11T09:00', end: '2026-10-11T10:30',
     score: { home: 13, away: 11 },
     description: 'Mixed ultimate, first to 13.' },
@@ -239,7 +244,7 @@ export const GAMES = [
     teams: ['eng', 'agsoe'], venue: 'covered-court', start: '2026-10-12T09:30', end: '2026-10-12T11:00',
     score: { home: 3, away: 1 },
     description: 'Men’s volleyball elimination. The Warriors’ block held all morning.' },
-  { id: 'd3-fr-mx-sbm-med', sport: 'Frisbee', division: 'Mixed', round: 'Elimination',
+  { id: 'd3-fr-mx-sbm-med', sport: 'Ultimate Frisbee', division: 'Mixed', round: 'Elimination',
     teams: ['sbm', 'med'], venue: 'soccer-field', start: '2026-10-12T11:00', end: '2026-10-12T12:30',
     score: { home: 9, away: 13 },
     description: 'Mixed ultimate, first to 13.' },
@@ -247,20 +252,20 @@ export const GAMES = [
     teams: ['law', 'cas'], venue: 'xu-gym', start: '2026-10-12T14:30', end: '2026-10-12T16:00',
     score: { home: 41, away: 38 },
     description: 'Men’s basketball elimination. Winner stays in the race for a semifinal slot.' },
-  { id: 'd3-sc-nsg-ccs', sport: 'Soccer', division: 'Open', round: 'Elimination',
+  { id: 'd3-sc-nsg-ccs', sport: 'Football', division: 'Men', round: 'Elimination',
     teams: ['nsg', 'ccs'], venue: 'soccer-field', start: '2026-10-12T15:00', end: '2026-10-12T16:30',
     score: { home: 1, away: 0 },
-    description: 'Soccer elimination. A draw sends both sides into the play-off on the final weekend.' },
+    description: 'Men’s football elimination. A draw sends both sides into the play-off on the final weekend.' },
   { id: 'd3-vb-w-eng-med', sport: 'Volleyball', division: 'Women', round: 'Elimination',
     teams: ['eng', 'med'], venue: 'covered-court', start: '2026-10-12T15:30', end: '2026-10-12T17:00',
     score: { home: 1, away: 0 },
     description: 'Women’s volleyball elimination, best of five sets.' },
   { id: 'd3-sb-w-sbm-law', sport: 'Softball', division: 'Women', round: 'Elimination',
     teams: ['sbm', 'law'], venue: 'soccer-field', start: '2026-10-12T17:00', end: '2026-10-12T18:30',
-    description: 'Softball elimination under the lights, once the soccer is done.' },
+    description: 'Softball elimination under the lights, once the football is done.' },
 
   /* ---- Day 4 · Tue, Oct 13 ---- */
-  { id: 'd4-fr-mx-nsg-cas', sport: 'Frisbee', division: 'Mixed', round: 'Elimination',
+  { id: 'd4-fr-mx-nsg-cas', sport: 'Ultimate Frisbee', division: 'Mixed', round: 'Elimination',
     teams: ['nsg', 'cas'], venue: 'soccer-field', start: '2026-10-13T15:00', end: '2026-10-13T16:30',
     description: 'Mixed ultimate, first to 13.' },
   { id: 'd4-bb-w-ccs-med', sport: 'Basketball', division: 'Women', round: 'Elimination',
@@ -271,9 +276,9 @@ export const GAMES = [
   { id: 'd5-vb-m-ccs-sbm', sport: 'Volleyball', division: 'Men', round: 'Elimination',
     teams: ['ccs', 'sbm'], venue: 'covered-court', start: '2026-10-14T16:00', end: '2026-10-14T17:30',
     description: 'Men’s volleyball elimination.' },
-  { id: 'd5-sc-eng-law', sport: 'Soccer', division: 'Open', round: 'Elimination',
+  { id: 'd5-sc-eng-law', sport: 'Football', division: 'Men', round: 'Elimination',
     teams: ['eng', 'law'], venue: 'soccer-field', start: '2026-10-14T16:00', end: '2026-10-14T17:30',
-    description: 'Last round of soccer eliminations.' },
+    description: 'Last round of men’s football eliminations.' },
 
   /* ---- Day 6 · Thu, Oct 15 ---- */
   { id: 'd6-sb-w-nsg-agsoe', sport: 'Softball', division: 'Women', round: 'Elimination',
@@ -297,13 +302,13 @@ export const GAMES = [
     description: 'First men’s basketball semifinal.' },
 
   /* ---- Day 9 · Sun, Oct 18 ---- */
-  { id: 'd9-fr-mx-final', sport: 'Frisbee', division: 'Mixed', round: 'Final',
+  { id: 'd9-fr-mx-final', sport: 'Ultimate Frisbee', division: 'Mixed', round: 'Final',
     teams: ['med', 'agsoe'], venue: 'soccer-field', start: '2026-10-18T10:00', end: '2026-10-18T11:30',
     note: 'Championship',
     description: 'Mixed ultimate final, first to 15.' },
-  { id: 'd9-sc-semi', sport: 'Soccer', division: 'Open', round: 'Semifinal',
+  { id: 'd9-sc-semi', sport: 'Football', division: 'Men', round: 'Semifinal',
     teams: ['sbm', 'nsg'], venue: 'soccer-field', start: '2026-10-18T15:00', end: '2026-10-18T16:30',
-    description: 'Soccer semifinal. Extra time and penalties if level.' },
+    description: 'Men’s football semifinal. Extra time and penalties if level.' },
 
   /* ---- Day 10 · Mon, Oct 19 ---- */
   { id: 'd10-sb-w-final', sport: 'Softball', division: 'Women', round: 'Final',
@@ -316,10 +321,10 @@ export const GAMES = [
     description: 'Men’s volleyball final.' },
 
   /* ---- Day 11 · Tue, Oct 20 ---- */
-  { id: 'd11-sc-final', sport: 'Soccer', division: 'Open', round: 'Final',
+  { id: 'd11-sc-final', sport: 'Football', division: 'Men', round: 'Final',
     teams: ['sbm', 'cas'], venue: 'soccer-field', start: '2026-10-20T14:00', end: '2026-10-20T15:30',
     note: 'Championship',
-    description: 'Soccer final.' },
+    description: 'Men’s football final.' },
   { id: 'd11-bb-m-final', sport: 'Basketball', division: 'Men', round: 'Final',
     teams: ['eng', 'sbm'], venue: 'xu-gym', start: '2026-10-20T16:00', end: '2026-10-20T18:00',
     note: 'Championship', featured: true,
@@ -475,7 +480,7 @@ export const CUP_PHOTOS = {
     { src: null, caption: 'Parade of colleges', alt: 'The colleges marching in the opening parade at the SBM steps' },
     { src: null, caption: 'Basketball · University Gym', alt: 'A basketball game at the Xavier University Gym' },
     { src: null, caption: 'Volleyball · Covered Court', alt: 'A volleyball rally at the XU Covered Court' },
-    { src: null, caption: 'Soccer · XU Soccer Field', alt: 'A soccer match at the XU Soccer Field' },
+    { src: null, caption: 'Football · XU Soccer Field', alt: 'A football match at the XU Soccer Field' },
     { src: null, caption: 'The crowd', alt: 'Students cheering for their college' },
   ],
 };
@@ -483,29 +488,72 @@ export const CUP_PHOTOS = {
 /* ============================================================
    7. SPORTS
    ------------------------------------------------------------
-   One entry per sport, in the order they show on the Sports tab.
+   One entry per sport, grouped below the way the Intramurals 2026-27
+   General Guidelines group them (major, minor and bonus events, with
+   the divisions its table of players gives); the Sports tab and the
+   Matches filter list them A to Z by themselves, each with its
+   pictogram (components/sport-pictograms.js).
    A game names its sport by `name`, spelled exactly the same;
-   `id` is what goes in the link (?tab=sports&sport=soccer).
+   `id` is what goes in the link (?tab=sports&sport=football).
 
    id         url-safe, lower case
    name       as written in GAMES[].sport
-   icon       the sport's picture: its tile, its match cards, its
-              marker on the map
+   icon       the sport's marker picture on the map (its tile, page
+              and match cards use its pictogram; the picture is the
+              fallback for a sport without one)
    photo      a wide photo for the top of the sport's page
               (assets/sports/photos/…). null = a placeholder graphic
    photos     more photos, shown as a strip on the sport's page
               ([{ src, alt }]; leave empty for none)
+   categories what the sport is split into, in the order its page
+              shows them: 'Men', 'Women', 'Mixed', or an event with
+              its division ('100m · Men', see GAMES[].event). Leave
+              it out for a sport played as one category.
+   format     'versus' (default): college against college, so the
+              sport's page has standings and a knockout bracket.
+              'field': every college competes at once (races,
+              routines), so the page has no standings or bracket.
 
    The standings (wins and losses from the finished Elimination
    games) work themselves out from GAMES. A sport in GAMES that is
    missing here still gets a page, with no pictures.
    ============================================================ */
+const MW = ['Men', 'Women'];
+// Athletics: every event Men and Women, except the relay (Mixed).
+const ATHLETICS = [
+  '100m · Men', '100m · Women', '200m · Men', '200m · Women', '400m · Men', '400m · Women',
+  'Relay · Mixed',
+  'Javelin · Men', 'Javelin · Women', 'Shot Put · Men', 'Shot Put · Women', 'Discus · Men', 'Discus · Women',
+];
+
 export const SPORTS = [
-  { id: 'basketball', name: 'Basketball', icon: 'assets/sports/basketball.webp', photo: null, photos: [] },
-  { id: 'volleyball', name: 'Volleyball', icon: 'assets/sports/volleyball.webp', photo: null, photos: [] },
-  { id: 'soccer',     name: 'Soccer',     icon: 'assets/sports/soccer.webp',     photo: null, photos: [] },
-  { id: 'frisbee',    name: 'Frisbee',    icon: 'assets/sports/frisbee.webp',    photo: null, photos: [] },
-  { id: 'softball',   name: 'Softball',   icon: 'assets/sports/softball.webp',   photo: null, photos: [] },
+  // Major events (100 / 70 / 50 points to the top three colleges)
+  // Basketball 3x3 is a category of Basketball (a minor event): its
+  // games are sport 'Basketball', event '3x3', division 'Men' or 'Women'.
+  { id: 'basketball', name: 'Basketball', icon: 'assets/sports/basketball.webp', photo: null, photos: [], categories: [...MW, '3x3 · Men', '3x3 · Women'] },
+  { id: 'volleyball', name: 'Volleyball', icon: 'assets/sports/volleyball.webp', photo: null, photos: [], categories: MW },
+  { id: 'football',   name: 'Football',   icon: 'assets/sports/soccer.webp',     photo: null, photos: [], categories: MW },   // 8-a-side
+  { id: 'softball',   name: 'Softball',   icon: 'assets/sports/softball.webp',   photo: null, photos: [], categories: MW },
+  { id: 'ultimate-frisbee', name: 'Ultimate Frisbee', icon: 'assets/sports/frisbee.webp', photo: null, photos: [], categories: ['Mixed'] },
+  { id: 'esports',    name: 'Esports',    icon: null, photo: null, photos: [], categories: ['ML', 'CODM', 'Valorant', 'Dota 2'] },   // each Open
+  { id: 'cheerdance', name: 'Cheerdance', icon: null, photo: null, photos: [], categories: ['Mixed'], format: 'field' },
+  { id: 'megacrew',   name: 'Megacrew',   icon: null, photo: null, photos: [], format: 'field' },   // Open
+  // Minor events (team 20 / 14 / 10, individual 10 / 7 / 5)
+  { id: 'athletics',  name: 'Athletics',  icon: null, photo: null, photos: [], categories: ATHLETICS, format: 'field' },
+  { id: 'swimming',   name: 'Swimming',   icon: null, photo: null, photos: [], categories: MW, format: 'field' },
+  { id: 'sepak-takraw', name: 'Sepak Takraw', icon: null, photo: null, photos: [], categories: MW },
+  { id: 'table-tennis', name: 'Table Tennis', icon: null, photo: null, photos: [], categories: MW },
+  { id: 'lawn-tennis',  name: 'Lawn Tennis',  icon: null, photo: null, photos: [], categories: MW },
+  { id: 'badminton',    name: 'Badminton',    icon: null, photo: null, photos: [], categories: MW },
+  { id: 'pickleball',   name: 'Pickleball',   icon: null, photo: null, photos: [], categories: MW },
+  { id: 'taekwondo',  name: 'Taekwondo',  icon: null, photo: null, photos: [], categories: MW },
+  { id: 'karatedo',   name: 'Karatedo',   icon: null, photo: null, photos: [], categories: MW },
+  { id: 'chess',      name: 'Chess',      icon: null, photo: null, photos: [], categories: MW },
+  { id: 'darts',      name: 'Darts',      icon: null, photo: null, photos: [], categories: MW },
+  // Bonus events (20 / 14 / 10)
+  { id: 'debate',      name: 'Debate',      icon: null, photo: null, photos: [], categories: ['Mixed'] },
+  { id: 'hypemaster',  name: 'Hypemaster',  icon: null, photo: null, photos: [], format: 'field' },   // one per college, Open
+  { id: 'cheer-chant', name: 'Cheer Chant', icon: null, photo: null, photos: [], format: 'field' },
 ];
 
 /* ---------- Lookups ---------- */
@@ -514,9 +562,9 @@ export const VENUE_BY_ID = Object.fromEntries(CUP_MAP.venues.map(v => [v.id, v])
 export const SPORT_BY_NAME = Object.fromEntries(SPORTS.map(s => [s.name, s]));
 
 /**
- * allSports() — SPORTS in order, then any sport GAMES plays that
- * SPORTS leaves out (with no pictures), so every sport with a game
- * has a page.
+ * allSports() — every sport, A to Z: SPORTS, plus any sport GAMES
+ * plays that SPORTS leaves out (with no pictures), so every sport
+ * with a game has a page.
  */
 export function allSports() {
   const extra = sportsInPlay()
@@ -525,10 +573,10 @@ export function allSports() {
       id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
       name, icon: null, photo: null, photos: [],
     }));
-  return [...SPORTS, ...extra];
+  return [...SPORTS, ...extra].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** A sport from a link: its id ("soccer") or its name ("Soccer"). */
+/** A sport from a link: its id ("football") or its name ("Football"). */
 export function findSport(value) {
   const v = String(value || '');
   return allSports().find(s => s.id === v.toLowerCase() || s.name === v) || null;
