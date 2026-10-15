@@ -830,6 +830,7 @@ function renderWins(root, games) {
             </li>`).join('')}
         </ol>`
         : '<p class="cup-wins__none">No results yet. The first wins land soon.</p>'}
+      <p class="cup-wins__note">Unofficial tally, counted from the results shown here. Not the official TXC count.</p>
     </div>`;
 }
 
