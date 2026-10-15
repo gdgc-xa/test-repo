@@ -19,7 +19,7 @@
   - `docs/src/css/screens/cup.css`, `docs/src/css/components/*.css`
   - Cup markup lives in `docs/index.html` (`data-cup-tab` / `data-cup-view`)
 - Every section has an on/off switch in `CUP_CONFIG` (`show*`) — keep that pattern for anything new.
-- Three skins (`Xavier Cup 2026`, `World Cup`, `Sands of Time`) + light/dark — new UI must work in all of them using existing tokens in `tokens.css` / `skins.css`.
+- Two skins (`Xavier Cup 2026`, `Sands of Time`; World Cup was removed) + light/dark — new UI must work in all of them using existing tokens in `tokens.css` / `skins.css`.
 - `CUP_CONFIG.previewNow` fakes "now" so live/finished states can be tested. Use it while testing.
 
 ## 2. What's wrong today (audit)
@@ -111,7 +111,7 @@ Do them in order. Each phase must leave the site working.
 
 ### Phase 6 — Cleanup
 - Remove dead code/CSS from the old Calendar tab and featured pager if no longer used.
-- Check mobile (tab bar scrolls sideways, 5 tabs fit), all 3 skins, light/dark, reduced motion.
+- Check mobile (tab bar scrolls sideways, 5 tabs fit), both skins, light/dark, reduced motion.
 - Fix Discover's "Program Flow — See schedule →" tile (currently goes nowhere) → link to Matches.
 - Replace placeholder/sample content before launch and set `previewNow: null`.
 

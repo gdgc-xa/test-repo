@@ -187,6 +187,7 @@ function applyTabVisibility() {
     const on = Boolean(cfg.enabled);
     document.querySelectorAll(`[data-nav-item="${id}"]`).forEach(el => {
       if (!on) { el.remove(); return; }
+      el.hidden = false;   // index.html ships Events hidden until this runs
       const isSheet = el.classList.contains('nav-sheet__item');
       const label = isSheet ? (cfg.sheetLabel || cfg.navLabel) : cfg.navLabel;
       if (label) el.textContent = label;
