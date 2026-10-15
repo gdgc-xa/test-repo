@@ -181,3 +181,30 @@ export const MEDALS = {
 <!-- Example:
 - [Phase 3] Make standings rows show the team crest bigger on mobile.
 -->
+
+- [Map integration, 2026-10-15] User requested a **2D-only** map; this supersedes
+  the Phase 2 reference to preserving 3D. Removed the Mapbox module/settings and
+  added the TXC camera gestures, mobile venue sheet, and outside-campus panel.
+  Campus Compass clock/status rules remain unchanged. The full sport catalogue,
+  official external venue records, and live tracker adapter await verification.
+
+
+### Tentative venue assignments — 2026-10-16
+
+User-provided planning notes. **All assignments below await verification against
+the official schedule.** These notes do not change runtime venue records, matches,
+map positions, or GPS coordinates.
+
+| Sport | Tentative venue | Existing venue ID / detail |
+|---|---|---|
+| Frisbee | XU Soccer Field | `soccer-field`; existing venue and Frisbee coordinates are available |
+| Badminton | XU Covered Court | `covered-court` |
+| Table Tennis | XU Covered Court | `covered-court` |
+| Pickleball | XU Covered Court | `covered-court` |
+| Lawn Tennis | XU Covered Court | `covered-court` |
+| Cheerdance | Xavier University Gym | `xu-gym` |
+| Swimming | Outside campus | Exact venue name, address, and coordinates to be confirmed |
+
+Confirm these assignments before updating the tracker-to-map mapping or publishing
+fixtures. Swimming should use the outside-campus panel once its venue and matches
+are established; its Google Maps button requires confirmed valid coordinates.
