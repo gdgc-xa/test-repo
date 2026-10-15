@@ -41,7 +41,7 @@ export const SITE = {
      instead of showing an empty page.                            */
   tabs: {
     events: {
-      enabled: true,
+      enabled: false,                // off for now: true brings the tab back
       navLabel: 'Events',            // desktop nav
       sheetLabel: 'Events',          // mobile sheet
     },
