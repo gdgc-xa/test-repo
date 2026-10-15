@@ -20,34 +20,26 @@
   contain: inline-size;
 }
 
-/* The viewport is the drawing's shape. At 1× the canvas fills it
-   exactly; zoomed, the canvas grows and the viewport scrolls — by
-   dragging with a mouse, natively with a finger. */
+/* A real camera viewport: readable close-up first, with a full overview available. */
 .cup-map__viewport {
   position: relative;
-  aspect-ratio: 560 / 310;
+  height: clamp(480px, 66dvh, 780px);
   overflow: hidden;
   outline: none;
-}
-.cup-map__viewport.is-zoomed {
-  overflow: auto;
   cursor: grab;
-  scrollbar-width: thin;
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 .cup-map__viewport.is-dragging { cursor: grabbing; }
 .cup-map__viewport:focus-visible { box-shadow: inset 0 0 0 3px var(--campus-select); }
-.cup-map__viewport[hidden],
-.cup-map__3d[hidden] { display: none; }
-
 .cup-map__canvas {
-  position: relative;
-  width: var(--canvas-w, 100%);
-  height: var(--canvas-h, 100%);
-  container-type: inline-size;
+  position: absolute;
+  width: 560px;
+  height: 310px;
+  transform-origin: 0 0;
   user-select: none;
   -webkit-user-select: none;
-  /* Sport icon size: grows with the map, within thumb-sized limits */
-  --icon: clamp(30px, 6.2cqw, 48px);
+  --icon: 44px;
 }
 .cup-map__canvas .campus {
   position: absolute;
@@ -167,13 +159,13 @@
 }
 .cup-map__markers > * { pointer-events: auto; }
 
-/* 2D placement: centred on their spot. In 3D, Mapbox places them. */
+/* Markers keep their screen size while the campus drawing zooms. */
 .cup-map__markers > .cup-tag,
 .cup-map__markers > .cup-sport {
   position: absolute;
   left: var(--x);
   top: var(--y);
-  transform: translate(-50%, -50%);
+  transform: scale(var(--marker-scale, 1)) translate(-50%, -50%);
 }
 
 /* ---------- Venue name tag ---------- */
@@ -320,11 +312,11 @@
   .cup-tag { font-size: 10.5px; padding: 2px 3px 2px 7px; }
   .cup-tag__count { font-size: 10px; min-width: 17px; padding: 0 5px; }
   /* Lean edge tags inwards (--lean, set per tag) so none is cut off */
-  .cup-map__markers > .cup-tag { transform: translate(var(--lean, -50%), -50%); }
+  .cup-map__markers > .cup-tag { transform: scale(var(--marker-scale, 1)) translate(var(--lean, -50%), -50%); }
 }
 
 /* ============================================================
-   CONTROLS — 2D / 3D and zoom, top right (the campus leaves that
+   CONTROLS — zoom and recenter, top right (the campus leaves that
    corner empty; bottom right is the gym)
    ============================================================ */
 .cup-map__dock {
@@ -337,7 +329,6 @@
   align-items: flex-end;
   gap: 8px;
 }
-.cup-map__modes,
 .cup-map__zoom {
   display: flex;
   flex-direction: column;
@@ -362,41 +353,6 @@
 .cup-map__btn:hover:not(:disabled) { background: var(--surface-2); }
 .cup-map__btn:disabled { color: var(--border-strong); cursor: default; }
 .cup-map__btn:focus-visible { outline: 2px solid var(--campus-select); outline-offset: -2px; }
-.cup-map__btn--mode {
-  font-family: var(--font-serif);
-  font-size: 12.5px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-.cup-map__btn--mode[aria-pressed="true"] {
-  background: var(--campus-select);
-  color: var(--campus-on-select);
-}
-
-/* ============================================================
-   3D (Mapbox) — only ever shown when a token is set
-   ============================================================ */
-.cup-map__3d {
-  position: relative;
-  aspect-ratio: 560 / 310;
-  min-height: 320px;
-  --icon: 44px;
-}
-.cup-map__3d.is-far .cup-sport__name { display: none; }
-.cup-map__3d-note {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  gap: var(--space-2);
-  padding: var(--space-5);
-  text-align: center;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--ink-2);
-}
-.cup-map__3d-note strong { color: var(--ink); }
-
 /* ============================================================
    MINI MAP — one venue lit, in a match's detail view
    ============================================================ */
@@ -589,18 +545,128 @@
   .cup-sport__icon { transition: none; }
 }
 
-/* On a phone the map is too small to give a corner to the controls,
-   so they become a strip under it. */
-@media (max-width: 560px) {
-  .cup-map__dock {
-    position: static;
-    flex-direction: row;
-    justify-content: flex-end;
-    padding: 6px;
-    border-top: 1px solid var(--border);
+/* Outside venue cards reuse site tokens in every skin. */
+.venue-location { display: grid; justify-items: start; gap: var(--space-2); margin-block: var(--space-3); }
+.outside-venues { margin-top: var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+.outside-venues summary { display: flex; justify-content: space-between; align-items: center; min-height: 64px; padding: var(--space-4); cursor: pointer; color: var(--ink); }
+.outside-venues summary > span:first-child { display: grid; gap: 4px; }
+.outside-venues__count { font-size: 12px; color: var(--muted); }
+.outside-venues__body { border-top: 1px solid var(--border); padding: var(--space-4); }
+.outside-games { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
+.outside-game { display: flex; align-items: center; gap: var(--space-3); min-width: 0; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius); text-align: left; background: var(--surface-2); color: var(--ink); cursor: pointer; }
+.outside-game:hover, .outside-game.is-selected { border-color: var(--campus-select); }
+.outside-game img { object-fit: contain; flex: 0 0 48px; }
+.outside-game__initial { display: grid; place-items: center; width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; background: var(--campus-ground); font-weight: 800; }
+.outside-game__body { display: grid; flex: 1; min-width: 0; gap: 4px; overflow-wrap: anywhere; font-size: 12px; }
+.outside-game__body strong { font-size: 14px; }
+.outside-venues__locations { display: grid; gap: var(--space-3); }
+.outside-venues__locations article { border-top: 1px solid var(--border); padding-top: var(--space-2); }
+.cup-map__btn { min-width: 44px; min-height: 44px; font-size: 23px; }
+.cup-map__dock { top: 12px; right: 12px; }
+/* ============================================================
+   MAP WORKSPACE — full available screen with a floating glass list.
+   Scoped to Map: the website navigation and other tabs keep their layout.
+   ============================================================ */
+#screen-cup.is-map-view { padding-bottom: 0; }
+#screen-cup.is-map-view [data-cup-hero] { display: none; }
+#screen-cup.is-map-view .cup-tabs { margin-top: 0; }
+#cup-view-map > .wrap { width: 100%; max-width: none; padding: 0; }
+#cup-view-map [data-cup-map-section] { padding: 0; }
+#cup-view-map .cup-map-grid {
+  --map-glass: color-mix(in srgb, var(--surface) 84%, transparent);
+  display: block;
+  position: relative;
+  height: calc(100dvh - var(--cup-map-top, 144px));
+  min-height: 360px;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--campus-ground);
+}
+#cup-view-map .cup-map-panel { height: 100%; padding: 0; border: 0; border-radius: 0; box-shadow: none; }
+#cup-view-map .cup-map-panel__inner,
+#cup-view-map .cup-map,
+#cup-view-map .cup-map__viewport { height: 100%; }
+#cup-view-map .cup-map { border-radius: 0; }
+#cup-view-map .cup-map-heading,
+#cup-view-map .cup-map-list,
+#cup-view-map .cup-map-panel__legend {
+  background: var(--map-glass);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  border: 1px solid color-mix(in srgb, var(--border-strong) 65%, transparent);
+  box-shadow: var(--shadow-md);
+}
+#cup-view-map .cup-map-heading {
+  position: absolute; z-index: 5; top: 20px; left: 20px;
+  padding: 14px 18px; border-radius: var(--radius-lg); max-width: 310px;
+  pointer-events: none;
+}
+#cup-view-map .cup-map-heading .cup-section__title { font-size: 21px; margin-top: 4px; }
+#cup-view-map .cup-map-heading .cup-section__hint { font-size: 12px; margin-top: 5px; }
+#cup-view-map .cup-map-list {
+  position: absolute; z-index: 7; top: 20px; right: 20px;
+  width: 360px; max-height: calc(100% - 40px); border-radius: var(--radius-lg);
+  display: flex; flex-direction: column; overflow: hidden; color: var(--ink);
+}
+.cup-map-list__toggle {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 72px;
+  padding: 14px 18px; text-align: left; cursor: pointer; flex-shrink: 0;
+}
+.cup-map-list__toggle:focus-visible { outline: 3px solid var(--campus-select); outline-offset: -4px; }
+.cup-map-list__label { display: grid; flex: 1; gap: 4px; min-width: 0; }
+.cup-map-list__label strong { font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
+.cup-map-list__label > span { font-size: 12px; color: var(--muted); }
+.cup-map-list__chevron { width: 20px; height: 20px; flex-shrink: 0; transition: transform 160ms; }
+[data-expanded="true"] .cup-map-list__chevron { transform: rotate(180deg); }
+.cup-map-list__handle { display: none; }
+.cup-map-list__content { overflow-y: auto; overscroll-behavior: contain; min-height: 0; scrollbar-width: thin; border-top: 1px solid var(--border); }
+.cup-map-list__content[hidden] { display: none; }
+#cup-view-map .venue-panel { padding: 18px; border: 0; border-radius: 0; background: transparent; }
+#cup-view-map .venue-panel__head { position: relative; padding-bottom: 14px; }
+#cup-view-map .has-selection .venue-panel__head { padding-top: 34px; }
+#cup-view-map .venue-panel__title { font-size: 18px; }
+#cup-view-map .venue-panel__hint { font-size: 12px; }
+#cup-view-map .venue-panel__clear { margin-top: 0; position: absolute; top: -4px; right: 0; min-height: 36px; }
+#cup-view-map .venue-panel__sports { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px; margin-top: 12px; }
+#cup-view-map .venue-panel__sports > * { flex-shrink: 0; }
+#cup-view-map .venue-location:empty { display: none; }
+#cup-view-map .venue-location { margin-block: 10px; }
+#cup-view-map .mini-game { background: color-mix(in srgb, var(--surface-2) 72%, transparent); }
+#cup-view-map .mini-game:hover { background: color-mix(in srgb, var(--surface) 92%, transparent); }
+#cup-view-map .outside-venues { margin: 0; border-width: 1px 0 0; border-radius: 0; background: transparent; }
+#cup-view-map .outside-venues summary { min-height: 64px; padding: 14px 18px; }
+#cup-view-map .outside-games { grid-template-columns: 1fr; }
+#cup-view-map .outside-game { background: color-mix(in srgb, var(--surface-2) 72%, transparent); }
+#cup-view-map .cup-map__dock { top: auto; right: auto; left: 20px; bottom: 110px; }
+#cup-view-map .cup-map-panel__legend {
+  position: absolute; z-index: 5; left: 20px; bottom: 20px; margin: 0;
+  max-width: min(540px, calc(100% - 420px)); padding: 10px 14px; border-radius: var(--radius);
+  pointer-events: none;
+}
+#cup-view-map .cup-legend { font-size: 11px; gap: 5px 14px; }
+@media (max-width: 1000px) {
+  #cup-view-map .cup-map-grid { --sheet-height: 72px; }
+  #cup-view-map .cup-map-grid.is-list-expanded { --sheet-height: min(56%, 460px); }
+  /* Keep a single compact label on phones, whether the game sheet is open or closed. */
+  #cup-view-map .cup-map-heading {
+    top: 12px; left: 12px; width: max-content; max-width: calc(100% - 84px);
+    padding: 8px 12px; border-radius: var(--radius-pill);
   }
-  .cup-map__modes,
-  .cup-map__zoom { flex-direction: row; box-shadow: none; }
-  .cup-map__btn { width: 42px; height: 36px; }
-  .cup-map__btn + .cup-map__btn { border-top: 0; border-left: 1px solid var(--border); }
+  #cup-view-map .cup-map-heading .cup-section__title {
+    font-size: 13px; line-height: 1.25; letter-spacing: -0.15px; margin: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #cup-view-map .cup-map-heading .panel__kicker,
+  #cup-view-map .cup-map-heading .cup-section__hint { display: none; }
+  #cup-view-map .cup-map-list {
+    top: auto; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom));
+    width: auto; height: var(--sheet-height); max-height: calc(100% - 125px); border-radius: 22px;
+  }
+  .cup-map-list__toggle { position: relative; min-height: 72px; padding: 18px 16px 10px; }
+  .cup-map-list__handle { display: block; position: absolute; width: 32px; height: 4px; border-radius: 4px; top: 7px; left: calc(50% - 16px); background: var(--border-strong); }
+  #cup-view-map .cup-map__dock { top: 12px; right: 12px; left: auto; bottom: auto; }
+  #cup-view-map .cup-map-panel__legend { left: 12px; bottom: calc(var(--sheet-height) + 24px); max-width: calc(100% - 24px); padding: 7px 10px; }
+  #cup-view-map .cup-legend__item--hint { display: none; }
+  #cup-view-map .venue-panel { padding: 14px 16px; }
+  #cup-view-map .has-selection .venue-panel__head { padding-top: 30px; }
 }

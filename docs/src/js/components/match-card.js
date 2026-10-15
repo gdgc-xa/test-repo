@@ -35,7 +35,7 @@ function hasScore(g) {
     && g.score.home !== undefined && g.score.away !== undefined;
 }
 
-/** The sport's picture from CUP_MAP.sportIcons, else its line glyph. */
+/** The sport's configured/shared WebP picture, else its line glyph. */
 function sportIconHtml(sport) {
   const src = sportIcon(sport);
   if (src) return `<img class="match__icon" src="${escapeAttr(src)}" alt="" loading="lazy" decoding="async">`;
