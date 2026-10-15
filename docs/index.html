@@ -132,11 +132,14 @@
       </a>
 
       <!-- Labels for the two configurable tabs are stamped from
-           data/site.js by router.js; the text here is the fallback. -->
+           data/site.js by router.js; the text here is the fallback.
+           Events ships hidden and router.js shows it only when site.js
+           turns the tab on, so a switched-off tab never flashes in the
+           nav while the scripts load. -->
       <nav class="nav-links" aria-label="Main">
         <button class="nav-links__item" data-nav="landing" data-nav-item="landing">Discover</button>
         <button class="nav-links__item" data-nav="browse"  data-nav-item="browse">Organizations</button>
-        <button class="nav-links__item" data-nav="events"  data-nav-item="events">Events</button>
+        <button class="nav-links__item" data-nav="events"  data-nav-item="events" hidden>Events</button>
         <button class="nav-links__item" data-nav="cup"     data-nav-item="cup">Xavier Cup</button>
         <button class="nav-links__item" data-nav="about"   data-nav-item="about">About</button>
       </nav>
@@ -175,7 +178,7 @@
     <nav class="nav-sheet__links" aria-label="Mobile">
       <button class="nav-sheet__item" data-nav="landing" data-nav-item="landing">Discover</button>
       <button class="nav-sheet__item" data-nav="browse"  data-nav-item="browse">Browse Organizations</button>
-      <button class="nav-sheet__item" data-nav="events"  data-nav-item="events">Events</button>
+      <button class="nav-sheet__item" data-nav="events"  data-nav-item="events" hidden>Events</button>
       <button class="nav-sheet__item" data-nav="cup"     data-nav-item="cup">The Xavier Cup</button>
       <button class="nav-sheet__item" data-nav="about"   data-nav-item="about">About</button>
     </nav>
