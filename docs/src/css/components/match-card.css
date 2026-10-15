@@ -3,7 +3,9 @@
    in, and the "Featured match" frame with its day pager.
    Markup: components/match-card.js.
 
-   The card is a <button>, so every child is a span laid out here.
+   The card is an <article>. .match__open is a button stretched
+   over all of it (it opens the match); the venue link sits on top
+   of that button so it can be clicked on its own.
    ============================================================ */
 
 .match-grid {
@@ -36,7 +38,19 @@
   box-shadow: 0 0 0 2.5px var(--tx-accent), var(--shadow-sm);
 }
 
-/* ---------- Top line: sport · division, round ---------- */
+/* The whole card is this button's hit area. */
+.match__open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.match__open:focus-visible { border-radius: inherit; }
+
+/* ---------- Top line: sport icon · sport · division · round ---------- */
 .match__meta {
   display: flex;
   align-items: center;
@@ -50,7 +64,8 @@
 }
 .match__sport { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
 .match__sport .sport-glyph { width: 15px; height: 15px; flex: 0 0 auto; color: var(--ink-2); }
-.match__round { white-space: nowrap; }
+.match__icon { width: 18px; height: 18px; flex: 0 0 auto; object-fit: contain; }
+.match__what { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .match__note {
   padding: 2px 8px;
   border-radius: var(--radius-pill);
@@ -179,6 +194,19 @@
 }
 .match__venue { display: inline-flex; align-items: center; gap: 5px; min-width: 0; }
 .match__venue svg { width: 13px; height: 13px; flex: 0 0 auto; }
+.match__venue span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A link to the Map, above the card's own button. */
+a.match__venue {
+  position: relative;
+  z-index: 2;
+  margin: -6px -8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-pill);
+  color: var(--ink-2);
+  font-weight: 600;
+  transition: background 160ms, color 160ms;
+}
+a.match__venue:hover { background: var(--surface-2); color: var(--ink); text-decoration: underline; }
 .match__day { white-space: nowrap; }
 
 .match__mine {
@@ -262,15 +290,47 @@
 .match--featured.match--upcoming .match__box { font-size: 22px; }
 .match--featured .match__bar { font-size: 10.5px; padding: 4px 8px; }
 
-@media (max-width: 480px) {
-  .match { padding: 12px 12px 10px; }
-  .match__crest { width: 44px; height: 44px; }
-  .match__team { font-size: 12.5px; }
-  .match__mid { min-width: 78px; }
-  .match__box { font-size: 16px; padding-inline: 8px; }
-  .match--featured { padding: 16px 14px 12px; }
-  .match--featured .match__crest { width: 60px; height: 60px; }
-  .match--featured .match__mid { min-width: 96px; }
-  .match--featured .match__box { font-size: 22px; }
-  .match--featured .match__college { display: none; }
+/* ---------- Phones: the compact card ----------
+   The two teams stack on the left, one line each, with the score
+   box on the right, the way scores apps list a day's games. About
+   two thirds the height of the wide card, so a day fits on a screen. */
+@media (max-width: 560px) {
+  .match,
+  .match--featured { gap: 8px; padding: 10px 12px; border-radius: 16px; }
+  .match__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    column-gap: 10px;
+    row-gap: 6px;
+  }
+  .match__side {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+  }
+  .match__side--home { grid-area: 1 / 1; }
+  .match__side--away { grid-area: 2 / 1; }
+  .match__mid { grid-area: 1 / 2 / 3 / 3; align-self: center; min-width: 76px; }
+  .match__row--solo .match__mid { grid-area: auto; }
+  .match__crest,
+  .match--featured .match__crest { width: 30px; height: 30px; flex: 0 0 auto; }
+  .match__initials { width: 30px; height: 30px; font-size: 10px; }
+  .match__team,
+  .match--featured .match__team {
+    min-width: 0;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .match__college { display: none; }
+  .match__solo { font-size: 16px; }
+  .match__box,
+  .match--featured .match__box { font-size: 17px; padding: 7px 8px 5px; }
+  .match--upcoming .match__box,
+  .match--featured.match--upcoming .match__box { font-size: 14px; padding-block: 8px 6px; }
+  .match--featured .match__mid { min-width: 76px; border-radius: 12px; }
+  .match--featured .match__bar { font-size: 9.5px; padding: 3px 6px; }
+  .match__foot { padding-top: 6px; }
 }

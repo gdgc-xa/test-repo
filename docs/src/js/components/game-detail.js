@@ -77,7 +77,7 @@ export function gameDetailHtml(g) {
             <p class="detail__body">${
               g.description
                 ? escapeHtml(g.description)
-                : 'No write-up for this fixture yet.'
+                : 'No write-up for this match yet.'
             }</p>
             ${link ? `
               <a class="btn btn--primary detail__cta" href="${escapeAttr(link)}"
@@ -94,7 +94,7 @@ export function gameDetailHtml(g) {
 
         <aside class="detail__aside">
           <section class="panel">
-            <div class="panel__kicker">Fixture</div>
+            <div class="panel__kicker">Match</div>
             <div class="detail-facts">${facts}</div>
           </section>
         </aside>

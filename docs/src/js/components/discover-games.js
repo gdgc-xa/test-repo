@@ -3,7 +3,7 @@
    One chip at a time, scrolls sideways forever (the chips are laid
    out three times and the scroll position jumps by one set at
    either end). Click a chip -> the shared detail popup, with a
-   "See More Games" button that goes to Fixtures.
+   "See More Matches" button that goes to Matches.
    Put in: docs/src/js/components/discover-games.js
    Load it with one line in main.js:
      import './components/discover-games.js';
@@ -55,12 +55,12 @@ function pick() {
 
 function openGame(g) {
   const more = `<div class="dgame-more">
-      <a class="btn btn--primary" href="?screen=cup&amp;tab=fixtures" data-see-more>See More Games →</a>
+      <a class="btn btn--primary" href="?screen=cup&amp;tab=matches" data-see-more>See More Matches →</a>
     </div>`;
   openDetail(gameDetailHtml(g) + more, {
     wire: (panel) => {
       panel.querySelector('[data-see-more]')?.addEventListener('click', (e) => {
-        e.preventDefault(); closeDetail(); navigate({ screen: 'cup', tab: 'fixtures' });
+        e.preventDefault(); closeDetail(); navigate({ screen: 'cup', tab: 'matches' });
       });
       panel.querySelector('[data-show-venue]')?.addEventListener('click', (e) => {
         const venue = e.currentTarget.dataset.showVenue;
@@ -91,8 +91,8 @@ function init() {
     tile.classList.toggle('is-single', n < 2);
 
     if (!n) {
-      track.innerHTML = `<a class="dchip dchip--empty" href="?screen=cup&amp;tab=fixtures" data-go-tab="fixtures">
-        <span class="dchip__solo">No games right now</span><span class="dchip__cta">See fixtures →</span></a>`;
+      track.innerHTML = `<a class="dchip dchip--empty" href="?screen=cup&amp;tab=matches" data-go-tab="matches">
+        <span class="dchip__solo">No games right now</span><span class="dchip__cta">See matches →</span></a>`;
       dots.innerHTML = ''; return;
     }
     // One real set, with a copy of it on each side when there is more than one chip.

@@ -56,8 +56,7 @@
 
   /* Small labels stay small, but never below 12px. */
   .theme-legend__clusters,
-  .card__short,
-  .cup-counter__label       { font-size: 12.5px; }
+  .card__short              { font-size: 12.5px; }
 
   /* ---------- Section rhythm: 32px between sections ---------- */
   .cup-section                 { padding-top: 32px; }
@@ -232,8 +231,7 @@
   .seg { display: flex; width: 100%; }
   .seg__btn { flex: 1 1 0; padding-inline: 8px; white-space: normal; text-align: center; }
 
-  /* ---------- Xavier Cup: counters and tiles at a readable size ---------- */
-  .cup-counter { padding: 16px; }
+  /* ---------- Xavier Cup: tiles at a readable size ---------- */
   .featured-match { padding: 12px; }
 }
 
@@ -273,4 +271,51 @@
     grid-auto-rows: auto;
   }
   :is(.browse-grid, .browse-featured__grid, .landing-featured .card-grid) .card__body { display: block; }
+}
+
+/* ============================================================
+   THE XAVIER CUP ON A PHONE (≤560px) — short, not tall.
+   Under the full-screen banner, the team picker is one sideways row
+   and the Matches tools a few thin rows. Here, last, so it wins
+   over skins.css; the :root[data-skin] prefix matches the skins'
+   own weight.
+   ============================================================ */
+@media (max-width: 560px) {
+  /* --- Banner: still the full screen (cup.css), small labels smaller --- */
+  .cup-hero__preview { padding: 3px 10px; font-size: 11px; }
+  .cup-photo__caption { padding: 3px 9px; font-size: 11px; }
+
+  /* --- Follow your teams: one row that scrolls sideways --- */
+  .cup-follow { padding-top: 14px; }
+  .cup-follow__head { margin-bottom: 8px; }
+  .cup-follow .cup-section__title--sm { font-size: 17px; }
+  .cup-follow .cup-section__hint {
+    margin-top: 2px;
+    font-size: 13.5px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .cup-follow .team-strip {
+    display: flex;
+    gap: 8px;
+    margin-inline: -16px;
+    padding: 4px 16px 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .cup-follow .team-strip::-webkit-scrollbar { display: none; }
+  .cup-follow .team-tile { flex: 0 0 72px; padding: 8px 4px 6px; border-radius: 14px; }
+  .cup-follow .team-tile__crest { height: 38px; }
+  .cup-follow .team-tile__name { font-size: 11px; }
+  .cup-follow .team-tile__short { display: none; }
+
+  .cup-tabs { margin-top: var(--space-3); }
+  .cup-section { padding-top: 20px; }
+
+  /* --- Matches: the title and its one-line description --- */
+  .screen--cup .cup-matches__head { margin-bottom: 12px; }
+  .cup-matches__head .cup-section__hint { margin-top: 2px; font-size: 14px; }
 }

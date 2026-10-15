@@ -1,16 +1,16 @@
 /* ============================================================
    components/discover-teams.js — the Teams tile on Discover.
-   The same logo tiles as the Fixtures "Follow your team" strip
-   (team-strip.js / team-strip.css). Clicking a team saves it as
-   the followed team and jumps to Fixtures, where that team is
-   already highlighted. Clicking the team you already follow
-   still goes to Fixtures (it does not un-pick here).
+   The same logo tiles as the Cup tab's "Follow your teams" strip
+   (team-strip.js / team-strip.css). Clicking a team follows it
+   and jumps to Matches, where its games are at the top. Clicking
+   a team you already follow still goes to Matches (it does not
+   un-follow here; that is done on the Cup tab).
    Put in: docs/src/js/components/discover-teams.js
    Load it with one line in main.js:
      import './components/discover-teams.js';
    ============================================================ */
 import { teamStripHtml } from './team-strip.js';
-import { currentTeam, setMyTeam, onMyTeamChange } from '../lib/my-team.js';
+import { myTeams, followTeam, onMyTeamChange } from '../lib/my-team.js';
 import { navigate } from '../router.js';
 
 function init() {
@@ -20,13 +20,13 @@ function init() {
 
   el.classList.add('team-strip');
   el.setAttribute('role', 'group');
-  el.setAttribute('aria-label', 'Pick a team to see its fixtures');
-  el.innerHTML = teamStripHtml(currentTeam());
+  el.setAttribute('aria-label', 'Pick a team to see its matches');
+  el.innerHTML = teamStripHtml(myTeams());
 
   const paint = () => {
-    const selected = currentTeam();
+    const selected = myTeams();
     el.querySelectorAll('[data-team-id]').forEach((btn) => {
-      const on = btn.dataset.teamId === selected;
+      const on = selected.includes(btn.dataset.teamId);
       btn.classList.toggle('is-selected', on);
       btn.setAttribute('aria-pressed', String(on));
     });
@@ -35,15 +35,15 @@ function init() {
   el.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-team-id]');
     if (!btn) return;
-    setMyTeam(btn.dataset.teamId);              // always follow, never toggle off
-    navigate({ screen: 'cup', tab: 'fixtures' });
+    followTeam(btn.dataset.teamId);             // always follow, never toggle off
+    navigate({ screen: 'cup', tab: 'matches' });
   });
 
   onMyTeamChange(paint);
 }
 
 /* Every Discover link that opens one tab of the Xavier Cup
-   (View more, Go to fixtures, ...) carries data-go-tab="<tab>".
+   (View more, Go to matches, ...) carries data-go-tab="<tab>".
    Handled here, so it does not depend on the router's data-nav. */
 document.addEventListener('click', (e) => {
   const a = e.target.closest('[data-go-tab]');
