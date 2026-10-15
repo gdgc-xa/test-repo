@@ -19,7 +19,7 @@
   - `docs/src/css/screens/cup.css`, `docs/src/css/components/*.css`
   - Cup markup lives in `docs/index.html` (`data-cup-tab` / `data-cup-view`)
 - Every section has an on/off switch in `CUP_CONFIG` (`show*`) — keep that pattern for anything new.
-- Three skins (`Xavier Cup 2026`, `World Cup`, `Sands of Time`) + light/dark — new UI must work in all of them using existing tokens in `tokens.css` / `skins.css`.
+- Two skins (`Xavier Cup 2026`, `Sands of Time`; World Cup was removed) + light/dark — new UI must work in all of them using existing tokens in `tokens.css` / `skins.css`.
 - `CUP_CONFIG.previewNow` fakes "now" so live/finished states can be tested. Use it while testing.
 
 ## 2. What's wrong today (audit)

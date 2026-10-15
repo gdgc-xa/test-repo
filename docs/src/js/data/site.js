@@ -54,7 +54,6 @@ export const SITE = {
 
   /* ---------- Design / skin ----------
      'txc'      — The Xavier Cup 2026: navy, lime and cream tiles.
-     'worldcup' — the floodlit pitch and stadium.
      'sands'    — the original Sands of Time beach design, kept intact.
 
      defaultSkin  what a first-time visitor sees.
@@ -65,7 +64,6 @@ export const SITE = {
     allowToggle: true,
     labels: {
       txc: 'Xavier Cup 2026',
-      worldcup: 'World Cup',
       sands: 'Sands of Time',
     },
   },
@@ -81,13 +79,6 @@ export const SITE = {
       footerTagline: 'Built for The Xavier Cup 2026 · University-wide Season',
       footerSeason: 'Xavier Cup 2026',
     },
-    worldcup: {
-      brandSub: 'Xavier Ateneo · The Xavier Cup',
-      heroTagline: 'The Xavier Cup',
-      heroAnchor: 'Every org is a team. Every cluster a side of the draw.',
-      footerTagline: 'Built for The Xavier Cup · University-wide Season',
-      footerSeason: 'Xavier Cup',
-    },
     sands: {
       brandSub: 'Xavier Ateneo · Sands of Time',
       heroTagline: 'Sands of Time',
@@ -102,7 +93,7 @@ export const SITE = {
      hides the gear button entirely.                                */
   settings: {
     showAppearance: true,   // Light / Dark
-    showDesign: true,       // Xavier Cup 2026 / World Cup / Sands of Time
+    showDesign: true,       // Xavier Cup 2026 / Sands of Time
     showMotion: true,       // Full / Reduced animation
   },
 };
