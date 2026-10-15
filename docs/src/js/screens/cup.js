@@ -197,6 +197,19 @@ export function initCup(root) {
     PHONE.addEventListener('change', rerender);
     SWIPE.addEventListener('change', rerender);
 
+    // Live data (lib/live-data.js) lands after the first render and on
+    // every refresh: repaint. The first time, also open a shared
+    // ?game= link, which could not be found before the data arrived.
+    let dataSeen = false;
+    window.addEventListener('cup:data', () => {
+      const q = currentQuery();
+      if (q.screen === 'cup') {
+        render();
+        if (!dataSeen && q.game) renderGameDetail(q.game);
+      }
+      dataSeen = true;
+    });
+
     // Back and Forward step through the Sports pages (sport, team);
     // screens and the match pop-up are the router's.
     window.addEventListener('popstate', () => {
@@ -583,7 +596,9 @@ function renderSports(root, games, mine) {
   const sportGames = games.filter(g => g.sport === sport.name);
   const divisions = divisionsFor(sportGames);
   const div = divisions.find(d => d.toLowerCase() === state.sportsDiv.toLowerCase()) || divisions[0] || 'Open';
-  state.sportsDiv = div;
+  // With no games yet (live data still loading), keep the division the
+  // link asked for so it still applies when the games arrive.
+  if (divisions.length) state.sportsDiv = div;
   const divGames = sportGames.filter(g => divisionOf(g) === div);
 
   wrap.innerHTML = sportPageHtml({
@@ -713,7 +728,7 @@ function miniGameHtml(g) {
       <span class="mini-game__time">${escapeHtml(time)}</span>
       <span class="mini-game__title">${escapeHtml(g.title)}</span>
       <span class="mini-game__meta">${escapeHtml(g.meta)}</span>
-      <span class="mini-game__status">${statusPillHtml(g.status, { labels: GAME_STATUS_LABEL, size: 'sm' })}</span>
+      <span class="mini-game__status">${statusPillHtml(g.status, { labels: GAME_STATUS_LABEL, label: g.statusLabel, size: 'sm' })}</span>
     </button>`;
 }
 

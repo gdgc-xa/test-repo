@@ -22,12 +22,14 @@ export const GAME_STATUS_LABEL = {
   finished: 'Full time',
 };
 
-export function statusPillHtml(status, { labels = STATUS_LABEL, size = '' } = {}) {
+/* `label` replaces the wording but keeps the state's colour — a
+   Postponed match still reads as Upcoming, a Cancelled one as done. */
+export function statusPillHtml(status, { labels = STATUS_LABEL, size = '', label = '' } = {}) {
   const id = STATUS_LABEL[status] ? status : 'upcoming';
   const cls = ['status-pill', `status-pill--${id}`, size ? `status-pill--${size}` : '']
     .filter(Boolean).join(' ');
   const dot = id === 'ongoing'
     ? '<span class="status-pill__dot" aria-hidden="true"></span>'
     : '';
-  return `<span class="${cls}">${dot}${escapeHtml(labels[id] || STATUS_LABEL[id])}</span>`;
+  return `<span class="${cls}">${dot}${escapeHtml(label || labels[id] || STATUS_LABEL[id])}</span>`;
 }

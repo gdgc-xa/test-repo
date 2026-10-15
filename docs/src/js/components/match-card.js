@@ -82,12 +82,13 @@ export function matchCardHtml(g, { i = 0, myTeams = [], featured = false } = {})
   const middle = `
     <span class="match__mid match__mid--${g.status}">
       <span class="match__box">${box}</span>
-      <span class="match__bar">${BAR_LABEL[g.status] || ''}</span>
+      <span class="match__bar">${escapeHtml(g.statusLabel || BAR_LABEL[g.status] || '')}</span>
     </span>`;
 
   const row = solo
     ? `<span class="match__row match__row--solo" aria-hidden="true">
-         <span class="match__solo">${escapeHtml(g.teams[0] || g.sport || 'All colleges')}</span>
+         <span class="match__solo">${escapeHtml(g.title || g.teams[0] || g.sport || 'All colleges')}${
+           g.podium ? `<span class="match__podium">${escapeHtml(g.podium)}</span>` : ''}</span>
          ${middle}
        </span>`
     : `<span class="match__row" aria-hidden="true">
@@ -104,7 +105,9 @@ export function matchCardHtml(g, { i = 0, myTeams = [], featured = false } = {})
          </svg>
          <span>${escapeHtml(g.venueName)}</span>
        </a>`
-    : `<span class="match__venue match__venue--none">Venue to follow</span>`;
+    : g.venueName
+      ? `<span class="match__venue"><span>${escapeHtml(g.venueName)}</span></span>`
+      : `<span class="match__venue match__venue--none">Venue to follow</span>`;
 
   const cls = [
     'match', 'reveal',

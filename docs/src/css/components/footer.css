@@ -59,8 +59,7 @@
   color: var(--muted);
   text-transform: uppercase;
 }
-/* The official GDG on Campus Xavier logo: round, so no box around it. */
-.gdg-credit__mark { width: 44px; height: 44px; flex: 0 0 auto; border-radius: 50%; }
+.gdg-credit__mark { width: 32px; height: 32px; flex: 0 0 auto; }
 .gdg-credit__text { display: flex; flex-direction: column; }
 .gdg-credit__org {
   font-size: 13px;

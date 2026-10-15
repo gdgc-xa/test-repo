@@ -136,6 +136,15 @@
   font-size: 18px;
   line-height: 1.2;
 }
+/* A placement event's top three, under its name ("1st CCS · 2nd LAW …"). */
+.match__podium {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--muted);
+}
 
 /* ---------- The box in the middle ---------- */
 .match__mid {

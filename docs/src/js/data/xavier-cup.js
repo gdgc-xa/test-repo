@@ -6,7 +6,8 @@
 
      1. CUP_CONFIG  which sections of the tab appear at all
      2. CUP_MAP     the venues, what is played where, the 3D view
-     3. GAMES       every match, with its venue and kickoff time
+     3. CUP_LIVE    where the real matches come from (the tracker)
+        GAMES       sample matches, used only while CUP_LIVE is off
      4. CUP_NEWS    the News & Updates column
      5. CUP_EVENTS  the Upcoming Events cards under the news
      6. CUP_PHOTOS  the photo slideshow in the banner
@@ -44,8 +45,9 @@ export const CUP_CONFIG = {
       this moment: statuses, the live strip, the featured match and
       the calendar all read it instead of the real clock. It exists
       so the tab can be reviewed with games live and finished before
-      the season starts. Set it to null for launch.               */
-  previewNow: '2026-10-12T15:30',
+      the season starts. Set it to null for launch. (Live data from
+      CUP_LIVE needs the real clock, so it stays null while that is on.) */
+  previewNow: null,
 
   /* --- Sections. Each one is independent. A view with nothing
          left in it loses its tab. --- */
@@ -174,7 +176,56 @@ export const CUP_MAP = {
 };
 
 /* ============================================================
-   3. THE FIXTURES
+   3. LIVE DATA — the Intramurals Tracker
+   ------------------------------------------------------------
+   The real matches and events come from the tracker (Google Sheet
+   → n8n → MySQL), read by lib/live-data.js every refreshSeconds:
+     api        the Campus Compass API on the VPS (see api/README.md)
+     devApi     tried first when the site runs on localhost, so a
+                local API can be tested; skipped when it isn't running
+     fallback   the api.gs data link (same JSON), used only when the
+                API fails or takes longer than timeoutSeconds
+   While enabled, GAMES below is ignored and "Updated X min ago"
+   shows in the banner. Set enabled: false to go back to GAMES.
+   ============================================================ */
+export const CUP_LIVE = {
+  enabled: true,
+  api: 'https://campus-api.srv1804367.hstgr.cloud/v1/snapshot',
+  devApi: 'http://localhost:3000/v1/snapshot',
+  // The api.gs data link (Apps Script web app). It runs on Google with
+  // usage limits, so the site only uses it when the API fails.
+  fallback: 'https://script.google.com/macros/s/AKfycbxGzJP10p0qmt-5kHtzLJ_0IL0MxXPjzlh2jx7dCV3pMFQjh_y4UU2WXhl-rrbwupUg/exec',
+  timeoutSeconds: 5,
+  refreshSeconds: 45,
+
+  /* Venue names as the sheet writes them (its Lists tab) → the map's
+     venue ids in CUP_MAP.venues. Matching ignores capitals and extra
+     spaces. A venue not listed here still shows on its matches, just
+     not on the map. The sheet's names are still samples: confirm
+     these with the database lead. */
+  venues: {
+    'soccer-field':  ['Soccer Field', 'XU Soccer Field', 'Field (Pitch 1)', 'Field (Pitch 2)', 'Softball Field'],
+    'covered-court': ['Covered Court', 'XU Covered Court'],
+    'xu-gym':        ['University Gym', 'Xavier University Gym', 'Gym'],
+  },
+
+  /* College codes in the sheet → team ids in data/teams.js.
+     PRIMUS was COLOSSUS until Oct 15; both point to the same team. */
+  colleges: {
+    CCS: 'ccs',
+    NURSING: 'nsg',
+    SBM: 'sbm',
+    ENG: 'eng',
+    CAS: 'cas',
+    LAW: 'law',
+    MED: 'med',
+    PRIMUS: 'agsoe',
+    COLOSSUS: 'agsoe',
+  },
+};
+
+/* ============================================================
+   3b. THE SAMPLE FIXTURES (only while CUP_LIVE.enabled is false)
    ------------------------------------------------------------
    id        unique, url-safe (used in the ?game=… link)
    sport     free text — the sport chips are built from these, and
@@ -506,6 +557,9 @@ export const SPORTS = [
   { id: 'soccer',     name: 'Soccer',     icon: 'assets/sports/soccer.webp',     photo: null, photos: [] },
   { id: 'frisbee',    name: 'Frisbee',    icon: 'assets/sports/frisbee.webp',    photo: null, photos: [] },
   { id: 'softball',   name: 'Softball',   icon: 'assets/sports/softball.webp',   photo: null, photos: [] },
+  // Placement events (100m Dash, relays…), from the tracker's Events tab.
+  // No picture yet: it shows as its initial on the map and its line glyph on cards.
+  { id: 'athletics',  name: 'Athletics',  icon: null,                            photo: null, photos: [] },
 ];
 
 /* ---------- Lookups ---------- */
@@ -513,13 +567,18 @@ export const SPORTS = [
 export const VENUE_BY_ID = Object.fromEntries(CUP_MAP.venues.map(v => [v.id, v]));
 export const SPORT_BY_NAME = Object.fromEntries(SPORTS.map(s => [s.name, s]));
 
+/** Every sport the tracker lists (its Lists tab), in its order.
+    Filled by lib/live-data.js, so a sport added to the sheet gets a
+    tile and a page here before its first game. */
+export const TRACKER_SPORTS = [];
+
 /**
- * allSports() — SPORTS in order, then any sport GAMES plays that
- * SPORTS leaves out (with no pictures), so every sport with a game
- * has a page.
+ * allSports() — SPORTS in order, then the tracker's other sports and
+ * any sport GAMES plays that SPORTS leaves out (with no pictures), so
+ * every sport has a page.
  */
 export function allSports() {
-  const extra = sportsInPlay()
+  const extra = [...new Set([...TRACKER_SPORTS, ...sportsInPlay()])]
     .filter(name => !SPORT_BY_NAME[name])
     .map(name => ({
       id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),

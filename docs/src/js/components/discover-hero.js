@@ -233,5 +233,12 @@ function init() {
   };
   paint();
   setInterval(paint, 60000);
+
+  // Live data arrived or refreshed: the game count and the pill follow.
+  window.addEventListener('cup:data', () => {
+    counts.games = GAMES.length;
+    stats.querySelectorAll('[data-count="games"]').forEach(el => { el.textContent = counts.games; });
+    paint();
+  });
 }
 init();

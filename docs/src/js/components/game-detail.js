@@ -58,7 +58,7 @@ export function gameDetailHtml(g) {
     <article class="detail detail--game" style="--detail-accent: var(--${g.color});">
       <header class="detail__hero detail__hero--game">
         <div class="detail__tags">
-          ${statusPillHtml(g.status, { labels: GAME_STATUS_LABEL })}
+          ${statusPillHtml(g.status, { labels: GAME_STATUS_LABEL, label: g.statusLabel })}
           ${g.round ? `<span class="tag tag--booth tag--plain">${escapeHtml(g.round)}</span>` : ''}
           ${g.sport ? `<span class="tag tag--booth tag--plain">${escapeHtml(g.sport)}${g.division ? ` · ${escapeHtml(g.division)}` : ''}</span>` : ''}
         </div>

@@ -113,11 +113,10 @@
   gap: var(--space-4);
 }
 .about-gdg__mark {
-  width: 72px;
-  height: 72px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   max-width: none;
-  border-radius: 50%;
 }
 .about-gdg__org {
   margin-top: 2px;

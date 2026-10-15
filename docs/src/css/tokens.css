@@ -48,8 +48,8 @@
   /* ============================================================
      THE XAVIER CUP — pitch green, trophy gold, floodlit white.
      Defined in BOTH skins on purpose: the Cup tab keeps its own
-     identity whichever design the visitor has chosen. The Cup
-     screen's pitch and trophy colours read from these.
+     identity whichever design the visitor has chosen. Everything
+     world-cup-shaped reads from these and nothing else.
      ============================================================ */
   --cup-green:      #0E7A43;
   --cup-green-dk:   #0A5B32;
@@ -245,8 +245,8 @@
   /* ============================================================
      MATCH ROLES — used by the team picker, match cards, featured
      match and calendar, which all three designs share. They point
-     at each design's own accents, so Sands of Time picks them
-     up with no extra rules. The Xavier Cup 2026 design
+     at each design's own accents, so World Cup and Sands of Time
+     pick them up with no extra rules. The Xavier Cup 2026 design
      sets them directly (bottom of this file).
      ============================================================ */
   --tx-tile:          var(--ocean-deep);
@@ -504,11 +504,126 @@
 }
 
 /* ============================================================
+   WORLD CUP SKIN — data-skin="worldcup" on <html>.
+
+   Only the palette changes here; the structural swaps (which
+   scene is painted, hourglass vs trophy) are in skins.css.
+   The four cluster hues are deliberately untouched: they are the
+   org taxonomy, not the season's decoration.
+
+   Two blocks, and they must stay in step — anything declared in
+   the day block needs a night value below it, or dark mode will
+   inherit a daylight colour.
+   ============================================================ */
+:root[data-skin="worldcup"] {
+  /* ---------- Ground / neutrals — chalk and clipped grass ---------- */
+  --ground:        #EDF4EE;
+  --ground-2:      #DFECE1;
+  --surface:       #FFFFFF;
+  --surface-2:     #E4EFE6;
+  --ink:           #11251A;
+  --ink-2:         #3A5444;
+  --muted:         #6B8574;
+  --border:        #D2E2D6;
+  --border-strong: #AEC8B5;
+
+  /* ---------- Primary accents — pitch green and trophy gold ---------- */
+  --ocean:         #0E7A43;
+  --ocean-deep:    #0A5B32;
+  --ocean-soft:    #DDF0E4;
+  --sun:           #EFB100;
+  --sun-deep:      #B98604;
+  --sun-soft:      #FCEFCF;
+
+  --startup-soft:  #FCEFCF;
+  --startup-ink:   #8A5E08;
+  --startup-edge:  #EFB100;
+
+  --compass-face:  #C9A227;
+  --compass-tick:  #AEC8B5;
+
+  --focus-ring: 0 0 0 3px rgba(14, 122, 67, 0.45);
+
+  --shadow-sm: 0 2px 8px rgba(12, 48, 28, 0.08);
+  --shadow-md: 0 6px 18px rgba(12, 48, 28, 0.10);
+  --shadow-lg: 0 14px 40px rgba(12, 48, 28, 0.16);
+  --shadow-modal: 0 30px 80px rgba(6, 26, 16, 0.38);
+
+  /* ---------- Hero content sitting on the pitch ----------
+     The lockup, tagline and chips are shared markup; re-pointing
+     these tokens re-dresses them without touching a rule. */
+  --scene-ink:       #F2FBF4;
+  --scene-ink-warm:  #FFFFFF;
+  --scene-ink-muted: #CFE7D7;
+  --scene-ink-halo:  rgba(6, 40, 22, 0.55);
+
+  --scene-word-orange:  #FBD96B;   /* "Campus" */
+  --scene-word-cream:   #0A3A22;   /* the outline around both words */
+  --scene-word-stroke:  #FFFFFF;   /* "Compass" */
+  --scene-tagline-fill:   #FFFFFF;
+  --scene-tagline-stroke: #0A5B32;
+
+  --scene-chip-bg:      #FFFFFF;
+  --scene-chip-ink:     #11251A;
+  --scene-search-btn:   #0A5B32;
+  --scene-card-cream:   #FFFFFF;
+}
+
+:root[data-skin="worldcup"][data-theme="dark"] {
+  --ground:        #0C1712;
+  --ground-2:      #101F18;
+  --surface:       #16261D;
+  --surface-2:     #1D3227;
+  --ink:           #E9F5EC;
+  --ink-2:         #BED6C6;
+  --muted:         #86A392;
+  --border:        #263E30;
+  --border-strong: #3B5A48;
+
+  --ocean:         #34B871;
+  --ocean-deep:    #1E9A58;
+  --ocean-soft:    #12301F;
+  --sun:           #F5C43C;
+  --sun-deep:      #C98A12;
+  --sun-soft:      #33280C;
+
+  --startup-soft:  #33280C;
+  --startup-ink:   #F5C43C;
+  --startup-edge:  #C98A12;
+
+  --compass-face:  #E3C766;
+  --compass-tick:  #3B5A48;
+
+  --focus-ring: 0 0 0 3px rgba(52, 184, 113, 0.5);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.55);
+  --shadow-modal: 0 30px 80px rgba(0, 0, 0, 0.7);
+
+  --scene-ink:       #DCEFE2;
+  --scene-ink-warm:  #F0FBF3;
+  --scene-ink-muted: #A8C7B4;
+  --scene-ink-halo:  rgba(0, 0, 0, 0.6);
+
+  --scene-word-orange:  #FBD96B;
+  --scene-word-cream:   #04160D;
+  --scene-word-stroke:  #F2FBF4;
+  --scene-tagline-fill:   #F2FBF4;
+  --scene-tagline-stroke: #0A3A22;
+
+  --scene-chip-bg:      #1D3227;
+  --scene-chip-ink:     #E9F5EC;
+  --scene-search-btn:   #1E9A58;
+  --scene-card-cream:   #16261D;
+}
+
+/* ============================================================
    XAVIER CUP 2026 SKIN — data-skin="txc" on <html>. The default.
 
-   Navy, lime and cream, sampled from the TXC reference. Only the
-   palette changes here; skins.css swaps the landing scene for the
-   tile layout and sets the type.
+   Navy, lime and cream, sampled from the TXC reference. Like the
+   World Cup skin, only the palette changes here; skins.css swaps
+   the landing scene for the tile layout and sets the type.
 
    Rules the palette depends on (contrast):
      navy on white 14.0:1 · navy on cream 11.1:1 · lime on navy 9.8:1

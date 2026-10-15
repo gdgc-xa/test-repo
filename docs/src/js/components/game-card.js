@@ -75,7 +75,8 @@ export function resolveGame(g, now = new Date()) {
     ...g,
     venue,
     venueId: g.venue || null,
-    venueName: venue?.name || '',
+    // A venue the map doesn't have yet still has a name (live data: `place`).
+    venueName: venue?.name || g.place || '',
     status,
     start,
     sides,
@@ -127,7 +128,9 @@ export function gameCardHtml(g, i = 0) {
          </svg>
          ${escapeHtml(g.venue.short || g.venue.name)}
        </span>`
-    : `<span class="card__meta card__meta--muted">Venue to follow</span>`;
+    : g.venueName
+      ? `<span class="card__meta">${escapeHtml(g.venueName)}</span>`
+      : `<span class="card__meta card__meta--muted">Venue to follow</span>`;
 
   return `
     <button class="card card--game reveal"
@@ -157,7 +160,7 @@ export function gameCardHtml(g, i = 0) {
       </div>
 
       <div class="card__tags">
-        ${statusPillHtml(g.status, { labels: GAME_STATUS_LABEL })}
+        ${statusPillHtml(g.status, { labels: GAME_STATUS_LABEL, label: g.statusLabel })}
         ${g.round ? `<span class="tag tag--card tag--plain">${escapeHtml(g.round)}</span>` : ''}
       </div>
 

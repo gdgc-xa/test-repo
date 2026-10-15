@@ -185,5 +185,6 @@ function init() {
   new ResizeObserver(() => { const nw = track.clientWidth; if (nw && nw !== w) settle(); }).observe(track);
   paint();
   setInterval(paint, 60000);
+  window.addEventListener('cup:data', paint);   // live data arrived or refreshed
 }
 init();
