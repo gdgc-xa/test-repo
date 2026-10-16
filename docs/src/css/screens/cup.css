@@ -625,7 +625,8 @@
 /* ============================================================
    FULL SCREEN — the photo banner fills the screen edge to edge,
    like Discover's full-screen hero (.dhero--full in
-   discover-grid.css), on every screen size. The words stay lined
+   discover-grid.css); on phones and tablets both are a rounded card
+   instead (the 820px rules at the end). The words stay lined
    up with the page below (inside .wrap); the photos fill the whole
    banner section, which is as wide as the page. A small bouncing
    arrow at the foot says there is more below.
@@ -700,18 +701,27 @@
 @media (prefers-reduced-motion: reduce) { .cup-hero.has-photos .cup-hero__tile::after { animation: none; } }
 :root[data-motion="reduced"] .cup-hero.has-photos .cup-hero__tile::after { animation: none; }
 
+/* Phones and tablets (820px and under): Discover's banner turns into a
+   rounded card there (discover-grid.css → PHONE RATIO: 16px in from the
+   edges, 40px under the nav, 28px corners, as tall as what is in it, no
+   arrow), so this one does the same, and moving between the two tabs
+   keeps one look. */
 @media (max-width: 820px) {
-  :root[data-skin] .cup-hero.has-photos .cup-hero__tile {
-    min-height: calc(100vh - var(--nav-h-mob));
-    min-height: calc(100svh - var(--nav-h-mob));
+  :root[data-skin] .cup-hero.has-photos {
+    --cup-gutter: 24px;                   /* the card's own padding, as Discover's */
+    margin: calc(var(--space-4) + var(--space-5)) var(--space-4) 0;
+    border-radius: 28px;
   }
-}
-@media (max-width: 768px) {
-  .cup-hero.has-photos { --cup-gutter: 16px; }   /* the .wrap padding on phones (mobile.css) */
+  :root[data-skin] .cup-hero.has-photos .cup-hero__wrap { padding-inline: var(--cup-gutter); }
+  :root[data-skin] .cup-hero.has-photos .cup-hero__tile {
+    min-height: 400px;
+    padding: 60px 0 56px;                 /* room for the caption above, the bars below */
+  }
+  .cup-hero.has-photos .cup-hero__tile::after { display: none; }
+  .cup-hero.has-photos .cup-photos .news-hero__bars { bottom: 24px; }
+  .cup-hero.has-photos .cup-hero__title { font-size: clamp(36px, 10.5vw, 56px); line-height: 0.98; }
 }
 @media (max-width: 560px) {
-  :root[data-skin] .cup-hero.has-photos .cup-hero__tile { padding: 64px 0 112px; }
-  .cup-hero.has-photos .cup-hero__title { font-size: clamp(38px, 11.5vw, 60px); }
   .cup-hero.has-photos .cup-hero__kicker { font-size: 11px; letter-spacing: 0.14em; }
   .cup-hero.has-photos .cup-photo__caption { top: 16px; }
   .cup-hero.has-photos .cup-photo .news-ph--hero { padding: 14px var(--cup-gutter); }
