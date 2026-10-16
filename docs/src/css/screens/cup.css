@@ -1316,17 +1316,18 @@
 .cup-event__desc { font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
 
 @media (max-width: 560px) {
-  /* Hero on a phone, as FIFA does it: picture on top, a solid dark
-     panel under it for the story, the progress bars at its foot. */
-  .news-hero__slide { min-height: 0; grid-template-rows: auto 1fr; }
-  .news-hero__media { grid-area: 1 / 1; aspect-ratio: 16 / 10; }
+  /* Hero on a phone: the same layout as on desktop and on Discover —
+     the picture fills the card and the story sits over a fade at its
+     foot (light or dark, see ADAPTIVE TONE), bars underneath. */
+  .news-hero__slide { min-height: clamp(440px, 116vw, 540px); }
   .news-hero__panel {
-    grid-area: 2 / 1;
-    align-self: stretch;
     max-width: none;
-    padding: 20px 20px 60px;
+    gap: 8px;
+    padding: 20px 20px 56px;
   }
-  .news-hero__slide::after { display: none; }
+  .news-hero__title { font-size: clamp(22px, 6vw, 28px); line-height: 1.15; }
+  .news-hero__body { -webkit-line-clamp: 2; }
+  .news-hero__cta { min-height: 42px; padding: 0 22px; font-size: 14px; }
   .news-hero__bars { left: 20px; right: 20px; bottom: 18px; }
   .news-ph--hero .news-ph__mark { transform: none; font-size: 20px; }
   .news-ph--hero .news-ph__mark svg { width: 32px; height: 32px; }
@@ -1466,3 +1467,14 @@
   background: linear-gradient(0deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.72) 38%, transparent 64%);
 }
 .news-card[data-tone="light"] .news-card__meta { color: rgba(11, 27, 51, 0.75); }
+
+/* On a phone the story covers more of the picture, so the fade runs
+   higher and stronger, in whichever tone the picture calls for. */
+@media (max-width: 560px) {
+  .news-hero__slide::after {
+    background: linear-gradient(0deg, rgba(4, 12, 28, 0.95) 0%, rgba(4, 12, 28, 0.82) 52%, rgba(4, 12, 28, 0.25) 82%, transparent 100%);
+  }
+  .news-hero__slide[data-tone="light"]::after {
+    background: linear-gradient(0deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.86) 52%, rgba(255, 255, 255, 0.3) 82%, transparent 100%);
+  }
+}
