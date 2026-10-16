@@ -973,7 +973,7 @@
   grid-area: 1 / 1;
   align-self: end;
   position: relative;
-  z-index: 1;
+  z-index: 2;                      /* above the fade (1) */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -984,6 +984,12 @@
 .news-hero__slide::after {
   content: "";
   grid-area: 1 / 1;
+  /* Over the picture, under the words. Without a layer of its own it
+     was painted beneath the photo (the photo's drift animation lifts
+     it), so no fade ever showed and the words sat on the bare picture.
+     The words are at 2, the progress bars at 2, Discover's arrows at 3. */
+  position: relative;
+  z-index: 1;
   background:
     linear-gradient(0deg, rgba(4, 12, 28, 0.92) 0%, rgba(4, 12, 28, 0.55) 45%, transparent 75%),
     linear-gradient(90deg, rgba(4, 12, 28, 0.55) 0%, transparent 60%);
@@ -1342,6 +1348,15 @@
   .news-ph--hero .news-ph__mark { transform: none; font-size: 20px; }
   .news-ph--hero .news-ph__mark svg { width: 32px; height: 32px; }
   .news-track .news-card { width: 210px; }
+  /* "See all" on a phone: two a row, the same tall 4:5 cards as the
+     carousel (one a row blew each up to the full width), the words
+     inside sized down to fit. */
+  .news-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+  .news-grid .news-card { border-radius: 12px; }
+  .news-grid .news-card__caption { gap: 3px; padding: 10px; }
+  .news-grid .news-card__meta { font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .news-grid .news-card__title { font-size: 13px; line-height: 1.25; }
+  .news-grid .news-card__new { top: 8px; right: 8px; padding: 2px 6px; font-size: 9.5px; }
 }
 
 /* ============================================================
@@ -1441,22 +1456,43 @@
 }
 
 /* ============================================================
-   ADAPTIVE TONE — set by js/lib/adaptive-tone.js.
-   A light picture gets a light fade and dark text; a dark one
-   keeps the default dark fade and white text. Covers the News
-   hero, the Discover slideshow and the post cards alike.
+   ADAPTIVE TONE — set by js/lib/adaptive-tone.js, which reads the
+   part of each post picture under the words and writes:
+     data-tone      "light" (dark words) or "dark" (white words)
+     --scrim        the fade's colour (navy or white)
+     --scrim-a      its strength: just enough for 4.5 : 1 contrast
+                    over the lightest / darkest parts under the words
+     --scrim-hold   how far up it holds that strength (to just above
+                    the words), before it fades out
+     --tone-ink, --tone-ink-soft     the headline and the rest
+     --tone-accent                   the source label (the picture's
+                                     own colour, made readable)
+     --tone-cta-bg, --tone-cta-ink   the Read more button
+   Without a reading (a picture that can't be read) the default dark
+   fade and white words stay. Covers the News hero, the Discover
+   slideshow and the post cards alike.
    ============================================================ */
-.news-hero__slide[data-tone="light"]::after {
+.news-hero__slide[data-tone]::after,
+.news-card[data-tone]::after {
   background:
-    linear-gradient(0deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.72) 45%, transparent 78%),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.6) 0%, transparent 60%);
+    linear-gradient(0deg,
+      rgb(var(--scrim) / var(--scrim-a)) 0%,
+      rgb(var(--scrim) / var(--scrim-a)) var(--scrim-hold),
+      transparent calc(var(--scrim-hold) + 30%)),
+    linear-gradient(90deg, rgb(var(--scrim) / calc(var(--scrim-a) * 0.5)) 0%, transparent 60%);
 }
-.news-hero__slide[data-tone="light"] .news-hero__kicker { color: rgba(11, 27, 51, 0.9); }
-.news-hero__slide[data-tone="light"] .news-hero__date { color: rgba(11, 27, 51, 0.72); }
-.news-hero__slide[data-tone="light"] .news-hero__title { color: #0B1B33; }
-.news-hero__slide[data-tone="light"] .news-hero__body { color: rgba(11, 27, 51, 0.85); }
-.news-hero__slide[data-tone="light"] .news-hero__cta { background: #0B1B33; color: #FFFFFF; }
-.news-hero__slide[data-tone="light"] .news-hero__cta:hover { background: var(--tx-accent); color: #0B1B33; }
+/* A faint glow of the fade's colour behind the words lifts them off
+   whatever detail is left in the picture. */
+.news-hero__slide[data-tone] .news-hero__kicker,
+.news-hero__slide[data-tone] .news-hero__title,
+.news-hero__slide[data-tone] .news-hero__body,
+.news-card[data-tone] .news-card__caption { text-shadow: 0 0 18px rgb(var(--scrim) / 0.7), 0 0 4px rgb(var(--scrim) / 0.5); }
+.news-hero__slide[data-tone] .news-hero__kicker { color: var(--tone-accent); }
+.news-hero__slide[data-tone] .news-hero__date { color: var(--tone-ink-soft); }
+.news-hero__slide[data-tone] .news-hero__title { color: var(--tone-ink); }
+.news-hero__slide[data-tone] .news-hero__body { color: var(--tone-ink-soft); }
+.news-hero__slide[data-tone] .news-hero__cta { background: var(--tone-cta-bg); color: var(--tone-cta-ink); }
+.news-hero__slide[data-tone] .news-hero__cta:hover { background: var(--tx-accent); color: #0B1B33; }
 
 /* The progress bars and Discover's arrows sit on the same fade. */
 .news-hero:has(.news-hero__slide.is-active[data-tone="light"]) .news-hero__bar {
@@ -1471,20 +1507,14 @@
 }
 .news-hero:has(.news-hero__slide.is-active[data-tone="light"]) .du-step:hover { background: var(--tx-accent); color: var(--tx-on-accent); }
 
-.news-card[data-tone="light"],
-.news-card[data-tone="light"]:hover { color: #0B1B33; }
-.news-card[data-tone="light"]::after {
-  background: linear-gradient(0deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.72) 38%, transparent 64%);
-}
-.news-card[data-tone="light"] .news-card__meta { color: rgba(11, 27, 51, 0.75); }
+.news-card[data-tone],
+.news-card[data-tone]:hover { color: var(--tone-ink); }
+.news-card[data-tone] .news-card__meta { color: var(--tone-accent); }
 
-/* On a phone the story covers more of the picture, so the fade runs
-   higher and stronger, in whichever tone the picture calls for. */
+/* On a phone the story covers more of the picture, so the default
+   fade (a picture that couldn't be read) runs higher and stronger. */
 @media (max-width: 560px) {
   .news-hero__slide::after {
     background: linear-gradient(0deg, rgba(4, 12, 28, 0.95) 0%, rgba(4, 12, 28, 0.82) 52%, rgba(4, 12, 28, 0.25) 82%, transparent 100%);
-  }
-  .news-hero__slide[data-tone="light"]::after {
-    background: linear-gradient(0deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.86) 52%, rgba(255, 255, 255, 0.3) 82%, transparent 100%);
   }
 }
