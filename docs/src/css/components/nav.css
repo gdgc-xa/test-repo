@@ -36,7 +36,9 @@
 }
 .brand__mark {
   width: 36px; height: 36px;
-  animation: compassIdle 8s ease-in-out infinite;
+  rotate: var(--compass-rot, 0deg);      /* its heading; swings on a change of screen */
+  transition: var(--compass-swing);
+  animation: compassWobble 8s ease-in-out infinite;
   transform-origin: center;
 }
 .brand__text {

@@ -132,9 +132,9 @@
    Centred on the hourglass region (inset bottom matches the
    padding-bottom that reserves the puzzle row) and sitting
    BEHIND the hourglass, so the glass reads as standing in
-   front of the brand mark. compassIdle rotates it around
-   --compass-rot, which compass-orientation.js points at the
-   current screen — so it is a live indicator, not decoration. */
+   front of the brand mark. It turns to --compass-rot, which
+   compass-orientation.js points at the current screen (and wobbles
+   gently, compassWobble) — so it is a live indicator, not decoration. */
 .lockup__rose {
   position: absolute;
   /* translate-centred, not `margin:auto`: the rose is WIDER than the
@@ -153,7 +153,9 @@
 }
 .lockup__rose svg {
   width: 100%; height: 100%; display: block;
-  animation: compassIdle 14s ease-in-out infinite;
+  rotate: var(--compass-rot, 0deg);
+  transition: var(--compass-swing);
+  animation: compassWobble 14s ease-in-out infinite;
 }
 
 /* At night the rose catches the hourglass's lantern light */
