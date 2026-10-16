@@ -18,7 +18,10 @@ body {
 
 html {
   color-scheme: light dark;
+  /* No text enlarging by the phone: under 500px the whole page is shrunk
+     to fit (the viewport script in index.html), evenly, words included. */
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {

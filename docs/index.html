@@ -3,6 +3,32 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Phones narrower than 500px: the page is laid out at 500px and the
+       phone shrinks the whole of it to fit, instead of squeezing the
+       layout to the screen. Everything scales together (nav, pop-ups,
+       map, cards), taps still land where they look. Set here, before the
+       first paint; again when the phone turns (landscape is wider, so it
+       gets the normal site). Wider screens are untouched. Pinch-zoom
+       still works. -->
+  <script>
+    (function () {
+      var LAYOUT = 500;
+      var meta = document.querySelector('meta[name="viewport"]');
+      function fit() {
+        var a = screen.width, b = screen.height;
+        // iOS reports the portrait size however the phone is held.
+        var landscape = window.matchMedia && matchMedia('(orientation: landscape)').matches;
+        var w = landscape ? Math.max(a, b) : Math.min(a, b);
+        var want = w && w < LAYOUT
+          ? 'width=' + LAYOUT + ', initial-scale=' + (w / LAYOUT).toFixed(4)
+          : 'width=device-width, initial-scale=1.0';
+        if (meta.getAttribute('content') !== want) meta.setAttribute('content', want);
+      }
+      fit();
+      addEventListener('orientationchange', fit);
+      addEventListener('resize', fit);
+    })();
+  </script>
   <!-- The phone's address bar colour. A starting value: appearance.js
        sets it to the ground of the theme and design actually showing. -->
   <meta name="theme-color" content="#F4F1EC"/>
