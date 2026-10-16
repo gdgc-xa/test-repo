@@ -1087,21 +1087,31 @@
     <!-- ==================== MAP ==================== -->
     <div class="cup-view" id="cup-view-map" role="tabpanel" aria-labelledby="cup-tab-map" data-cup-view="map" hidden>
       <div class="wrap">
-        <!-- CONSOLIDATED MAP -->
-        <section class="cup-section" data-cup-map-section>
-          <div class="cup-section__head">
-            <div>
-              <h2 class="cup-section__title">Where the games are</h2>
-              <p class="cup-section__hint">The campus, with every venue in play this season. Tap a venue or a sport to see its live games, upcoming games and results.</p>
-            </div>
-          </div>
-
+        <!-- The map fills the view; venue/game information floats above it. -->
+        <section class="cup-section" data-cup-map-section aria-label="Interactive campus map">
           <div class="cup-map-grid">
             <div class="cup-map-panel">
               <div class="cup-map-panel__inner" data-cup-map></div>
               <div class="cup-map-panel__legend" data-cup-legend></div>
             </div>
-            <aside class="venue-panel" data-cup-venue-panel aria-live="polite"></aside>
+            <div class="cup-map-heading">
+              <p class="panel__kicker">Explore the campus</p>
+              <h2 class="cup-section__title">Where the games are</h2>
+              <p class="cup-section__hint">Tap a venue or sport to see its games.</p>
+            </div>
+            <aside class="cup-map-list" data-cup-map-list aria-label="Venues and games">
+              <button class="cup-map-list__toggle" type="button" data-cup-map-list-toggle
+                      aria-expanded="true" aria-controls="cup-map-list-content" aria-label="Collapse games panel">
+                <span class="cup-map-list__handle" aria-hidden="true"></span>
+                <span class="cup-map-list__label"><strong data-cup-map-list-title>Venues &amp; games</strong>
+                  <span data-cup-map-list-note>Choose a venue to explore</span></span>
+                <svg class="cup-map-list__chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m5 8 5 5 5-5"/></svg>
+              </button>
+              <div class="cup-map-list__content" id="cup-map-list-content">
+                <div class="venue-panel" data-cup-venue-panel aria-live="polite" aria-label="Venue details"></div>
+                <div data-cup-off-campus></div>
+              </div>
+            </aside>
           </div>
         </section>
       </div>

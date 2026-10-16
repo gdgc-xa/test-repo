@@ -11,6 +11,7 @@
 import { CUP_CONFIG } from '../data/xavier-cup.js';
 import { statusPillHtml, GAME_STATUS_LABEL } from './status.js';
 import { cupMapHtml } from './cup-map.js';
+import { hasCampusPoint, venueLocationHtml } from '../lib/cup-map-locations.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
 
 export function gameDetailHtml(g) {
@@ -48,7 +49,8 @@ export function gameDetailHtml(g) {
       <div class="panel__kicker">Where it is being played</div>
       <p class="detail__venue-name">${escapeHtml(g.venue.name)}</p>
       ${g.venue.note ? `<p class="detail__venue-note">${escapeHtml(g.venue.note)}</p>` : ''}
-      <div class="detail__map">${cupMapHtml({}, { selected: g.venueId, sport: g.sport })}</div>
+      ${venueLocationHtml(g.venue)}
+      ${hasCampusPoint(g.venue) ? `<div class="detail__map">${cupMapHtml({}, { selected: g.venueId, sport: g.sport })}</div>` : ''}
       <button class="btn btn--ghost btn--sm detail__venue-cta" type="button" data-show-venue="${escapeAttr(g.venueId)}">
         See everything at this venue
       </button>

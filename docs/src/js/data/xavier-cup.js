@@ -5,7 +5,7 @@
    Four things live in here and each can be edited on its own:
 
      1. CUP_CONFIG  which sections of the tab appear at all
-     2. CUP_MAP     the venues, what is played where, the 3D view
+     2. CUP_MAP     the venues and what is played where on the 2D map
      3. CUP_LIVE    where the real matches come from (the tracker)
         GAMES       sample matches, used only while CUP_LIVE is off
      4. CUP_NEWS    the News & Updates column
@@ -19,6 +19,7 @@
    ============================================================ */
 
 import { parseDate } from '../lib/dates.js';
+import { sportIconFor } from './sport-icons.js';
 
 /* ============================================================
    1. CONFIGURATION
@@ -85,7 +86,7 @@ export const CUP_CONFIG = {
    The campus itself (every building, path and gate) is drawn in
    data/campus-map.js and rarely needs touching. What lives here
    is what changes with the season: which buildings are venues,
-   where each sport's icon sits, and the 3D view's settings.
+   where each sport's icon sits, and optional outside locations.
 
    To add a venue: add an entry below whose `id` (or `footprint`)
    is a building id from data/campus-map.js, then point games at
@@ -96,18 +97,25 @@ export const CUP_CONFIG = {
    change when the map is resized or zoomed.
    ============================================================ */
 export const CUP_MAP = {
+  showOffCampus: true,
+  // Outside venues belong in this SAME venues array. Example shape (not a real venue):
+  // { id: 'confirmed-venue-id', name: 'Confirmed venue name', venueType: 'off-campus',
+  //   address: 'Confirmed address', gps: [longitude, latitude], note: 'Access details' }
+  // gps/address are optional; outside venues never need campus label/footprint/icons.
+  // Games reference the stable id through GAMES[].venue. Do not infer venues from sports.
+
   /* --- VENUES --------------------------------------------------
      id         referenced by each game's `venue`
      footprint  the building in data/campus-map.js (defaults to id)
      name       full name, shown in the panel and the detail view
      short      the name tag on the map
      label      [x, y] where that name tag sits on the drawing
-     gps        [longitude, latitude] of the tag in the 3D view
+     gps        optional [longitude, latitude] for Google Maps
      indoor     true for roofed venues
      note       the walking-directions line
      icons      where each sport's icon sits at this venue:
                   at   [x, y] on the drawing
-                  gps  optional [longitude, latitude] in 3D;
+                  gps  optional [longitude, latitude];
                        without it the icon uses the venue's gps
                 A sport only shows here once GAMES has a fixture
                 for it at this venue. One with no spot listed is
@@ -158,21 +166,6 @@ export const CUP_MAP = {
      sport with no picture still shows — as a plain badge with its
      first letter. */
 
-  /* --- THE 3D VIEW ---------------------------------------------
-     Mapbox draws the campus in 3D. It needs a public access token
-     (it starts with pk.) from a free Mapbox account. Public tokens
-     are meant to ship in a website, but restrict this one to the
-     site's address in the Mapbox dashboard (URL restrictions) so
-     nobody else can use up the free monthly quota.
-
-     While token is empty, the 2D / 3D switch does not appear at
-     all and the map stays 2D.
-     ------------------------------------------------------------ */
-  mapbox: {
-    token: '',
-    style: 'mapbox://styles/mapbox/standard',
-    version: '3.28.0',
-  },
 };
 
 /* ============================================================
@@ -549,7 +542,7 @@ export const CUP_PHOTOS = {
 
    The standings (wins and losses from the finished Elimination
    games) work themselves out from GAMES. A sport in GAMES that is
-   missing here still gets a page, with no pictures.
+   missing here still gets a page, using supplied artwork where available.
    ============================================================ */
 export const SPORTS = [
   { id: 'basketball', name: 'Basketball', icon: 'assets/sports/basketball.webp', photo: null, photos: [] },
@@ -557,9 +550,9 @@ export const SPORTS = [
   { id: 'soccer',     name: 'Soccer',     icon: 'assets/sports/soccer.webp',     photo: null, photos: [] },
   { id: 'frisbee',    name: 'Frisbee',    icon: 'assets/sports/frisbee.webp',    photo: null, photos: [] },
   { id: 'softball',   name: 'Softball',   icon: 'assets/sports/softball.webp',   photo: null, photos: [] },
-  // Placement events (100m Dash, relays…), from the tracker's Events tab.
-  // No picture yet: it shows as its initial on the map and its line glyph on cards.
-  { id: 'athletics',  name: 'Athletics',  icon: null,                            photo: null, photos: [] },
+  // Placement events (100m Dash, relays...), from the tracker's Events tab.
+  // Keep the Sports-tab artwork unset; map markers can use shared icon assets.
+  { id: 'athletics', name: 'Athletics', icon: null, photo: null, photos: [] },
 ];
 
 /* ---------- Lookups ---------- */
@@ -574,15 +567,15 @@ export const TRACKER_SPORTS = [];
 
 /**
  * allSports() — SPORTS in order, then the tracker's other sports and
- * any sport GAMES plays that SPORTS leaves out (with no pictures), so
- * every sport has a page.
+ * any sport GAMES plays that SPORTS leaves out. Supplied artwork is used
+ * where available, so every sport has a page.
  */
 export function allSports() {
   const extra = [...new Set([...TRACKER_SPORTS, ...sportsInPlay()])]
     .filter(name => !SPORT_BY_NAME[name])
     .map(name => ({
       id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
-      name, icon: null, photo: null, photos: [],
+      name, icon: sportIconFor(name), photo: null, photos: [],
     }));
   return [...SPORTS, ...extra];
 }
