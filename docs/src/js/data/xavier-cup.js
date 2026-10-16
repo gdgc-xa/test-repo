@@ -613,7 +613,7 @@ export const SPORTS = [
   // Minor events (team 20 / 14 / 10, individual 10 / 7 / 5)
   { id: 'athletics',  name: 'Athletics',  icon: null, photo: null, photos: [], categories: ATHLETICS, format: 'field' },
   { id: 'swimming',   name: 'Swimming',   icon: null, photo: null, photos: [], categories: MW, format: 'field' },
-  { id: 'sepak-takraw', name: 'Sepak Takraw', icon: null, photo: null, photos: [], categories: MW },
+  { id: 'sepak-takraw', name: 'Sepak Takraw', icon: null, photo: null, photos: [], categories: MW, bracket: 'crossover' },
   { id: 'table-tennis', name: 'Table Tennis', icon: null, photo: null, photos: [], categories: RACKET, bracket: 'crossover' },
   { id: 'lawn-tennis',  name: 'Lawn Tennis',  icon: null, photo: null, photos: [], categories: MW },
   { id: 'badminton',    name: 'Badminton',    icon: null, photo: null, photos: [], categories: RACKET, bracket: 'crossover' },
@@ -661,7 +661,9 @@ export const BRACKETS = {
     third: null,
     placings: [],
   },
-  // Volleyball, Softball, Badminton, Table Tennis, Pickleball.
+  // Volleyball, Softball, Badminton, Table Tennis, Pickleball, and Sepak
+  // Takraw (its Oct 17–18 schedule: groups 1 and 2 of four teams, then
+  // T1G1 v T2G2 and T2G1 v T1G2, L13 v L14 for third, W13 v W14).
   crossover: {
     groups: ['A', 'B'],
     note: 'The top two of each group cross over to the semifinals.',
