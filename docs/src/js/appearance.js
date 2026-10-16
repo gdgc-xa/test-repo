@@ -199,7 +199,10 @@ export function initAppearance() {
   // The inline script in <head> has usually applied these already;
   // re-applying is cheap and covers the case where it did not run.
   setTheme(getTheme(), { persist: false });
-  setSkin(getSkin(), { persist: false });
+  // A locked design also replaces a saved choice of another one, so
+  // the inline script in <head> stops painting that design for a frame
+  // before this runs (Sands of Time while it is switched off).
+  setSkin(getSkin(), { persist: !SITE.skin.allowToggle });
   setMotion(getMotion(), { persist: false });
 
   document.querySelectorAll('[data-theme-toggle]').forEach(btn => {

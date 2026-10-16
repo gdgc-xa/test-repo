@@ -58,10 +58,13 @@ export const SITE = {
 
      defaultSkin  what a first-time visitor sees.
      allowToggle  false hides the Design row in Settings and locks
-                  everyone to defaultSkin (the saved choice is ignored).  */
+                  everyone to defaultSkin (the saved choice is ignored).
+                  This is the Sands of Time switch: off for now, so
+                  everyone sees the Xavier Cup design; true brings the
+                  Design choice back.                                  */
   skin: {
     defaultSkin: 'txc',
-    allowToggle: true,
+    allowToggle: false,
     labels: {
       txc: 'Xavier Cup 2026',
       sands: 'Sands of Time',
