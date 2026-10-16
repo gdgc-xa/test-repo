@@ -12,13 +12,19 @@ import { initSettings }     from './settings.js';
 import { watchReveals }     from './reveal-observer.js';
 import { initLanding }      from './screens/landing.js';
 import { initNavSheet }     from './nav-sheet.js';
+import { startLiveData }    from './lib/live-data.js';
 import './components/discover-updates.js';
 import './components/discover-games.js';
 import './components/discover-flow.js';
 import './components/discover-teams.js';
 import './components/discover-hero.js';
+import './lib/adaptive-tone.js';
 
 function boot() {
+  // Live Xavier Cup data: clears the sample fixtures before anything
+  // draws them, then fills them in from the tracker.
+  startLiveData();
+
   // Appearance first: it stamps data-theme / data-skin / data-motion
   // and swaps the season wording before anything measures the page.
   initAppearance();

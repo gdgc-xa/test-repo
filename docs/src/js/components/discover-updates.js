@@ -70,6 +70,7 @@ function wire(el, total) {
     || document.documentElement.getAttribute('data-motion') === 'reduced';
   el.classList.toggle('is-static', reduced);
   let index = 0;
+  if (count) count.textContent = `01 / ${String(total).padStart(2, '0')}`;
 
   const show = (next) => {
     index = (next + total) % total;

@@ -1,0 +1,41 @@
+# Campus Compass API stack. Runs NEXT TO the database stack in
+# /opt/campus-compass and the n8n stack; it changes neither.
+# Deploy steps: README.md, "Deploy on the VPS".
+name: campus-api
+
+services:
+  api:
+    build: .
+    container_name: campus-api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TZ: Asia/Manila
+      # Keep Node's memory well under the container's limit.
+      NODE_OPTIONS: --max-old-space-size=96
+    mem_limit: 150m
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - shared
+    # No "ports:" on purpose. Traefik reaches the API over the Docker
+    # network; nothing is published on the server. Do not add one.
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=n8n-9duu_default
+      - traefik.http.routers.campus-api.rule=Host(`campus-api.srv1804367.hstgr.cloud`)
+      # Copied from n8n's own labels (README explains how to find them).
+      - traefik.http.routers.campus-api.entrypoints=${TRAEFIK_ENTRYPOINT:?Set TRAEFIK_ENTRYPOINT in .env}
+      - traefik.http.routers.campus-api.tls=true
+      - traefik.http.routers.campus-api.tls.certresolver=${TRAEFIK_CERTRESOLVER:?Set TRAEFIK_CERTRESOLVER in .env}
+      - traefik.http.services.campus-api.loadbalancer.server.port=3000
+
+networks:
+  shared:
+    external: true
+    name: n8n-9duu_default

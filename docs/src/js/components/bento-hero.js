@@ -60,6 +60,7 @@ export function initBentoHero(root) {
   };
   paint();
   setInterval(paint, 60000);
+  window.addEventListener('cup:data', paint);   // live data arrived or refreshed
   onMyTeamChange(paint);
 }
 
