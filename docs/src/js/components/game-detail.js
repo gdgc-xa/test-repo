@@ -30,7 +30,9 @@ export function gameDetailHtml(g) {
 
   const facts = [
     ['Sport', g.sport],
+    ['Event', g.event],
     ['Division', g.division],
+    ['Group', g.group ? `Group ${g.group}` : ''],
     ['Round', g.round],
     ['When', g.when],
     ['Venue', g.venueName],
@@ -60,7 +62,7 @@ export function gameDetailHtml(g) {
         <div class="detail__tags">
           ${statusPillHtml(g.status, { labels: GAME_STATUS_LABEL, label: g.statusLabel })}
           ${g.round ? `<span class="tag tag--booth tag--plain">${escapeHtml(g.round)}</span>` : ''}
-          ${g.sport ? `<span class="tag tag--booth tag--plain">${escapeHtml(g.sport)}${g.division ? ` · ${escapeHtml(g.division)}` : ''}</span>` : ''}
+          ${g.sport ? `<span class="tag tag--booth tag--plain">${escapeHtml([g.sport, g.event, g.division].filter(Boolean).join(' · '))}</span>` : ''}
         </div>
         <h1 class="detail__title detail__title--game" id="detail-title">${escapeHtml(g.title)}</h1>
         ${teamsBlock}
