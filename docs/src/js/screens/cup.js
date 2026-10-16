@@ -188,7 +188,7 @@ export function initCup(root) {
       root.querySelectorAll('[data-cup-teams]').forEach(el => mountTeamStrip(el));
     }
     onMyTeamChange(() => {
-      if (currentQuery().screen === 'cup') render();
+      if (currentQuery().screen === 'cup') render({ instant: true });
     });
 
     mountHeroPhotos(root);
@@ -201,7 +201,7 @@ export function initCup(root) {
     mountFilters(root);
 
     // Crossing the phone or swipe width changes how much each view shows.
-    const rerender = () => { if (currentQuery().screen === 'cup') render(); };
+    const rerender = () => { if (currentQuery().screen === 'cup') render({ instant: true }); };
     PHONE.addEventListener('change', rerender);
     SWIPE.addEventListener('change', rerender);
 
@@ -213,7 +213,8 @@ export function initCup(root) {
       liveArrived = true;
       const q = currentQuery();
       if (q.screen === 'cup') {
-        render();
+        // The first data fades in like a first load; refreshes don't blink.
+        render({ instant: dataSeen });
         if (!dataSeen && q.game) renderGameDetail(q.game);
       }
       dataSeen = true;
@@ -533,7 +534,7 @@ function startClock() {
   tick = setInterval(() => {
     const screen = currentQuery().screen;
     if (screen !== 'cup') return;          // idle on other tabs
-    render();
+    render({ instant: true });
   }, 60000);
 }
 
@@ -556,7 +557,14 @@ export function findGame(id) {
 
 /* ---------- Render ---------- */
 
-function render() {
+/**
+ * render({ instant }) — draw the tab from the current state.
+ * `instant` is for a refresh of the same view (a team picked, live
+ * data, the minute tick, a resize): the cards come back already shown
+ * instead of fading in again, so nothing blinks. Moving to another
+ * view (a tab, a sport, a filter) keeps the fade-in.
+ */
+function render({ instant = false } = {}) {
   const root = rootEl;
   if (!root) return;
 
@@ -568,6 +576,9 @@ function render() {
   renderMatches(root, games, mine);
   renderSports(root, games, mine);
   renderMap(root, games);
+
+  // Before the next paint, so the redrawn cards never show hidden.
+  if (instant) root.querySelectorAll('.reveal:not(.revealed)').forEach(el => el.classList.add('revealed'));
 
   syncUrl();
 }
@@ -1060,7 +1071,7 @@ function renderWins(root, games) {
         <ol class="cup-wins__list">
           ${top.map(x => `
             <li class="cup-wins__team" title="${escapeAttr(x.team.name)}">
-              <img src="${escapeAttr(x.team.logo)}" alt="" loading="lazy" decoding="async">
+              <img src="${escapeAttr(x.team.logo)}" alt="">
               <span>${escapeHtml(x.team.short)}</span>
               <b aria-label="${escapeAttr(`${x.n} win${x.n === 1 ? '' : 's'}`)}">${x.n}</b>
             </li>`).join('')}
@@ -1358,7 +1369,7 @@ async function renderNews(root) {
   const all = await loadPosts();
   // Each sport's page shows its own posts from the same feed.
   newsPosts = all;
-  if (state.sportsSport) render();
+  if (state.sportsSport) render({ instant: true });
   const posts = all.slice(0, CUP_NEWS.maxPosts || (HERO_COUNT + MORE_MAX));
   const heroPosts = posts.slice(0, HERO_COUNT);
    const rest = posts.slice(HERO_COUNT, HERO_COUNT + MORE_MAX);
@@ -1613,7 +1624,8 @@ function wireHero(el, { ms = HERO_MS } = {}) {
  * its team's crest on navy instead.
  */
 function eventsHtml() {
-  const items = CUP_EVENTS?.enabled ? (CUP_EVENTS.items || []) : [];
+  // Off with CUP_CONFIG.showEvents (or CUP_EVENTS.enabled).
+  const items = (CUP_CONFIG.showEvents !== false && CUP_EVENTS?.enabled) ? (CUP_EVENTS.items || []) : [];
   if (!items.length) return '';
 
   const card = (ev) => {

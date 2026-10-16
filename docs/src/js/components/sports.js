@@ -17,6 +17,7 @@
    the taps (data-sports-*).
    ============================================================ */
 
+import { CUP_CONFIG } from '../data/xavier-cup.js';
 import { matchCardHtml } from './match-card.js';
 import { sportPictogram } from './sport-pictograms.js';
 import { outcome, bracketRounds, seedTeams } from '../lib/standings.js';
@@ -46,7 +47,7 @@ function tally(games) {
 }
 
 const crestHtml = (team, cls) => (team?.logo
-  ? `<img class="${cls}" src="${escapeAttr(team.logo)}" alt="" loading="lazy" decoding="async">`
+  ? `<img class="${cls}" src="${escapeAttr(team.logo)}" alt="">`
   : `<span class="${cls} ${cls}--blank" aria-hidden="true"></span>`);
 
 /* A sport with no photo yet: the news placeholder graphic with the
@@ -107,7 +108,7 @@ export function sportsIndexHtml({ sports, games, categoriesOf }) {
     <div class="cup-section__head">
       <div>
         <h2 class="cup-section__title" tabindex="-1" data-sports-heading>Sports</h2>
-        <p class="cup-section__hint">Pick a sport for its standings, knockouts, news and matches.</p>
+        <p class="cup-section__hint">Pick a sport for its standings, ${CUP_CONFIG.showBracket !== false ? 'knockouts, ' : ''}news and matches.</p>
       </div>
     </div>
     <div class="sport-grid">${tiles}</div>`;
@@ -536,9 +537,12 @@ export function sportPageHtml({
 
   // Every college at once (races, routines): no table, no bracket.
   const versus = sport.format !== 'field';
+  // The bracket can be switched off (CUP_CONFIG.showBracket).
+  const bracketOn = versus && CUP_CONFIG.showBracket !== false;
   // Two groups: once the games say who is in which group, the groups
-  // sit under the bracket in place of a separate standings table.
-  const withGroups = versus && format.groups.length > 0 && tables.some(t => t.group);
+  // sit under the bracket in place of a separate standings table (with
+  // the bracket off, the standings show them).
+  const withGroups = bracketOn && format.groups.length > 0 && tables.some(t => t.group);
   // A group played to the end puts its teams into the bracket's seeds.
   const seeds = versus ? seedTeams(tables, divGames) : {};
   const named = div && div !== 'Open';
@@ -550,7 +554,7 @@ export function sportPageHtml({
     ${sport.photos?.length ? sectionHtml('Photos', photosHtml(sport.photos), { id: 'sport-photos' }) : ''}
     ${versus && !withGroups ? sectionHtml('Standings', standingsHtml(tables, { sport, div, mine, format }), {
       id: 'sport-standings', extra: named ? `<span class="browse-count">${escapeHtml(div)}</span>` : '' }) : ''}
-    ${versus ? sectionHtml('Bracket', bracketHtml(ko, format, { mine, tables, seeds, withGroups }), {
+    ${bracketOn ? sectionHtml('Bracket', bracketHtml(ko, format, { mine, tables, seeds, withGroups }), {
       id: 'sport-ko', extra: named ? `<span class="browse-count">${escapeHtml(div)}</span>` : '' }) : ''}
     ${sectionHtml(named ? `${div} matches` : 'Matches', divGames.length
       ? matchListHtml([...divGames].sort(byInterest), mine, matchesShown, collapsible)

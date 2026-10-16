@@ -49,7 +49,7 @@ function sportIconHtml(sport) {
 function sideHtml(team, { winner = false, loser = false, align = 'home' } = {}) {
   if (!team) return '<span class="match__side" aria-hidden="true"></span>';
   const crest = team.logo
-    ? `<img src="${escapeAttr(team.logo)}" alt="" loading="lazy" decoding="async">`
+    ? `<img src="${escapeAttr(team.logo)}" alt="">`
     : `<span class="match__initials">${escapeHtml(String(team.short || team.name).slice(0, 3))}</span>`;
   return `
     <span class="match__side match__side--${align}${winner ? ' is-winner' : ''}${loser ? ' is-loser' : ''}">
@@ -155,7 +155,7 @@ const pickedWord = (picked) => (picked.length > 1 ? 'Selected teams' : 'Selected
 /** The tag on a picked team's game: its logo (both, when both teams are picked) and the words. */
 function selectedTagHtml(picked) {
   const crests = picked.map(t => (t.logo
-    ? `<img class="match__mine-crest" src="${escapeAttr(t.logo)}" alt="" loading="lazy" decoding="async">`
+    ? `<img class="match__mine-crest" src="${escapeAttr(t.logo)}" alt="">`
     : `<span class="match__mine-crest match__mine-crest--initials">${escapeHtml(String(t.short || t.name).slice(0, 3))}</span>`)).join('');
   return `
       <span class="match__mine" aria-hidden="true">
