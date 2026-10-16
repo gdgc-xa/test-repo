@@ -456,7 +456,12 @@ export function mountCupMap(el, handlers) {
   }
   listen(viewport, 'pointerup', e => finish(e));
   listen(viewport, 'pointercancel', e => finish(e, true));
-  listen(viewport, 'lostpointercapture', e => finish(e, true));
+  listen(viewport, 'lostpointercapture', e => {
+    // A touch starts captured by its SVG/button target. Moving capture to
+    // the viewport emits a loss event from that child, which bubbles here.
+    // Only losing the viewport's own capture should cancel the drag.
+    if (e.target === viewport) finish(e, true);
+  });
   listen(viewport, 'pointerleave', e => { if (!viewport.hasPointerCapture(e.pointerId)) finish(e, true); });
   listen(viewport, 'wheel', e => {
     e.preventDefault();
