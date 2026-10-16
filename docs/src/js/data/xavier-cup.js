@@ -185,9 +185,14 @@ export const CUP_MAP = {
    division  optional ('Men', 'Women', 'Mixed', 'Open'). With `event`
              it makes the category: event '100m' + division 'Men' is
              "100m · Men"; an Esports game needs only its event.
-   round     optional ('Elimination', 'Semifinal', 'Final', 'Bronze').
-             Finished Elimination games make the standings on the
-             Sports tab; the others make its bracket.
+   round     optional ('Elimination', 'Quarterfinal', 'Semifinal', 'Final',
+             'Third place', and placing games: '5th place', '7th place',
+             'Ranking'). Finished Elimination games make the standings
+             on the Sports tab; the others fill its bracket, in
+             kickoff order within a round (see BRACKETS).
+   group     optional, for Elimination games: the group letter ('A',
+             'B') in the sport's schedule. Games with a group make one
+             standings table per group.
    teams     [home, away] as ids from data/teams.js ('ccs', 'eng').
              Anything that is not a team id prints as written, so
              ['All colleges'] works for a solo or all-in event.
@@ -513,9 +518,13 @@ export const CUP_PHOTOS = {
               sport's page has standings and a knockout bracket.
               'field': every college competes at once (races,
               routines), so the page has no standings or bracket.
+   bracket    for a versus sport, its tournament format: a name from
+              BRACKETS below (how its schedule runs: groups, cross-
+              overs, quarterfinals, placing games). Leave it out to
+              keep the original table, semifinals and final.
 
    The standings (wins and losses from the finished Elimination
-   games) work themselves out from GAMES. A sport in GAMES that is
+   games, one table per group) work themselves out from GAMES. A sport in GAMES that is
    missing here still gets a page, with no pictures.
    ============================================================ */
 const MW = ['Men', 'Women'];
@@ -525,16 +534,21 @@ const ATHLETICS = [
   'Relay · Mixed',
   'Javelin · Men', 'Javelin · Women', 'Shot Put · Men', 'Shot Put · Women', 'Discus · Men', 'Discus · Women',
 ];
+// Badminton and Table Tennis: singles and doubles each way, and mixed doubles.
+const RACKET = ['Singles · Men', 'Singles · Women', 'Doubles · Men', 'Doubles · Women', 'Doubles · Mixed'];
+// Pickleball's schedule lists mixed doubles for men and for women, as written.
+const PICKLEBALL = ['Singles · Men', 'Singles · Women', 'Doubles · Men', 'Doubles · Women', 'Mixed Doubles · Men', 'Mixed Doubles · Women'];
 
 export const SPORTS = [
   // Major events (100 / 70 / 50 points to the top three colleges)
   // Basketball 3x3 is a category of Basketball (a minor event): its
   // games are sport 'Basketball', event '3x3', division 'Men' or 'Women'.
-  { id: 'basketball', name: 'Basketball', icon: 'assets/sports/basketball.webp', photo: null, photos: [], categories: [...MW, '3x3 · Men', '3x3 · Women'] },
-  { id: 'volleyball', name: 'Volleyball', icon: 'assets/sports/volleyball.webp', photo: null, photos: [], categories: MW },
+  { id: 'basketball', name: 'Basketball', icon: 'assets/sports/basketball.webp', photo: null, photos: [], categories: [...MW, '3x3 · Men', '3x3 · Women'],
+    bracket: { default: 'quarters', '3x3': 'crossover-placings' } },   // 5x5 and 3x3 run differently
+  { id: 'volleyball', name: 'Volleyball', icon: 'assets/sports/volleyball.webp', photo: null, photos: [], categories: MW, bracket: 'crossover' },
   { id: 'football',   name: 'Football',   icon: 'assets/sports/soccer.webp',     photo: null, photos: [], categories: MW },   // 8-a-side
-  { id: 'softball',   name: 'Softball',   icon: 'assets/sports/softball.webp',   photo: null, photos: [], categories: MW },
-  { id: 'ultimate-frisbee', name: 'Ultimate Frisbee', icon: 'assets/sports/frisbee.webp', photo: null, photos: [], categories: ['Mixed'] },
+  { id: 'softball',   name: 'Softball',   icon: 'assets/sports/softball.webp',   photo: null, photos: [], categories: MW, bracket: 'crossover' },
+  { id: 'ultimate-frisbee', name: 'Ultimate Frisbee', icon: 'assets/sports/frisbee.webp', photo: null, photos: [], categories: ['Mixed'], bracket: 'seeded' },
   { id: 'esports',    name: 'Esports',    icon: null, photo: null, photos: [], categories: ['ML', 'CODM', 'Valorant', 'Dota 2'] },   // each Open
   { id: 'cheerdance', name: 'Cheerdance', icon: null, photo: null, photos: [], categories: ['Mixed'], format: 'field' },
   { id: 'megacrew',   name: 'Megacrew',   icon: null, photo: null, photos: [], format: 'field' },   // Open
@@ -542,19 +556,95 @@ export const SPORTS = [
   { id: 'athletics',  name: 'Athletics',  icon: null, photo: null, photos: [], categories: ATHLETICS, format: 'field' },
   { id: 'swimming',   name: 'Swimming',   icon: null, photo: null, photos: [], categories: MW, format: 'field' },
   { id: 'sepak-takraw', name: 'Sepak Takraw', icon: null, photo: null, photos: [], categories: MW },
-  { id: 'table-tennis', name: 'Table Tennis', icon: null, photo: null, photos: [], categories: MW },
+  { id: 'table-tennis', name: 'Table Tennis', icon: null, photo: null, photos: [], categories: RACKET, bracket: 'crossover' },
   { id: 'lawn-tennis',  name: 'Lawn Tennis',  icon: null, photo: null, photos: [], categories: MW },
-  { id: 'badminton',    name: 'Badminton',    icon: null, photo: null, photos: [], categories: MW },
-  { id: 'pickleball',   name: 'Pickleball',   icon: null, photo: null, photos: [], categories: MW },
+  { id: 'badminton',    name: 'Badminton',    icon: null, photo: null, photos: [], categories: RACKET, bracket: 'crossover' },
+  { id: 'pickleball',   name: 'Pickleball',   icon: null, photo: null, photos: [], categories: PICKLEBALL, bracket: 'crossover' },
   { id: 'taekwondo',  name: 'Taekwondo',  icon: null, photo: null, photos: [], categories: MW },
   { id: 'karatedo',   name: 'Karatedo',   icon: null, photo: null, photos: [], categories: MW },
   { id: 'chess',      name: 'Chess',      icon: null, photo: null, photos: [], categories: MW },
   { id: 'darts',      name: 'Darts',      icon: null, photo: null, photos: [], categories: MW },
   // Bonus events (20 / 14 / 10)
   { id: 'debate',      name: 'Debate',      icon: null, photo: null, photos: [], categories: ['Mixed'] },
-  { id: 'hypemaster',  name: 'Hypemaster',  icon: null, photo: null, photos: [], format: 'field' },   // one per college, Open
-  { id: 'cheer-chant', name: 'Cheer Chant', icon: null, photo: null, photos: [], format: 'field' },
 ];
+
+/* ---------- Tournament formats ----------
+   How a versus sport goes from its group games to a champion,
+   copied from the TXC2026 Game Schedules folder (one schedule per
+   sport). A sport picks one with SPORTS[].bracket: a name, or
+   { default: name, '<event>': name } when its events run
+   differently. A sport with none (no schedule in the folder yet)
+   keeps 'round': one table, then semifinals and a final.
+
+   groups    group letters; games carry the same letter in
+             GAMES[].group. [] = one table for everyone.
+   note      one line under the standings: who goes through.
+   quarters, semis
+             the games of that round, in order, written the way the
+             schedules write them. Each shows in its bracket slot
+             until the real game is in GAMES (round 'Quarterfinal' /
+             'Semifinal'):  A1 = 1st in group A · #1 = 1st overall ·
+             W A3/B2 = the winner of A3 against B2.
+   final, third
+             the final and the third-place game (rounds 'Final' and
+             'Third place'); null = no slot until a game is set.
+   tree      two groups only: the draw as two halves meeting in the
+             final, drawn like a printed bracket. One entry per
+             semifinal (left, right), each its two entrants: a seed
+             ('A1') or { quarter: i }, the winner of quarters[i].
+   placings  games for places below the podium, by GAMES round. */
+export const BRACKETS = {
+  // No schedule to follow: the original bracket.
+  round: {
+    groups: [],
+    note: 'From finished group games.',
+    semis: [null, null],
+    final: null,
+    third: null,
+    placings: [],
+  },
+  // Volleyball, Softball, Badminton, Table Tennis, Pickleball.
+  crossover: {
+    groups: ['A', 'B'],
+    note: 'The top two of each group cross over to the semifinals.',
+    semis: ['A1 vs B2', 'B1 vs A2'],
+    tree: [['A1', 'B2'], ['B1', 'A2']],
+    final: 'Semifinal winners',
+    third: 'Semifinal losers',
+    placings: [],
+  },
+  // Basketball 3x3: the same, and every team plays for a place.
+  'crossover-placings': {
+    groups: ['A', 'B'],
+    note: 'The top two of each group cross over to the semifinals; 3rd and 4th play for 5th and 7th.',
+    semis: ['A1 vs B2', 'B1 vs A2'],
+    tree: [['A1', 'B2'], ['B1', 'A2']],
+    final: 'Semifinal winners',
+    third: 'Semifinal losers',
+    placings: [{ round: '5th place', games: ['A3 vs B3'] }, { round: '7th place', games: ['A4 vs B4'] }],
+  },
+  // Basketball 5x5: group winners wait in the semifinals.
+  quarters: {
+    groups: ['A', 'B'],
+    note: 'Group winners go straight to the semifinals; 2nd and 3rd play the quarterfinals; 4th plays for 7th.',
+    quarters: ['A2 vs B3', 'A3 vs B2'],
+    semis: ['A1 vs W A3/B2', 'B1 vs W A2/B3'],
+    tree: [['A1', { quarter: 1 }], ['B1', { quarter: 0 }]],
+    final: 'Semifinal winners',
+    third: 'Semifinal losers',
+    placings: [{ round: '5th place', games: ['Quarterfinal losers'] }, { round: '7th place', games: ['A4 vs B4'] }],
+  },
+  // Ultimate Frisbee: one table seeds an eight-team bracket.
+  seeded: {
+    groups: [],
+    note: 'Everyone plays everyone; the table seeds the quarterfinals, 1 v 8.',
+    quarters: ['#1 vs #8', '#4 vs #5', '#2 vs #7', '#3 vs #6'],
+    semis: ['W 1v8 vs W 4v5', 'W 2v7 vs W 3v6'],
+    final: 'Semifinal winners',
+    third: 'Semifinal losers',
+    placings: [{ round: 'Ranking', games: ['L 1v8 vs L 2v7', 'L 3v6 vs L 4v5'] }],
+  },
+};
 
 /* ---------- Lookups ---------- */
 

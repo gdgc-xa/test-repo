@@ -32,6 +32,7 @@ export function gameDetailHtml(g) {
     ['Sport', g.sport],
     ['Event', g.event],
     ['Division', g.division],
+    ['Group', g.group ? `Group ${g.group}` : ''],
     ['Round', g.round],
     ['When', g.when],
     ['Venue', g.venueName],

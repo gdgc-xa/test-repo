@@ -54,7 +54,7 @@ import { calendarHtml, gameMonths } from '../components/cup-calendar.js';
 import { openDetail, closeDetail } from '../components/detail-modal.js';
 import { sportsIndexHtml, sportPageHtml } from '../components/sports.js';
 import { myTeams, toggleMyTeam, onMyTeamChange } from '../lib/my-team.js';
-import { categoryOf, categoriesFor, standings, knockouts, winnerOf } from '../lib/standings.js';
+import { categoryOf, categoriesFor, groupTables, bracketFor, knockouts, winnerOf } from '../lib/standings.js';
 import { watchReveals } from '../reveal-observer.js';
 import { currentQuery } from '../router.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
@@ -251,6 +251,13 @@ export function initCup(root) {
         state.sportsAll = !state.sportsAll;
         render();
         root.querySelector('[data-sports-more]')?.focus({ preventScroll: true });
+        return;
+      }
+
+      // A round's chip on the phone bracket: slide to that round.
+      const slideRound = e.target.closest('[data-kslide-round]');
+      if (slideRound) {
+        setSlide(slideRound.closest('[data-kslide]'), Number(slideRound.dataset.kslideRound), true);
         return;
       }
 
@@ -589,11 +596,13 @@ function renderSports(root, games, mine) {
   const div = divisions.find(d => catSlug(d) === catSlug(state.sportsDiv)) || divisions[0] || 'Open';
   state.sportsDiv = div;
   const divGames = sportGames.filter(g => categoryOf(g) === div);
+  // How this category's schedule runs (groups, crossovers, placings).
+  const format = bracketFor(sport, div);
 
   wrap.innerHTML = sportPageHtml({
-    sport, index, sportGames, divisions, div, divGames,
-    table: standings(divGames),
-    ko: knockouts(divGames),
+    sport, index, sportGames, divisions, div, divGames, format,
+    tables: groupTables(divGames),
+    ko: knockouts(divGames, format),
     news: newsPosts.filter(p => isAbout(p, sport)).slice(0, isPhone() ? 2 : 3),
     team: TEAM_BY_ID[state.sportsTeam] || null,
     mine,
@@ -612,7 +621,117 @@ function renderSports(root, games, mine) {
     const left = on.getBoundingClientRect().left - cats.getBoundingClientRect().left;
     cats.scrollLeft = left - (cats.clientWidth - on.offsetWidth) / 2;
   }
+
+  // The bracket you slide through, round by round.
+  slideFit.disconnect();
+  wrap.querySelectorAll('[data-kslide]').forEach(slide => {
+    const frame = slide.querySelector('.kslide__frame');
+    let settle = null;
+    frame.addEventListener('scroll', () => {
+      clearTimeout(settle);
+      settle = setTimeout(() => {
+        const i = Math.round(frame.scrollLeft / slideStep(slide));
+        if (String(i) !== slide.dataset.active) layoutSlide(slide, i);
+      }, 90);
+    }, { passive: true });
+    slideFit.observe(frame);
+  });
 }
+
+/* The bracket (components/sports.js → slideHtml): one column per round,
+   like the World Cup's; two in view on a phone, all of them where they
+   fit (then there is nothing to slide and no chips). The round at the left is
+   stacked close; every later match sits halfway between the matches
+   that feed it, joined to them by a line. A swipe snaps to a round;
+   so does tapping its chip. Laid out again for each round it shows. */
+const SLIDE_GAP = 14;   // between two matches in a column, px
+
+/** From one column to the next, px. */
+function slideStep(slide) {
+  const cols = slide.querySelectorAll('.kslide__col');
+  return cols[1] ? cols[1].offsetLeft - cols[0].offsetLeft : (cols[0]?.offsetWidth || 1);
+}
+
+function layoutSlide(slide, active) {
+  const frame = slide.querySelector('.kslide__frame');
+  const cols = [...slide.querySelectorAll('.kslide__col')];
+  if (!frame.clientWidth || !cols.length) return;   // not on screen
+  const step = slideStep(slide);
+  const gapX = step - cols[0].offsetWidth;
+  // How many rounds are in view at once; when that is all of them,
+  // there is nothing to slide.
+  const visible = Math.max(1, Math.min(cols.length, Math.floor((frame.clientWidth + gapX) / step + 0.01)));
+  const all = visible >= cols.length;
+  slide.classList.toggle('kslide--all', all);
+  if (all) active = 0;
+  slide.dataset.active = String(active);
+
+  let prev = [];   // the centres of the column before, px from its top
+  cols.forEach((col, i) => {
+    const matches = [...col.children];
+    const h = matches[0]?.offsetHeight || 0;
+    const teams = matches[0]?.querySelector('.kmatch__teams');
+    const mid = teams ? teams.offsetTop + teams.offsetHeight / 2 : h / 2;   // where the lines meet it
+    let last = -Infinity;
+    const centres = matches.map((m, k) => {
+      const feeders = (m.dataset.from || '').split(',').filter(Boolean).map(Number).filter(j => prev[j] !== undefined);
+      // The round in view (and those before it) stack close; later ones line up with their feeders.
+      let top = i > active && feeders.length
+        ? feeders.reduce((sum, j) => sum + prev[j], 0) / feeders.length - mid
+        : k * (h + SLIDE_GAP);
+      top = Math.max(top, last + h + SLIDE_GAP);
+      last = top;
+      m.style.top = `${top}px`;
+
+      // The line from the feeders: a bracket on the right of the round
+      // before, then across to this match. None for the third-place game.
+      const link = m.querySelector('.kmatch__link');
+      if (i > 0 && feeders.length && !('losers' in m.dataset)) {
+        const ys = feeders.map(j => prev[j] - top);
+        const y1 = Math.min(...ys);
+        link.style.cssText = `display: block; left: ${-gapX}px; width: ${gapX / 2}px; top: ${y1}px;`
+          + ` height: ${Math.max(...ys) - y1}px; --kmid: ${mid - y1}px;`
+          // One feeder (a bye on the other side): a plain line across.
+          + (feeders.length === 1 ? ' border-right: 0; border-bottom: 0; border-radius: 0;' : '');
+      } else {
+        link.style.cssText = 'display: none;';
+      }
+      return top + mid;
+    });
+    col.style.height = `${last + h}px`;
+    prev = centres;
+  });
+  // Only as tall as the rounds in view, not the longest round.
+  frame.style.height = `${Math.max(...cols.slice(active, active + visible).map(c => parseFloat(c.style.height) || 0))}px`;
+
+  // The chips follow the round in view.
+  slide.querySelectorAll('[data-kslide-round]').forEach(chip => {
+    const on = Number(chip.dataset.kslideRound) === active;
+    chip.setAttribute('aria-pressed', String(on));
+    if (on) {
+      const row = chip.parentElement;
+      row.scrollLeft = chip.offsetLeft - (row.clientWidth - chip.offsetWidth) / 2;
+    }
+  });
+}
+
+/** Shows round i at the left (null: the round it is on, or opens on). */
+function setSlide(slide, i, smooth = false) {
+  const frame = slide?.querySelector('.kslide__frame');
+  if (!frame?.clientWidth) return;
+  const active = i ?? Number(slide.dataset.active ?? slide.dataset.start ?? 0);
+  layoutSlide(slide, active);
+  frame.scrollTo({ left: active * slideStep(slide), behavior: smooth && !reducedMotion() ? 'smooth' : 'instant' });
+}
+// Laid out again when its width changes (first shown, phone turned);
+// not on height, which the layout itself changes mid-slide.
+const slideFit = new ResizeObserver(entries => entries.forEach(e => {
+  const slide = e.target.closest('[data-kslide]');
+  const width = String(Math.round(e.contentRect.width));
+  if (!slide || slide.dataset.width === width) return;
+  slide.dataset.width = width;
+  setSlide(slide);
+}));
 
 /* --- The campus map + its venue panel --- */
 function renderMap(root, games) {

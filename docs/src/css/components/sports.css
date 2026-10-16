@@ -227,6 +227,20 @@
 }
 
 /* ---------- Standings ---------- */
+/* One table per group, side by side where there is room. */
+.standings-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-4);
+}
+.standings__group {
+  margin: 0 0 var(--space-2);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
 .standings-wrap {
   overflow-x: auto;
   border: 1px solid var(--border);
@@ -280,13 +294,7 @@
 .standings__crest--blank { display: inline-block; border-radius: 50%; background: var(--surface-2); }
 .standings__short { display: none; }
 
-/* ---------- Knockouts ---------- */
-.bracket {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: center;
-  gap: var(--space-5);
-}
+/* ---------- The games below the podium (5th, 7th) ---------- */
 .bracket__col { display: flex; flex-direction: column; gap: var(--space-3); }
 .bracket__label {
   font-size: 11px;
@@ -295,7 +303,6 @@
   text-transform: uppercase;
   color: var(--muted);
 }
-.bracket__col--final .bracket__label:not(:first-child) { margin-top: var(--space-3); }
 
 .kobox {
   display: flex;
@@ -348,6 +355,200 @@ button.kobox:hover { border-color: var(--border-strong); box-shadow: var(--shado
   background: transparent;
 }
 .kobox__tbd { font-size: 13px; color: var(--muted); }
+/* Who plays a slot before it is set, as the schedule writes it. */
+.kobox__seed {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-2);
+  text-align: center;
+}
+.kobox__seed + .kobox__tbd { font-size: 11.5px; }
+
+/* Games for the places below the podium, in a row under the bracket. */
+.bracket-places {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: var(--space-3) var(--space-5);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+.bracket__col--place .kobox--tbd { min-height: 72px; }
+
+/* The groups under the bracket: a gold head, the teams in table order. */
+.tgroups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+.tgroup {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.tgroup__head {
+  margin: 0;
+  padding: 8px 12px;
+  background: var(--tx-final);
+  color: var(--tx-on-final);
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+}
+.tgroup__list { margin: 0; padding: 6px; list-style: none; }
+.tgroup__team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 8px;
+  border-radius: 10px;
+  color: var(--ink);
+  text-align: left;
+  transition: background 160ms;
+}
+.tgroup__team:hover { background: var(--surface-2); }
+.tgroup__team.is-mine { box-shadow: inset 0 0 0 2px var(--tx-accent); }
+.tgroup__rank { width: 16px; font-weight: 800; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tgroup__crest { width: 24px; height: 24px; flex: 0 0 auto; object-fit: contain; }
+.tgroup__crest--blank { display: inline-block; border-radius: 50%; background: var(--surface-2); }
+.tgroup__name { flex: 1 1 auto; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tgroup__rec { font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+/* ---------- The bracket you slide through ----------
+   Markup: slideHtml() in components/sports.js; laid out and slid by
+   screens/cup.js (layoutSlide). Like the World Cup's: a chip per
+   round, the rounds side by side, each match two team bubbles; a
+   swipe snaps to the next round. Two rounds in view on a phone, three
+   on a tablet, four on a wide screen, each column at most 280px and
+   the whole centred; when every round fits there is nothing to slide
+   and the chips go (.kslide--all). */
+.kslide {
+  container: kslide / inline-size;
+  --kgap: 18px;   /* between two rounds */
+  --kcols: 2;     /* rounds in view */
+}
+.kslide__frame {
+  --kn: min(var(--kcols), var(--krounds, 2));
+  --kcol: min(280px, calc((100cqw - (var(--kn) - 1) * var(--kgap)) / var(--kn)));
+}
+@container kslide (min-width: 560px) { .kslide__frame { --kcols: 3; --kgap: 28px; } }
+@container kslide (min-width: 900px) { .kslide__frame { --kcols: 4; --kgap: 36px; } }
+
+.kslide__rounds {
+  display: flex;
+  gap: 6px;
+  margin-bottom: var(--space-3);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.kslide__rounds::-webkit-scrollbar { display: none; }
+.kslide__round { flex: 0 0 auto; }
+.kslide--all .kslide__rounds { display: none; }
+.kslide__frame {
+  overflow-x: auto;
+  overflow-y: hidden;
+  transition: height 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  border-radius: 12px;
+}
+.kslide__frame::-webkit-scrollbar { display: none; }
+.kslide__track {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--kgap);
+  width: max-content;
+  margin-inline: auto;   /* centred when every round fits */
+}
+/* Room after the final, so the last round can slide to the left too. */
+.kslide__track::after { content: ""; flex: 0 0 calc((var(--kn) - 1) * (var(--kcol) + var(--kgap)) - var(--kgap)); }
+.kslide--all .kslide__track::after { display: none; }
+.kslide__col {
+  position: relative;
+  flex: 0 0 var(--kcol);
+  scroll-snap-align: start;
+  transition: height 260ms ease;
+}
+
+.kmatch {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--ink);
+  text-align: left;
+  transition: top 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.kmatch__head {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kmatch__head.is-live { color: var(--tx-live); font-weight: 700; }
+.kmatch__teams { display: flex; flex-direction: column; gap: 4px; }
+
+/* A team: a rounded bubble, its name and its score. */
+.kteam {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 700;
+}
+button.kmatch:hover .kteam { border-color: var(--border-strong); }
+.kteam__crest { width: 20px; height: 20px; flex: 0 0 auto; object-fit: contain; }
+.kteam__crest--blank { display: inline-block; border-radius: 50%; background: var(--surface-2); }
+.kteam__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kteam__score {
+  min-width: 14px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.kteam.is-winner .kteam__score { box-shadow: inset 0 -2px 0 var(--tx-accent); }
+.kteam.is-out { color: var(--muted); font-weight: 600; }
+.kteam.is-seed { border-style: dashed; background: transparent; color: var(--muted); font-weight: 600; }
+.kteam.is-mine { border-color: var(--tx-accent); box-shadow: inset 0 0 0 1px var(--tx-accent); }
+
+/* The line from the feeders (placed by layoutSlide): a bracket on the
+   right of the round before, then across to the match. */
+.kmatch__link {
+  display: none;
+  position: absolute;
+  border: 2px solid var(--border-strong);
+  border-left: 0;
+  border-radius: 0 6px 6px 0;
+  pointer-events: none;
+}
+.kmatch__link::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  top: calc(var(--kmid, 0px) - 1px);
+  width: calc(100% + 2px);
+  border-top: 2px solid var(--border-strong);
+}
+/* Wider screens: a size up. */
+@container kslide (min-width: 560px) {
+  .kteam { height: 36px; gap: 8px; font-size: 14px; }
+  .kteam__crest { width: 22px; height: 22px; }
+  .kmatch__head { font-size: 12px; }
+}
 
 /* ============================================================
    A TEAM INSIDE A SPORT
@@ -464,8 +665,6 @@ button.kobox:hover { border-color: var(--border-strong); box-shadow: var(--shado
   .standings__short { display: inline; }
   .standings__crest { width: 24px; height: 24px; }
 
-  /* Semifinals and final stay side by side: shorter than stacked. */
-  .bracket { gap: var(--space-3); }
   .bracket__col { gap: var(--space-2); }
   .kobox { gap: 4px; padding: 8px 10px; border-radius: 12px; }
   .kobox__crest { width: 20px; height: 20px; }
@@ -473,6 +672,10 @@ button.kobox:hover { border-color: var(--border-strong); box-shadow: var(--shado
   .kobox__score { font-size: 14px; }
   .kobox__meta { padding-top: 4px; font-size: 11px; }
   .kobox--tbd { min-height: 76px; }
+  .kobox__seed { font-size: 12px; }
+  .bracket-places { margin-top: var(--space-4); padding-top: var(--space-3); gap: var(--space-2) var(--space-3); }
+  .tgroups { margin-top: var(--space-4); gap: var(--space-3); }
+  .bracket-places { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   .team-head { gap: var(--space-3); padding: 14px; border-radius: var(--radius-lg); }
   .team-head__crest { width: 52px; height: 52px; }

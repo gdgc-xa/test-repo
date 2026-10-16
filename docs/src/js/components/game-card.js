@@ -87,7 +87,8 @@ export function resolveGame(g, now = new Date()) {
     dayLabel: start ? formatDay(start, { withYear: false }) : '',
     timeLabel: start ? formatTime(start) : '',
     relative: start ? relativeLabel(start, now) : '',
-    meta: [g.sport, g.event, g.division, g.round].filter(Boolean).join(' · '),
+    // The group links a match to its table on the Sports tab ('Group A').
+    meta: [g.sport, g.event, g.division, g.group ? `Group ${g.group}` : '', g.round].filter(Boolean).join(' · '),
   };
 }
 
