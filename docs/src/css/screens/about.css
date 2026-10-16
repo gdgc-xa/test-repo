@@ -126,105 +126,103 @@
 }
 .about-card--gdg .btn { margin-top: var(--space-5); }
 
-/* ---------- The team ---------- */
+/* ---------- The team ----------
+   A "who we are" list (screens/about.js → hydrateTeam): a coloured
+   eyebrow and a big title centred above, then each group under its own
+   small heading, three people a row: a name with a small dot over the
+   position, no boxes, no photos. Two a row on a tablet, one on a phone. */
 .about-team {
   margin-top: var(--space-7);
 }
+.about-team__head {
+  margin-bottom: var(--space-7);
+  text-align: center;
+}
+.about-team__eyebrow {
+  margin-bottom: var(--space-2);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--tx-primary);
+}
 .about-team__title {
   font-family: var(--font-serif);
-  font-size: 26px;
+  font-size: clamp(30px, 4vw, 42px);
   font-weight: 800;
-  letter-spacing: -0.6px;
+  letter-spacing: -1px;
+  line-height: 1.08;
   color: var(--ink);
+}
+
+.team-group + .team-group { margin-top: var(--space-7); }
+.team-group__name {
   margin-bottom: var(--space-5);
-}
-
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--space-4);
-}
-
-.person {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4) var(--space-5);
-}
-
-/* Placeholder avatar: initials until a photo is dropped in.
-   Sized and shaped so swapping in an <img> changes nothing. */
-.person__avatar {
-  width: 56px;
-  height: 56px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  font-family: var(--font-serif);
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  border: 1px solid var(--border);
-}
-.person__photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  max-width: none;
-  display: block;
-}
-
-/* Leads (CEO, Project Head, Tech Lead) get a bigger, full-width
-   card with a stronger avatar and a colored top edge so they read
-   as the leadership row above the rest of the team. */
-.person--featured {
-  grid-column: 1 / -1;
-  gap: var(--space-5);
-  padding: var(--space-5) var(--space-6);
-  border-width: 2px;
-  border-top: 4px solid var(--sun);
-}
-.person--featured .person__avatar {
-  width: 76px;
-  height: 76px;
-  font-size: 25px;
-}
-.person--featured .person__role {
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
   font-size: 11.5px;
-  letter-spacing: 1.3px;
-}
-.person--featured .person__name {
-  font-size: 20px;
-}
-.person--featured .person__title {
-  font-size: 13.5px;
-}
-
-.person__text { min-width: 0; }
-.person__role {
-  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 1.1px;
+  letter-spacing: 1.4px;
   text-transform: uppercase;
   color: var(--muted);
 }
-.person__name {
-  margin-top: 3px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1.25;
+.team-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6) var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.person__title {
+/* Founders: two on the first line, three on the second. */
+.team-group--founders .team-person:nth-child(3) { grid-column-start: 1; }
+
+.team-person { min-width: 0; }
+.team-person__name {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+}
+/* The dot after the name: a developer's department hue, else quiet. */
+.team-person__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: var(--dot, var(--muted));
+  vertical-align: 0.15em;
+}
+.team-person__role {
   margin-top: 3px;
-  font-size: 12.5px;
-  color: var(--ink-2);
-  line-height: 1.35;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.team-person__title {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+/* Tablets: two a row (the founders then simply fill it). */
+@media (max-width: 900px) {
+  .team-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+  .team-group--founders .team-person:nth-child(3) { grid-column-start: auto; }
+}
+/* Phones: one a row, a hairline between, like a contact list. */
+@media (max-width: 560px) {
+  .about-team__head { margin-bottom: var(--space-6); }
+  .team-group + .team-group { margin-top: var(--space-6); }
+  .team-group__name { margin-bottom: 0; }
+  .team-list { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .team-person { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .team-person:last-child { border-bottom: 0; }
+  .team-person__name { font-size: 16px; }
+  .team-person__role { font-size: 13px; }
+  .team-person__title { font-size: 12px; }
 }
 
 /* ---------- Responsive ---------- */
@@ -238,12 +236,6 @@
   .about-head__title { font-size: 27px; }
   .about-head__lede { font-size: 15.5px; }
   .about-card { padding: var(--space-5); }
-  .team-grid { grid-template-columns: 1fr; }
-  .person { padding: var(--space-4); gap: var(--space-3); }
-  .person__avatar { width: 48px; height: 48px; font-size: 17px; }
-  .person--featured { padding: var(--space-4) var(--space-5); }
-  .person--featured .person__avatar { width: 60px; height: 60px; font-size: 20px; }
-  .person--featured .person__name { font-size: 18px; }
 }
 
 /* ============================================================

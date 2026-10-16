@@ -1076,8 +1076,8 @@
   </main>
 
   <!-- ============================================================
-       ABOUT — what this is, who made it. Team tiles are rendered
-       by screens/about.js from data/team.js.
+       ABOUT — what this is, who made it. The team is rendered by
+       screens/about.js from data/team.js.
        ============================================================ -->
   <main id="screen-about" class="screen screen--about" hidden data-screen="about">
     <div class="ground-wash" aria-hidden="true"></div>
@@ -1133,9 +1133,15 @@
            contact. Set contact.email to null there to drop it. -->
       <section class="about-contact" data-about-contact hidden></section>
 
-      <section class="about-team">
-        <h2 class="about-team__title">People behind the project</h2>
-        <div class="team-grid" data-team-grid></div>
+      <!-- The team: the CEO, the founders and the developers, a list
+           each. Filled by screens/about.js from data/team.js →
+           TEAM_GROUPS. -->
+      <section class="about-team" aria-labelledby="about-team-title">
+        <header class="about-team__head">
+          <p class="about-team__eyebrow">People behind the project</p>
+          <h2 class="about-team__title" id="about-team-title">Who we are</h2>
+        </header>
+        <div class="team-groups" data-team-groups></div>
       </section>
     </div>
   </main>
