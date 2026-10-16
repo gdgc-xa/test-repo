@@ -36,7 +36,8 @@ function hasScore(g) {
     && g.score.home !== undefined && g.score.away !== undefined;
 }
 
-/** The sport's pictogram (sport-pictograms.js), else its picture, else its line glyph. */
+/** The sport's pictogram (sport-pictograms.js), else its configured or
+    shared WebP picture (SPORTS / sport-icons.js), else its line glyph. */
 function sportIconHtml(sport) {
   const picto = sportPictogram(sport, { cls: 'match__icon' });
   if (picto) return picto;

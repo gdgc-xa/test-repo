@@ -356,3 +356,68 @@ Small mockup-only decorations that were not extracted separately (they exist ins
 
 Designed and built by **Google Developer Group on Campus – Xavier Ateneo**, for the
 **Sands of Time** organizational trip and **The Xavier Cup** season.
+
+## Campus map integration
+
+The Map tab is 2D only. Its camera starts close enough to read on phones and
+supports drag, pinch, wheel, double tap, keyboard arrows, +/−, and recenter (Home).
+The camera survives match refreshes and tab changes. A selected venue opens an
+translucent floating panel on desktop and a collapsible sheet at widths up to 1000px.
+The Map tab fills the screen below the existing navigation/tabs; its hero banner
+is hidden only while Map is active. Other tabs keep their existing header.
+Use the panel header to collapse/expand the game list; selecting a venue opens it.
+The camera keeps selected markers clear of the panel. Background blur preserves
+legibility without reducing text opacity. Outside games remain inside this panel.
+
+### Outside locations
+
+Keep one canonical venue record in `src/js/data/xavier-cup.js` → `CUP_MAP.venues`.
+For an outside location, set `venueType: 'off-campus'`. Give it a permanent `id`
+and a confirmed `name`; optional `address`, `note`, and `gps: [longitude, latitude]`.
+It needs no campus `label`, `footprint`, or `icons` positions. Point `GAMES[].venue`
+at that ID. Do not add a copy in a second venue list or use sport names as locations.
+No confirmed outside locations were available at integration, so none are invented.
+
+`CUP_MAP.showOffCampus` controls the Outside campus panel. It lists ongoing games
+(regardless of their scheduled day) and upcoming games today using the same
+resolved matches and `cupNow()` as the rest of Campus Compass. Select a venue to
+see all its existing matches and results; select a game to open its detail view.
+Results retain the site's existing behaviour. For outside venues, valid coordinates enable an external
+Google Maps link, with coordinate order converted to latitude,longitude. Missing
+coordinates never prevent venue information from appearing. No navigation, GPS
+tracking, or internal routing is implemented.
+
+### Clock and tracker boundary
+
+The existing one-minute refresh, `CUP_CONFIG.previewNow`, `resolveGame()` and
+`computeStatus()` are retained. Explicit upcoming/ongoing/finished statuses beat
+the clock; auto status uses start/end and the existing duration fallback.
+**This repository still uses its local GAMES data. It does not yet fetch the new
+tracker.** A later tracker adapter must read Master + Events, preserve IDs and
+reported statuses, and resolve controlled venue selections into the registry.
+The preview clock is still enabled in the existing configuration; set it to null
+when the team is ready to use real time.
+
+### Sport assets and Sports tab
+
+The 23 transparent WebP sport assets are connected through
+`src/js/data/sport-icons.js`. `sportIconFor(name)` matches case, spaces, hyphens,
+and known aliases, including Basketball3x3, ESports Dota and ESports MLBB.
+Map markers, match cards, outside games, and automatic Sports entries use this
+lookup; explicit icons in SPORTS keep priority. The mini map can show the image
+for a scheduled sport even without a custom sport position at its venue.
+
+The Sports tab is restored to its original five entries: Basketball, Volleyball,
+Soccer, Frisbee, and Softball. The additional tiles were removed at the user's
+request while the final Sports implementation is undecided. All 23 WebP assets
+and the shared icon lookup remain available for map markers and outside games.
+No assets, games, venue assignments, or map layout were removed by this revert.
+Verify the final sport catalogue and tracker mappings separately.
+
+Run the focused map tests from the repository root:
+
+```sh
+node --test tests/*.test.mjs
+```
+
+The source TXC worktree stays read-only. No framework or dependency was added.

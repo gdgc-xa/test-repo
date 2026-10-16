@@ -10,8 +10,7 @@
 
      mountCupMap(el, handlers)  the big interactive map on the Map
                                 tab. Drag (or arrow keys) to move,
-                                + / − to zoom, and 2D / 3D when a
-                                Mapbox token is set. Returns
+                                pinch or + / − to zoom. Returns
                                 { update(model) }; screens/cup.js
                                 calls update on every render and the
                                 map keeps its zoom and position.
@@ -20,12 +19,13 @@
                                 with one venue lit — the small map in
                                 a match's detail view.
 
-   What is a venue, where each sport's icon sits, and the 3D token
-   all come from data/xavier-cup.js → CUP_MAP. The drawing itself is
+   What is a venue and where each sport's icon sits
+   come from data/xavier-cup.js → CUP_MAP. The drawing itself is
    data/campus-map.js. Nothing here needs editing to move anything.
    ============================================================ */
 
 import { CUP_MAP, VENUE_BY_ID, SPORT_BY_NAME } from '../data/xavier-cup.js';
+import { sportIconFor } from '../data/sport-icons.js';
 import {
   CAMPUS_DRAWING, CAMPUS_OUTLINE, CAMPUS_ROAD, CAMPUS_WALKWAYS,
   CAMPUS_FOOTPRINTS, CAMPUS_MARKINGS, CAMPUS_LANDMARKS,
@@ -34,10 +34,11 @@ import { escapeHtml, escapeAttr } from '../lib/html.js';
 
 const { width: W, height: H, top: TOP } = CAMPUS_DRAWING;
 
-const ZOOM = { min: 1, max: 2.25, step: 0.25 };
+import { hasCampusPoint } from '../lib/cup-map-locations.js';
+import { constrainCamera, initialCamera, zoomAt, panBy, pinchCamera, minScale, MAX_SCALE } from '../lib/cup-map-camera.js';
 
 const footprintOf = (venue) => venue.footprint || venue.id;
-const VENUE_BY_FOOTPRINT = Object.fromEntries(CUP_MAP.venues.map(v => [footprintOf(v), v]));
+const VENUE_BY_FOOTPRINT = Object.fromEntries(CUP_MAP.venues.filter(hasCampusPoint).map(v => [footprintOf(v), v]));
 
 // Pattern ids must be unique per drawing: the tab's map and a detail
 // view's mini map can both be in the page, and a pattern referenced
@@ -80,13 +81,21 @@ export function venueIcons(venue, stat) {
     ...listed.filter(s => booked.includes(s)),
     ...booked.filter(s => !listed.includes(s)),
   ];
+  if (!hasCampusPoint(venue)) return sports.map(sport => ({ sport, stat: stat.sports[sport] }));
   const unplaced = sports.filter(s => !venue.icons?.[s]);
+  // Reserve configured spots even without a current game, keeping automatic
+  // icons away from them and consistent between the main map and mini map.
+  const reserved = Object.values(venue.icons || {}).map(spot => spot.at).filter(Boolean);
+  const halfRow = (unplaced.length - 1) * 12;
+  let rowY = venue.label[1] - 26;
+  while (unplaced.length && reserved.some(([x, y]) =>
+    Math.abs(y - rowY) < 24 && Math.abs(x - venue.label[0]) < halfRow + 24)) rowY -= 24;
   return sports.map(sport => {
     const spot = venue.icons?.[sport];
     let at = spot?.at;
     if (!at) {
       const i = unplaced.indexOf(sport);
-      at = [venue.label[0] + (i - (unplaced.length - 1) / 2) * 24, venue.label[1] - 26];
+      at = [venue.label[0] + (i - (unplaced.length - 1) / 2) * 24, rowY];
     }
     return { sport, at, gps: spot?.gps || venue.gps, stat: stat.sports[sport] };
   });
@@ -94,7 +103,7 @@ export function venueIcons(venue, stat) {
 
 /** The picture for a sport, or null (the marker falls back to a letter). */
 export function sportIcon(sport) {
-  return SPORT_BY_NAME[sport]?.icon || null;
+  return SPORT_BY_NAME[sport]?.icon || sportIconFor(sport);
 }
 
 /* ============================================================
@@ -229,7 +238,7 @@ export function sportMarkerHtml(venue, icon, { selected = false, style = '' } = 
 function markersHtml(stats, selectedVenue, selectedSport) {
   const tags = [];
   const sports = [];
-  for (const venue of CUP_MAP.venues) {
+  for (const venue of CUP_MAP.venues.filter(hasCampusPoint)) {
     const stat = stats[venue.id];
     tags.push(venueTagHtml(venue, stat, {
       selected: selectedVenue === venue.id && !selectedSport,
@@ -259,8 +268,8 @@ function markersHtml(stats, selectedVenue, selectedSport) {
 export function cupMapHtml(stats = {}, { selected = null, sport = null } = {}) {
   const venue = VENUE_BY_ID[selected];
   let extra = '';
-  if (venue) {
-    const icon = venue.icons?.[sport];
+  if (hasCampusPoint(venue)) {
+    const icon = sport ? venueIcons(venue, { sports: { [sport]: { total: 1 } } })[0] : null;
     const src = sportIcon(sport);
     const [lx, ly] = venue.label;
     const name = venue.short || venue.name;
@@ -284,7 +293,7 @@ export function cupLegendHtml() {
   return `
     <ul class="cup-legend" aria-label="Map key">
       <li class="cup-legend__item"><span class="cup-legend__swatch cup-legend__swatch--live"></span>Being played now</li>
-      <li class="cup-legend__item cup-legend__item--hint">Tap a venue or a sport to see its games. Zoom with + / −, then drag to move around.</li>
+      <li class="cup-legend__item cup-legend__item--hint">Tap a venue or a sport to see its games. Drag to explore. Pinch, scroll or use + / − to zoom. Recenter to return.</li>
     </ul>`;
 }
 
@@ -300,202 +309,188 @@ export function cupLegendHtml() {
  * Returns { update({ stats, venue, sport }) }.
  */
 export function mountCupMap(el, handlers) {
-  const has3d = Boolean(CUP_MAP.mapbox?.token);
-
-  el.innerHTML = `
-    <div class="cup-map" data-mode="2d">
-      <div class="cup-map__viewport" tabindex="0" role="region"
-           aria-label="Campus map. Use the arrow keys to move around when zoomed in.">
-        <div class="cup-map__canvas" data-map-canvas></div>
-      </div>
-      <div class="cup-map__3d" data-map-3d hidden></div>
-      <div class="cup-map__dock">
-        ${has3d ? `
-          <div class="cup-map__modes" role="group" aria-label="Map view">
-            <button class="cup-map__btn cup-map__btn--mode" type="button" data-map-mode="2d" aria-pressed="true">2D</button>
-            <button class="cup-map__btn cup-map__btn--mode" type="button" data-map-mode="3d" aria-pressed="false">3D</button>
-          </div>` : ''}
-        <div class="cup-map__zoom">
-          <button class="cup-map__btn" type="button" data-map-zoom="1" aria-label="Zoom in">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4.5v11M4.5 10h11"/></svg>
-          </button>
-          <button class="cup-map__btn" type="button" data-map-zoom="-1" aria-label="Zoom out">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4.5 10h11"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>`;
-
+  el.innerHTML = `<div class="cup-map">
+    <div class="cup-map__viewport" tabindex="0" role="region"
+      aria-label="Campus map. Drag to move, pinch or plus and minus to zoom, Home to recenter.">
+      <div class="cup-map__canvas" data-map-canvas></div>
+    </div>
+    <div class="cup-map__dock"><div class="cup-map__zoom">
+      <button class="cup-map__btn" type="button" data-map-zoom="1" aria-label="Zoom in">+</button>
+      <button class="cup-map__btn" type="button" data-map-zoom="-1" aria-label="Zoom out">−</button>
+      <button class="cup-map__btn" type="button" data-map-home aria-label="Recenter campus map" title="Recenter">⌖</button>
+    </div></div>
+  </div>`;
   const root = el.querySelector('.cup-map');
   const viewport = root.querySelector('.cup-map__viewport');
   const canvas = root.querySelector('[data-map-canvas]');
-  const box3d = root.querySelector('[data-map-3d]');
   const zoomIn = root.querySelector('[data-map-zoom="1"]');
   const zoomOut = root.querySelector('[data-map-zoom="-1"]');
-
-  let zoom = ZOOM.min;
-  let mode = '2d';
-  let model = { stats: {}, venue: null, sport: null };
-  let view3d = null;          // the Mapbox view, once 3D has been opened
-  let lastFocus = '';         // what the viewport last scrolled to
-
-  /* --- Size: the canvas is the viewport's width times the zoom --- */
-  function layout({ keepCentre = true } = {}) {
-    const fit = viewport.clientWidth;
-    if (!fit) return;
-    const cx = keepCentre && canvas.offsetWidth
-      ? (viewport.scrollLeft + viewport.clientWidth / 2) / canvas.offsetWidth : 0.5;
-    const cy = keepCentre && canvas.offsetHeight
-      ? (viewport.scrollTop + viewport.clientHeight / 2) / canvas.offsetHeight : 0.5;
-    const w = Math.floor(fit * zoom);
-    const h = Math.floor(w * H / W);
-    canvas.style.setProperty('--canvas-w', `${w}px`);
-    canvas.style.setProperty('--canvas-h', `${h}px`);
-    viewport.classList.toggle('is-zoomed', zoom > ZOOM.min);
-    viewport.scrollLeft = cx * w - viewport.clientWidth / 2;
-    viewport.scrollTop = cy * h - viewport.clientHeight / 2;
-    syncZoomButtons();
+  const abort = new AbortController();
+  const listen = (target, name, fn, options = {}) => target.addEventListener(name, fn, { ...options, signal: abort.signal });
+  let size = { width: 0, height: 0 }, camera = null;
+  let model = { stats: {}, venue: null, sport: null }, lastFocus = '', painted = '';
+  let gesture = null, suppressClick = false, lastTap = null, lastTouch = -Infinity, inertia = null;
+  const pointers = new Map();
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+    || document.documentElement.dataset.motion === 'reduced';
+  function stop() { if (inertia !== null) cancelAnimationFrame(inertia); inertia = null; }
+  function commit(next) {
+    camera = next;
+    canvas.style.transform = `translate(${size.width / 2 - camera.x * camera.scale}px, ${size.height / 2 - camera.y * camera.scale}px) scale(${camera.scale})`;
+    canvas.style.setProperty('--marker-scale', 1 / camera.scale);
+    zoomIn.disabled = camera.scale >= MAX_SCALE - 0.001;
+    zoomOut.disabled = camera.scale <= minScale(size) + 0.001;
   }
-
-  function syncZoomButtons() {
-    if (mode === '3d' && view3d) {
-      zoomIn.disabled = !view3d.canZoom(1);
-      zoomOut.disabled = !view3d.canZoom(-1);
-      return;
-    }
-    zoomIn.disabled = zoom >= ZOOM.max;
-    zoomOut.disabled = zoom <= ZOOM.min;
+  function zoom(factor, point = { x: size.width / 2, y: size.height / 2 }) {
+    stop();
+    if (camera) commit(zoomAt(camera, size, camera.scale * factor, point));
   }
-
-  function setZoom(next) {
-    const z = Math.min(ZOOM.max, Math.max(ZOOM.min, next));
-    if (z === zoom) return;
-    zoom = z;
-    layout();
-  }
-
-  /* --- Bring the selection into view when zoomed in --- */
-  function focusSelection() {
+  function recenter() { stop(); if (size.width && size.height) commit(initialCamera(size)); }
+  function focusSelection(force = false) {
+    if (!camera) return;
     const key = `${model.venue}|${model.sport}`;
-    if (key === lastFocus) return;
+    if (!force && key === lastFocus) return;
     lastFocus = key;
     const venue = VENUE_BY_ID[model.venue];
-    if (!venue || zoom === ZOOM.min) return;
-    const at = (model.sport && venue.icons?.[model.sport]?.at) || venue.label;
-    viewport.scrollTo({
-      left: (at[0] / W) * canvas.offsetWidth - viewport.clientWidth / 2,
-      top: ((at[1] - TOP) / H) * canvas.offsetHeight - viewport.clientHeight / 2,
-      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-    });
+    if (!hasCampusPoint(venue)) return;
+    const at = venueIcons(venue, model.stats[venue.id]).find(icon => icon.sport === model.sport)?.at || venue.label;
+    const scale = Math.max(camera.scale, 2.4);
+    const list = el.closest('.cup-map-grid')?.querySelector('[data-cup-map-list]');
+    const mobile = matchMedia('(max-width: 1000px)').matches;
+    const right = !mobile && list ? list.offsetWidth + 40 : 0;
+    const bottom = mobile && list ? list.offsetHeight + 16 : 0;
+    const targetX = (size.width - right) / 2;
+    const targetY = (size.height - bottom) / 2;
+    stop();
+    commit(constrainCamera({ scale, x: at[0] - (targetX - size.width / 2) / scale,
+      y: at[1] - TOP - (targetY - size.height / 2) / scale }, size));
   }
-
-  /* --- Paint (the canvas keeps its size, so zoom and scroll stay) --- */
   function paint() {
+    const signature = JSON.stringify(model);
+    if (signature === painted) return;
+    painted = signature;
+    const focused = canvas.contains(document.activeElement) ? document.activeElement : null;
+    const focusedVenue = focused?.dataset.mapVenue, focusedSport = focused?.dataset.mapSport;
     canvas.innerHTML = drawingSvg({ stats: model.stats, selected: model.venue, interactive: true })
       + `<div class="cup-map__markers">${markersHtml(model.stats, model.venue, model.sport)}</div>`;
+    if (focusedVenue) [...canvas.querySelectorAll('button[data-map-venue]')]
+      .find(b => b.dataset.mapVenue === focusedVenue && b.dataset.mapSport === focusedSport)?.focus({ preventScroll: true });
   }
-
-  /* --- Taps: markers and venue footprints, in both views. Caught on
-         the way down so a marker tap never reaches Mapbox (which
-         would read it as a tap on empty ground) or the screen. --- */
-  let suppressClick = false;
-  root.addEventListener('click', (e) => {
-    if (suppressClick) { suppressClick = false; e.stopPropagation(); return; }
-    const modeBtn = e.target.closest('[data-map-mode]');
-    if (modeBtn) { setMode(modeBtn.dataset.mapMode); return; }
+  listen(root, 'click', e => {
+    if (suppressClick && viewport.contains(e.target) && e.detail !== 0) { e.preventDefault(); e.stopPropagation(); return; }
     const zoomBtn = e.target.closest('[data-map-zoom]');
-    if (zoomBtn) {
-      const dir = Number(zoomBtn.dataset.mapZoom);
-      if (mode === '3d' && view3d) { view3d.zoom(dir); } else { setZoom(zoom + dir * ZOOM.step); }
-      return;
-    }
-    const sport = e.target.closest('[data-map-sport]');
+    if (zoomBtn) { zoom(Number(zoomBtn.dataset.mapZoom) > 0 ? 1.3 : 1 / 1.3); return; }
+    if (e.target.closest('[data-map-home]')) { recenter(); return; }
     const venue = e.target.closest('[data-map-venue]');
-    if (sport || venue) {
+    if (venue) {
       e.stopPropagation();
-      if (sport) handlers.onSport?.(sport.dataset.mapVenue, sport.dataset.mapSport);
+      if (venue.dataset.mapSport) handlers.onSport?.(venue.dataset.mapVenue, venue.dataset.mapSport);
       else handlers.onVenue?.(venue.dataset.mapVenue);
-      return;
-    }
-    // Empty ground in 2D; in 3D, Mapbox reports its own empty taps.
-    if (e.target.closest('.cup-map__viewport')) handlers.onClear?.();
-  }, true);
-
-  /* --- Mouse drag to pan. Touch scrolls the viewport natively,
-         which also lets a swipe carry on into the page. --- */
-  let drag = null;
-  viewport.addEventListener('pointerdown', (e) => {
-    if (e.pointerType !== 'mouse' || e.button !== 0 || zoom === ZOOM.min) return;
-    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, left: viewport.scrollLeft, top: viewport.scrollTop, moved: false };
-  });
-  viewport.addEventListener('pointermove', (e) => {
-    if (!drag || drag.id !== e.pointerId) return;
-    const dx = e.clientX - drag.x;
-    const dy = e.clientY - drag.y;
-    if (!drag.moved && Math.hypot(dx, dy) > 5) {
-      drag.moved = true;
-      // Keeps the drag going if the pointer leaves the map; harmless
-      // to lose if the pointer is already gone.
-      try { viewport.setPointerCapture(e.pointerId); } catch { /* no active pointer */ }
-      viewport.classList.add('is-dragging');
-    }
-    if (drag.moved) {
-      viewport.scrollLeft = drag.left - dx;
-      viewport.scrollTop = drag.top - dy;
-    }
-  });
-  const endDrag = (e) => {
-    if (!drag) return;
-    if (drag.moved) suppressClick = true;
-    if (viewport.hasPointerCapture?.(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
-    viewport.classList.remove('is-dragging');
-    drag = null;
-    // A drag that ends off any control fires no click to swallow.
-    setTimeout(() => { suppressClick = false; }, 0);
+    } else if (viewport.contains(e.target)) handlers.onClear?.();
+  }, { capture: true });
+  const pointFor = e => {
+    const rect = viewport.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   };
-  viewport.addEventListener('pointerup', endDrag);
-  viewport.addEventListener('pointercancel', endDrag);
-
-  /* --- Arrow keys pan when the map itself has focus --- */
-  viewport.addEventListener('keydown', (e) => {
-    if (e.target !== viewport) return;
-    const step = { ArrowLeft: [-80, 0], ArrowRight: [80, 0], ArrowUp: [0, -80], ArrowDown: [0, 80] }[e.key];
-    if (!step) return;
-    e.preventDefault();
-    viewport.scrollBy({ left: step[0], top: step[1] });
-  });
-
-  new ResizeObserver(() => layout()).observe(viewport);
-
-  /* --- 2D / 3D --- */
-  async function setMode(next) {
-    if (next === mode || (next === '3d' && !has3d)) return;
-    mode = next;
-    root.dataset.mode = mode;
-    root.querySelectorAll('[data-map-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mapMode === mode)));
-    viewport.hidden = mode !== '2d';
-    box3d.hidden = mode !== '3d';
-    if (mode === '3d') {
-      if (!view3d) {
-        const { mount3d } = await import('./cup-map-3d.js');
-        view3d = await mount3d(box3d, { ...handlers, onZoom: syncZoomButtons });
-      }
-      view3d?.update(model);
-      view3d?.resize();
-    } else {
-      layout();
-    }
-    syncZoomButtons();
+  function restartGesture() {
+    const points = [...pointers.values()].slice(0, 2);
+    if (!points.length || !camera) { gesture = null; return; }
+    const midpoint = points.length === 2 ? { x: (points[0].x + points[1].x) / 2, y: (points[0].y + points[1].y) / 2 } : points[0];
+    gesture = { camera, midpoint, distance: points.length === 2 ? Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) : 0,
+      moved: suppressClick, last: midpoint, time: performance.now(), vx: 0, vy: 0 };
   }
-
-  layout({ keepCentre: false });
-
+  listen(viewport, 'pointerdown', e => {
+    if (e.button !== 0 || !camera) return;
+    stop();
+    if (e.pointerType === 'touch') lastTouch = performance.now();
+    if (!pointers.size) suppressClick = false;
+    pointers.set(e.pointerId, pointFor(e));
+    if (pointers.size > 1) {
+      suppressClick = true; lastTap = null;
+      for (const id of pointers.keys()) viewport.setPointerCapture(id);
+    }
+    restartGesture();
+  });
+  listen(viewport, 'pointermove', e => {
+    if (!pointers.has(e.pointerId) || !gesture) return;
+    pointers.set(e.pointerId, pointFor(e));
+    const points = [...pointers.values()].slice(0, 2), start = gesture;
+    const midpoint = points.length === 2 ? { x: (points[0].x + points[1].x) / 2, y: (points[0].y + points[1].y) / 2 } : points[0];
+    const dx = midpoint.x - start.midpoint.x, dy = midpoint.y - start.midpoint.y;
+    if (points.length === 2 || Math.hypot(dx, dy) > 5) start.moved = true;
+    if (!start.moved) return;
+    suppressClick = true; viewport.classList.add('is-dragging'); viewport.setPointerCapture(e.pointerId);
+    const time = performance.now(), elapsed = Math.max(1, time - start.time);
+    start.vx = (midpoint.x - start.last.x) / elapsed; start.vy = (midpoint.y - start.last.y) / elapsed;
+    start.time = time; start.last = midpoint;
+    if (points.length === 2 && start.distance > 0) {
+      commit(pinchCamera(start.camera, size, start.midpoint, midpoint,
+        Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) / start.distance));
+    } else commit(panBy(start.camera, size, dx, dy));
+  });
+  function finish(e, cancelled = false) {
+    if (!pointers.has(e.pointerId)) return;
+    const start = gesture;
+    pointers.delete(e.pointerId);
+    if (viewport.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
+    if (pointers.size) { restartGesture(); return; }
+    gesture = null; viewport.classList.remove('is-dragging');
+    if (!start || cancelled) { suppressClick = true; lastTap = null; return; }
+    const point = pointFor(e);
+    if (!start.moved && e.pointerType === 'touch' && !e.target.closest('button, [data-map-venue]')) {
+      const time = performance.now();
+      if (lastTap && time - lastTap.time < 300 && Math.hypot(point.x - lastTap.point.x, point.y - lastTap.point.y) < 24) {
+        zoom(1.5, point); suppressClick = true; lastTap = null;
+      } else lastTap = { time, point };
+    }
+    if (!start.moved || start.distance || performance.now() - start.time > 80 || reduced()) return;
+    let vx = Math.max(-2, Math.min(2, start.vx)), vy = Math.max(-2, Math.min(2, start.vy)), previous = performance.now();
+    const glide = time => {
+      const elapsed = Math.min(32, time - previous); previous = time;
+      vx *= Math.exp(-elapsed / 140); vy *= Math.exp(-elapsed / 140);
+      if (Math.hypot(vx, vy) < 0.02) { inertia = null; return; }
+      commit(panBy(camera, size, vx * elapsed, vy * elapsed));
+      inertia = requestAnimationFrame(glide);
+    };
+    inertia = requestAnimationFrame(glide);
+  }
+  listen(viewport, 'pointerup', e => finish(e));
+  listen(viewport, 'pointercancel', e => finish(e, true));
+  listen(viewport, 'lostpointercapture', e => finish(e, true));
+  listen(viewport, 'pointerleave', e => { if (!viewport.hasPointerCapture(e.pointerId)) finish(e, true); });
+  listen(viewport, 'wheel', e => {
+    e.preventDefault();
+    const pixels = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? size.height : 1);
+    zoom(Math.exp(-Math.max(-160, Math.min(160, pixels)) * (e.ctrlKey ? 0.01 : 0.002)), pointFor(e));
+  }, { passive: false });
+  listen(viewport, 'dblclick', e => {
+    if (performance.now() - lastTouch < 600 || e.target.closest('[data-map-venue]')) return;
+    e.preventDefault(); zoom(1.5, pointFor(e));
+  });
+  listen(viewport, 'keydown', e => {
+    if (e.target !== viewport || !camera) return;
+    const delta = { ArrowLeft: [80, 0], ArrowRight: [-80, 0], ArrowUp: [0, 80], ArrowDown: [0, -80] }[e.key];
+    if (delta) { e.preventDefault(); stop(); commit(panBy(camera, size, ...delta)); }
+    if (e.key === '+' || e.key === '=') { e.preventDefault(); zoom(1.3); }
+    if (e.key === '-') { e.preventDefault(); zoom(1 / 1.3); }
+    if (e.key === 'Home') { e.preventDefault(); recenter(); }
+    if (e.key === 'Escape') handlers.onClear?.();
+  });
+  const observer = new ResizeObserver(([entry]) => {
+    const { width, height } = entry.contentRect;
+    if (!width || !height) return;
+    const first = !camera;
+    size = { width, height }; stop();
+    commit(camera ? constrainCamera(camera, size) : initialCamera(size));
+    if (first || model.venue) focusSelection(true);
+  });
+  observer.observe(viewport);
   return {
     update(next) {
       model = { stats: next.stats || {}, venue: next.venue || null, sport: next.sport || null };
-      paint();
-      if (mode === '3d') view3d?.update(model);
-      else focusSelection();
+      paint(); focusSelection();
     },
+    refocus() { focusSelection(true); },
+    destroy() { stop(); observer.disconnect(); abort.abort(); },
   };
 }

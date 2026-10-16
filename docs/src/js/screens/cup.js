@@ -47,6 +47,8 @@ import { resolveGame } from '../components/game-card.js';
 import { matchCardHtml } from '../components/match-card.js';
 import { gameDetailHtml } from '../components/game-detail.js';
 import { mountCupMap, cupLegendHtml, venueStats, venueIcons } from '../components/cup-map.js';
+import { offCampusHtml } from '../components/cup-off-campus.js';
+import { isOffCampus, venueLocationHtml } from '../lib/cup-map-locations.js';
 import { statusPillHtml, GAME_STATUS_LABEL } from '../components/status.js';
 import { mountTeamStrip } from '../components/team-strip.js';
 import { dayKey, gameDays, initialDay, gamesOn, pickFeatured, keyToDate } from '../components/featured-match.js';
@@ -121,6 +123,7 @@ const state = {
 let rootEl = null;
 let tick = null;
 let mapView = null;   // the mounted campus map (components/cup-map.js)
+let mapListExpanded = null; // presentation only; survives timer renders
 
 /* ---------- Boot ---------- */
 
@@ -190,6 +193,11 @@ export function initCup(root) {
 
     mountHeroPhotos(root);
     wireTabs(root);
+    const mapSpace = new ResizeObserver(() => {
+      root.style.setProperty('--cup-map-top', `${stuckHeight()}px`);
+    });
+    [document.querySelector('.site-nav'), root.querySelector('[data-cup-tabs]')]
+      .filter(Boolean).forEach(el => mapSpace.observe(el));
     mountFilters(root);
 
     // Crossing the phone or swipe width changes how much each view shows.
@@ -226,6 +234,12 @@ export function initCup(root) {
     // these are the venue list and the sport chips in the panel, and
     // everything on Matches.
     root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-cup-map-list-toggle]')) {
+        mapListExpanded = !mapListExpanded;
+        render();
+        requestAnimationFrame(() => mapView?.refocus());
+        return;
+      }
       // A match card's venue: the Map with that venue picked. A
       // new-tab click is left to the browser.
       const venueLink = e.target.closest('[data-match-venue]');
@@ -454,6 +468,7 @@ function showTab(id, { scroll = true } = {}) {
   const tabs = enabledTabs();
   state.tab = tabs.includes(id) ? id : (tabs[0] || 'matches');
 
+  root.classList.toggle('is-map-view', state.tab === 'map');
   root.querySelectorAll('[data-cup-view]').forEach(view => {
     view.hidden = view.dataset.cupView !== state.tab;
   });
@@ -465,7 +480,9 @@ function showTab(id, { scroll = true } = {}) {
   movePill();
 
   const view = root.querySelector(`[data-cup-view="${state.tab}"]`);
-  if (scroll) scrollToView();
+  root.style.setProperty('--cup-map-top', `${stuckHeight()}px`);
+  if (state.tab === 'map') window.scrollTo({ top: 0, behavior: 'auto' });
+  else if (scroll) scrollToView();
 
   // Revealed content in a view that was hidden needs watching again.
   if (view) watchReveals(view);
@@ -756,6 +773,32 @@ function renderMap(root, games) {
   const mapWrap = root.querySelector('[data-cup-map]');
   const panel = root.querySelector('[data-cup-venue-panel]');
   const stats = venueStats(games);
+  const grid = root.querySelector('.cup-map-grid');
+  grid?.classList.toggle('has-selection', Boolean(state.venue));
+  mapListExpanded ??= Boolean(state.venue) || matchMedia('(min-width: 1001px)').matches;
+  grid?.classList.toggle('is-list-expanded', mapListExpanded);
+  const list = root.querySelector('[data-cup-map-list]');
+  if (list) {
+    list.dataset.expanded = String(mapListExpanded);
+    const button = list.querySelector('[data-cup-map-list-toggle]');
+    button.setAttribute('aria-expanded', String(mapListExpanded));
+    button.setAttribute('aria-label', `${mapListExpanded ? 'Collapse' : 'Expand'} games panel`);
+    list.querySelector('.cup-map-list__content').hidden = !mapListExpanded;
+    list.querySelector('[data-cup-map-list-title]').textContent = VENUE_BY_ID[state.venue]?.short || 'Venues & games';
+    const live = games.filter(g => g.status === 'ongoing' && (!state.venue || g.venueId === state.venue)).length;
+    list.querySelector('[data-cup-map-list-note]').textContent = state.venue
+      ? `${live ? `${live} ongoing · ` : ''}Tap to ${mapListExpanded ? 'hide' : 'show'} games`
+      : `${CUP_MAP.venues.length} venues${live ? ` · ${live} ongoing` : ''}`;
+  }
+  const outside = root.querySelector('[data-cup-off-campus]');
+  if (outside) {
+    outside.hidden = !CUP_MAP.showOffCampus;
+    if (CUP_MAP.showOffCampus) {
+      const old = outside.querySelector('details');
+      const expanded = old ? old.open : matchMedia('(min-width: 1001px)').matches;
+      outside.innerHTML = offCampusHtml(games, { now: cupNow(), selected: state.venue, expanded });
+    }
+  }
 
   // A sport picked on the map only stands while its venue still has it.
   if (state.mapSport && !stats[state.venue]?.sports?.[state.mapSport]) state.mapSport = null;
@@ -835,12 +878,13 @@ function renderMap(root, games) {
 
   panel.innerHTML = `
     <div class="venue-panel__head">
-      <p class="panel__kicker">Venue</p>
+      <p class="panel__kicker">${isOffCampus(venue) ? 'Outside campus' : 'Campus venue'}</p>
       <h3 class="venue-panel__title">${escapeHtml(venue.name)}</h3>
       ${venue.note ? `<p class="venue-panel__hint">${escapeHtml(venue.note)}</p>` : ''}
+      ${venueLocationHtml(venue)}
       ${sportChips}
       <button class="btn btn--ghost btn--sm venue-panel__clear" type="button" data-cup-clear-venue>
-        ← All venues
+        ← Close venue
       </button>
     </div>
     ${here.length ? `
@@ -1568,6 +1612,7 @@ function selectVenue(id, { toggle: toggleSame = false } = {}) {
   const next = (toggleSame && state.venue === id && !state.mapSport) ? null : (id || null);
   state.venue = (next && VENUE_BY_ID[next]) ? next : null;
   state.mapSport = null;
+  mapListExpanded = Boolean(state.venue) || matchMedia('(min-width: 1001px)').matches;
   render();
   revealPanel();
 }
@@ -1578,25 +1623,21 @@ function selectSport(id, sport) {
   const same = state.venue === id && state.mapSport === sport;
   state.venue = VENUE_BY_ID[id] ? id : null;
   state.mapSport = (state.venue && !same) ? sport : null;
+  mapListExpanded = true;
   render();
   revealPanel();
 }
 
-/* Keep the panel in view after a tap on a phone, where it sits
-   below the fold under the map. */
+/* The map and its sheet share one viewport under the existing navigation. */
 function revealPanel() {
-  if (state.venue && window.matchMedia('(max-width: 1000px)').matches) {
-    rootEl?.querySelector('[data-cup-venue-panel]')
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  if (state.tab === 'map') window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
 /** Exported so a match's detail view can jump to its venue. */
 export function showVenue(id) {
   showTab('map', { scroll: false });
   selectVenue(id);
-  rootEl?.querySelector('[data-cup-map-section]')
-    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
 function openGame(id) {
