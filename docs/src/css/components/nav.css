@@ -95,9 +95,9 @@
   display: grid; place-items: center;
   color: var(--ink-2);
   cursor: pointer;
-  transition: background 160ms, transform 160ms;
+  transition: background 160ms;
 }
-.theme-toggle:hover { background: var(--surface-2); transform: rotate(20deg); }
+.theme-toggle:hover { background: var(--surface-2); }
 .theme-toggle svg { width: 18px; height: 18px; }
 
 /* ---------- Mobile ---------- */
@@ -121,22 +121,6 @@
   .brand__sub { display: none; }
 }
 
-/* --- Hamburger morphs into an X while the nav sheet is open.
-       Rotating about the viewBox centre (11,11): each outer line
-       is first slid onto that centre, then turned, so the two
-       arms cross exactly there. The middle line just fades. --- */
-.nav-toggle svg line {
-  transform-box: view-box;
-  transform-origin: 11px 11px;
-  transition: transform 200ms ease, opacity 140ms ease;
-}
-.nav-toggle[aria-expanded="true"] svg line:nth-child(1) { transform: translateY(5px) rotate(45deg); }
-.nav-toggle[aria-expanded="true"] svg line:nth-child(2) { opacity: 0; }
-.nav-toggle[aria-expanded="true"] svg line:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
-
-@media (prefers-reduced-motion: reduce) {
-  .nav-toggle svg line { transition-duration: 0s; }
-}
 
 /* ============================================================
    Five nav items instead of three — Events and the Xavier Cup

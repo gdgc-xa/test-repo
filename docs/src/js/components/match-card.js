@@ -26,6 +26,7 @@
 import { CUP_CONFIG } from '../data/xavier-cup.js';
 import { sportGlyph } from './game-card.js';
 import { sportIcon } from './cup-map.js';
+import { sportPictogram } from './sport-pictograms.js';
 import { escapeHtml, escapeAttr } from '../lib/html.js';
 
 const BAR_LABEL = { upcoming: 'Upcoming', ongoing: 'Live', finished: 'Final' };
@@ -35,8 +36,10 @@ function hasScore(g) {
     && g.score.home !== undefined && g.score.away !== undefined;
 }
 
-/** The sport's picture from CUP_MAP.sportIcons, else its line glyph. */
+/** The sport's pictogram (sport-pictograms.js), else its picture, else its line glyph. */
 function sportIconHtml(sport) {
+  const picto = sportPictogram(sport, { cls: 'match__icon' });
+  if (picto) return picto;
   const src = sportIcon(sport);
   if (src) return `<img class="match__icon" src="${escapeAttr(src)}" alt="" loading="lazy" decoding="async">`;
   return sportGlyph(sport) || '';

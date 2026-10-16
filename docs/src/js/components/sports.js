@@ -18,7 +18,8 @@
    ============================================================ */
 
 import { matchCardHtml } from './match-card.js';
-import { outcome } from '../lib/standings.js';
+import { sportPictogram } from './sport-pictograms.js';
+import { outcome, bracketRounds, seedTeams } from '../lib/standings.js';
 import { parseDate, formatDay, formatTime, formatRange } from '../lib/dates.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
 
@@ -40,7 +41,7 @@ function tally(games) {
   const parts = [];
   if (live) parts.push(`${live} live`);
   if (next) parts.push(`${next} upcoming`);
-  if (!live && !next) parts.push(count(done, 'result'));
+  if (!live && !next && done) parts.push(count(done, 'result'));   // none at all: '' ("No games yet")
   return { live, next, done, text: parts.join(' · ') };
 }
 
@@ -54,38 +55,48 @@ function photoHtml(sport, i = 0) {
   if (sport.photo) {
     return `<img class="sport-head__img" src="${escapeAttr(sport.photo)}" alt="" decoding="async">`;
   }
+  const mark = sportPictogram(sport.name, { cls: 'sport-head__mark' })
+    || (sport.icon ? `<img class="sport-head__mark" src="${escapeAttr(sport.icon)}" alt="">` : '');
   return `
-    <span class="sport-head__img news-ph news-ph--${i % 4}" aria-hidden="true">
-      ${sport.icon ? `<img class="sport-head__mark" src="${escapeAttr(sport.icon)}" alt="">` : ''}
-    </span>`;
+    <span class="sport-head__img news-ph news-ph--${i % 4}" aria-hidden="true">${mark}</span>`;
 }
 
 /* ============================================================
    INDEX
    ============================================================ */
 
+/** The sport's pictogram, else its picture, else its first letter. */
+function sportIconHtml(s) {
+  return sportPictogram(s.name)
+    || (s.icon ? `<img src="${escapeAttr(s.icon)}" alt="" loading="lazy" decoding="async">` : '')
+    || `<span class="sport-tile__letter">${escapeHtml(s.name.slice(0, 1))}</span>`;
+}
+
+/** "Men · Women"; "Men · Women · 3x3" for events with divisions
+    ("3x3 · Men"); "13 events" when a sport has too many to list. */
+function categoriesText(cats) {
+  if (cats.length > 4) return `${cats.length} events`;
+  return [...new Set(cats.flatMap(c => c.split(' · ')))].join(' · ');
+}
+
 /**
- * sportsIndexHtml({ sports, games, divisionsOf })
- *   sports        allSports(), in order
- *   games         every resolved game
- *   divisionsOf   (games) => ['Men', 'Women', …]
+ * sportsIndexHtml({ sports, games, categoriesOf })
+ *   sports         allSports(), in order
+ *   games          every resolved game
+ *   categoriesOf   (sport, games) => ['Men', 'Women', …]
  */
-export function sportsIndexHtml({ sports, games, divisionsOf }) {
+export function sportsIndexHtml({ sports, games, categoriesOf }) {
   const tiles = sports.map((s, i) => {
     const theirs = games.filter(g => g.sport === s.name);
     const t = tally(theirs);
-    const divs = divisionsOf(theirs);
-    const label = `${s.name}. ${divs.join(', ')}. ${t.text || 'No games yet'}.`;
+    const cats = categoriesOf(s, theirs).filter(c => c !== 'Open');
+    const label = `${[s.name, categoriesText(cats), t.text || 'No games yet'].filter(Boolean).join('. ')}.`;
     return `
       <button class="sport-tile reveal" type="button" data-sports-open="${escapeAttr(s.id)}"
               style="--reveal-delay: ${Math.min(i * 50, 300)}ms;" aria-label="${escapeAttr(label)}">
-        <span class="sport-tile__icon" aria-hidden="true">
-          ${s.icon
-            ? `<img src="${escapeAttr(s.icon)}" alt="" loading="lazy" decoding="async">`
-            : `<span class="sport-tile__letter">${escapeHtml(s.name.slice(0, 1))}</span>`}
-        </span>
+        <span class="sport-tile__icon" aria-hidden="true">${sportIconHtml(s)}</span>
         <span class="sport-tile__name" aria-hidden="true">${escapeHtml(s.name)}</span>
-        ${divs.length ? `<span class="sport-tile__divs" aria-hidden="true">${escapeHtml(divs.join(' · '))}</span>` : ''}
+        ${cats.length ? `<span class="sport-tile__divs" aria-hidden="true">${escapeHtml(categoriesText(cats))}</span>` : ''}
         <span class="sport-tile__stats" aria-hidden="true">
           ${t.live ? '<i class="sport-tile__live"></i>' : ''}${escapeHtml(t.text || 'No games yet')}
         </span>
@@ -119,10 +130,22 @@ function crumbsHtml(sport, team) {
     </nav>`;
 }
 
+/* The categories to switch between: a two- or three-way switch (Men /
+   Women), or for a sport with many (Athletics' events, Esports'
+   games) a row of small chips that scrolls sideways. */
 function divisionsHtml(divisions, div, sport) {
   if (divisions.length < 2) return '';
+  const label = escapeAttr(`${sport.name} category`);
+  if (divisions.length > 3) {
+    return `
+      <div class="sport-cats" role="group" aria-label="${label}">
+        ${divisions.map(d => `
+          <button class="cup-daychip" type="button" data-sports-div="${escapeAttr(d)}"
+                  aria-pressed="${d === div}">${escapeHtml(d)}</button>`).join('')}
+      </div>`;
+  }
   return `
-    <div class="seg sport-divs" role="group" aria-label="${escapeAttr(`${sport.name} division`)}">
+    <div class="seg sport-divs" role="group" aria-label="${label}">
       ${divisions.map(d => `
         <button class="seg__btn" type="button" data-sports-div="${escapeAttr(d)}"
                 aria-pressed="${d === div}">${escapeHtml(d)}</button>`).join('')}
@@ -135,10 +158,10 @@ function headHtml(sport, sportGames, index) {
     <header class="sport-head">
       <div class="sport-head__media">${photoHtml(sport, index)}</div>
       <div class="sport-head__text">
-        ${sport.icon ? `<img class="sport-head__icon" src="${escapeAttr(sport.icon)}" alt="">` : ''}
+        <span class="sport-head__icon" aria-hidden="true">${sportIconHtml(sport)}</span>
         <h2 class="sport-head__name" tabindex="-1" data-sports-heading>${escapeHtml(sport.name)}</h2>
         <p class="sport-head__stats">
-          ${t.live ? '<i class="sport-tile__live"></i>' : ''}${escapeHtml(`${count(sportGames.length, 'match')} · ${t.text}`)}
+          ${t.live ? '<i class="sport-tile__live"></i>' : ''}${escapeHtml(sportGames.length ? [count(sportGames.length, 'match'), t.text].filter(Boolean).join(' · ') : 'No games yet')}
         </p>
       </div>
     </header>`;
@@ -183,11 +206,17 @@ function photosHtml(photos) {
   }).join('')}</div>`;
 }
 
-/* --- Standings: wins and losses --- */
-function standingsHtml(table, { sport, div, mine }) {
-  if (!table.length) {
+/* --- Standings: wins and losses, one table per group --- */
+function standingsHtml(tables, { sport, div, mine, format }) {
+  if (!tables.some(t => t.table.length)) {
     return `<p class="sport-empty">No group games in ${escapeHtml(sport.name)} · ${escapeHtml(div)}.</p>`;
   }
+  return `
+    <div class="standings-groups">${tables.map(t => groupTableHtml(t, { sport, div, mine })).join('')}</div>
+    <p class="sport-note">${escapeHtml(format.note)} Tap a team for its matches.</p>`;
+}
+
+function groupTableHtml({ group, table }, { sport, div, mine }) {
   const rows = table.map(r => `
     <tr class="${mine.includes(r.id) ? 'is-mine' : ''}">
       <td class="standings__rank">${r.rank}</td>
@@ -202,9 +231,11 @@ function standingsHtml(table, { sport, div, mine }) {
       <td class="standings__num">${r.l}</td>
     </tr>`).join('');
   return `
+    <div class="standings-group">
+      ${group ? `<p class="standings__group">Group ${escapeHtml(group)}</p>` : ''}
     <div class="standings-wrap">
       <table class="standings">
-        <caption class="sr-only">${escapeHtml(`${sport.name} ${div} standings`)}</caption>
+        <caption class="sr-only">${escapeHtml(`${sport.name} ${div}${group ? ` group ${group}` : ''} standings`)}</caption>
         <thead>
           <tr>
             <th scope="col" class="standings__rank"><span class="sr-only">Rank</span>#</th>
@@ -216,13 +247,41 @@ function standingsHtml(table, { sport, div, mine }) {
         <tbody>${rows}</tbody>
       </table>
     </div>
-    <p class="sport-note">From finished group games. Tap a team for its matches.</p>`;
+    </div>`;
 }
 
-/* --- Knockouts: semifinals → final (→ bronze) --- */
-function koBoxHtml(g, mine) {
+/* --- The bracket: the rounds of the sport's format (lib/standings.js) ---
+   Like the World Cup's: a chip per round, the rounds side by side (two
+   on a phone, all of them where they fit), each match two team
+   bubbles; slide sideways for the rounds after. screens/cup.js lays
+   the columns out (the round at the left stacked close, each later
+   match halfway between the two that feed it) and slides them. The
+   games below the podium and the groups sit under it. */
+
+/** "Live", "Final", or when it starts. */
+const whenOf = (g) => (g.status === 'ongoing' ? 'Live'
+  : g.status === 'finished' ? 'Final'
+  : (g.start ? `${formatDay(g.start, { withYear: false })} · ${formatTime(g.start)}` : 'Time to follow'));
+
+const sideOf = (g, k) => g?.sides?.[k] || null;
+/** 0 or 1 for the side that won a decided game, else -1. */
+const wonBy = (g) => {
+  const o = g ? outcome(g) : null;
+  return o?.winner ? (o.winner === 'home' ? 0 : 1) : -1;
+};
+
+/** A seed in words, once its group is played: "A3 vs B3" → "SBM vs MED". */
+const seedName = (seed, seeds) => String(seed)
+  .replace(/#\d+|\b[A-Z]\d\b/g, s => (seeds[s] ? (seeds[s].short || seeds[s].name) : s));
+
+/** One game below the podium (5th, 7th); before it is set, who will play it. */
+function koBoxHtml(g, mine, seed = null, seeds = {}) {
   if (!g) {
-    return `<div class="kobox kobox--tbd"><span class="kobox__tbd">To be decided</span></div>`;
+    return `
+      <div class="kobox kobox--tbd">
+        ${seed ? `<span class="kobox__seed">${escapeHtml(seedName(seed, seeds))}</span>` : ''}
+        <span class="kobox__tbd">To be decided</span>
+      </div>`;
   }
   const o = outcome(g);
   const scored = g.status !== 'upcoming' && g.score?.home !== undefined && g.score?.away !== undefined;
@@ -236,9 +295,7 @@ function koBoxHtml(g, mine) {
         <b class="kobox__score">${escapeHtml(String(score))}</b>
       </span>`;
   };
-  const when = g.status === 'ongoing' ? 'Live'
-    : g.status === 'finished' ? 'Final'
-    : (g.start ? `${formatDay(g.start, { withYear: false })} · ${formatTime(g.start)}` : 'Time to follow');
+  const when = whenOf(g);
   const isMine = g.teamIds?.some(id => mine.includes(id));
   return `
     <button class="kobox kobox--${g.status}${isMine ? ' is-mine' : ''}" type="button" data-game-id="${escapeAttr(g.id)}"
@@ -249,24 +306,121 @@ function koBoxHtml(g, mine) {
     </button>`;
 }
 
-function knockoutsHtml(ko, mine) {
-  if (!ko.semis.length && !ko.final && !ko.bronze) {
-    return '<p class="sport-empty">The knockouts have not been drawn yet.</p>';
+const teamBubbleHtml = (team, mine, extra = '') => `
+  <span class="kteam${extra}${team && mine.includes(team.id) ? ' is-mine' : ''}">
+    ${crestHtml(team, 'kteam__crest')}
+    <span class="kteam__name">${escapeHtml(team?.short || team?.name || '')}</span>
+    <b class="kteam__score"></b>
+  </span>`;
+
+/** Entrant k of a match: its game's team and score; before that, who
+    comes through from the round before, a seed's team once its group
+    is played, or the seed itself. */
+function slideTeamHtml(m, k, prev, mine, seeds) {
+  const g = m.game;
+  if (g) {
+    const w = wonBy(g);
+    const team = sideOf(g, k);
+    const scored = g.status !== 'upcoming' && g.score?.home !== undefined && g.score?.away !== undefined;
+    const score = scored ? (k === 0 ? g.score.home : g.score.away) : '';
+    const state = w < 0 ? '' : (w === k ? ' is-winner' : ' is-out');
+    return `
+      <span class="kteam${state}${team && mine.includes(team.id) ? ' is-mine' : ''}">
+        ${team ? crestHtml(team, 'kteam__crest') : ''}
+        <span class="kteam__name">${escapeHtml(team ? (team.short || team.name) : (m.seeds[k] || 'To be decided'))}</span>
+        <b class="kteam__score">${escapeHtml(String(score))}</b>
+      </span>`;
   }
-  // Two semifinal slots, filled as the draw is made.
-  const semis = [ko.semis[0] || null, ko.semis[1] || null, ...ko.semis.slice(2)];
+  const feeder = m.from?.[k] != null ? prev?.matches[m.from[k]] : null;
+  const fw = feeder ? wonBy(feeder.game) : -1;
+  if (fw >= 0) return teamBubbleHtml(sideOf(feeder.game, m.losers ? 1 - fw : fw), mine);
+  if (seeds[m.seeds[k]]) return teamBubbleHtml(seeds[m.seeds[k]], mine);
+  const label = m.seeds[k]
+    || (feeder && feeder.seeds.every(Boolean) ? `${m.losers ? 'L' : 'W'} ${feeder.seeds.join('/')}` : 'To be decided');
+  return `<span class="kteam is-seed"><span class="kteam__name">${escapeHtml(label)}</span></span>`;
+}
+
+function slideMatchHtml(m, prev, mine, seeds) {
+  const g = m.game;
+  const status = !g ? 'To be decided'
+    : g.status === 'finished' ? 'Full time'
+    : whenOf(g);
+  const head = `${m.label ? `${escapeHtml(m.label)} · ` : ''}${escapeHtml(status)}`;
+  const body = `
+    <span class="kmatch__head${g?.status === 'ongoing' ? ' is-live' : ''}">${head}</span>
+    <span class="kmatch__teams">${slideTeamHtml(m, 0, prev, mine, seeds)}${slideTeamHtml(m, 1, prev, mine, seeds)}</span>
+    <span class="kmatch__link" aria-hidden="true"></span>`;
+  // Which matches before feed this one (for its place and its line); the
+  // third-place game takes the losers, so it gets no line.
+  const from = `data-from="${(m.from || []).filter(i => i != null).join(',')}"${m.losers ? ' data-losers' : ''}`;
+  return g
+    ? `<button class="kmatch" type="button" data-game-id="${escapeAttr(g.id)}" ${from}
+               aria-label="${escapeAttr(`${m.label || g.round}: ${g.title}. ${status}. Open match details`)}">${body}</button>`
+    : `<div class="kmatch" ${from}>${body}</div>`;
+}
+
+function slideHtml(rounds, mine, seeds) {
+  // Opens on the first round still to be played; when everything is
+  // played, on the last two (the semifinals and the final).
+  const open = rounds.findIndex(r => r.matches.some(m => m.game?.status !== 'finished'));
+  const start = Math.max(0, Math.min(open < 0 ? rounds.length : open, rounds.length - 2));
   return `
-    <div class="bracket">
-      <div class="bracket__col">
-        <p class="bracket__label">Semifinals</p>
-        ${semis.map(g => koBoxHtml(g, mine)).join('')}
+    <div class="kslide" data-kslide data-start="${start}" style="--krounds: ${rounds.length};">
+      <div class="kslide__rounds" role="group" aria-label="Rounds">
+        ${rounds.map((r, i) => `<button class="cup-daychip kslide__round" type="button" data-kslide-round="${i}" aria-pressed="false">${escapeHtml(r.label)}</button>`).join('')}
       </div>
-      <div class="bracket__col bracket__col--final">
-        <p class="bracket__label">Final</p>
-        ${koBoxHtml(ko.final, mine)}
-        ${ko.bronze ? `<p class="bracket__label">Bronze</p>${koBoxHtml(ko.bronze, mine)}` : ''}
+      <div class="kslide__frame" tabindex="0" aria-label="Bracket, round by round: slide sideways for the rounds after">
+        <div class="kslide__track">
+          ${rounds.map((r, i) => `
+            <div class="kslide__col" data-kslide-col="${i}" aria-label="${escapeAttr(r.label)}">
+              ${r.matches.map(m => slideMatchHtml(m, rounds[i - 1], mine, seeds)).join('')}
+            </div>`).join('')}
+        </div>
       </div>
     </div>`;
+}
+
+/* --- The groups, under the bracket: a gold head, the teams in table order --- */
+function groupBoxesHtml(tables, mine) {
+  return `
+    <div class="tgroups">${tables.map(({ group, table }) => `
+      <section class="tgroup" aria-label="${escapeAttr(`Group ${group}`)}">
+        <h4 class="tgroup__head">Group ${escapeHtml(group)}</h4>
+        <ol class="tgroup__list">${table.map(r => `
+          <li>
+            <button type="button" class="tgroup__team${mine.includes(r.id) ? ' is-mine' : ''}" data-sports-team="${escapeAttr(r.id)}"
+                    aria-label="${escapeAttr(`${r.rank}. ${r.team?.name || r.id}, ${r.w} wins, ${r.l} losses`)}">
+              <span class="tgroup__rank" aria-hidden="true">${r.rank}</span>
+              ${crestHtml(r.team, 'tgroup__crest')}
+              <span class="tgroup__name" aria-hidden="true">${escapeHtml(r.team?.short || r.team?.name || r.id)}</span>
+              <span class="tgroup__rec" aria-hidden="true">${r.w}–${r.l}</span>
+            </button>
+          </li>`).join('')}
+        </ol>
+      </section>`).join('')}
+    </div>`;
+}
+
+/** The whole bracket section: the rounds, the games below the podium, the groups. */
+function bracketHtml(ko, format, { mine, tables, seeds, withGroups }) {
+  const rounds = bracketRounds(ko, format);
+  // A format from a schedule shows its slots from the start; the
+  // original one waits for the draw.
+  const seeded = ko.columns.some(c => c.slots.some(s => s.seed));
+  if (!ko.drawn && !seeded) {
+    return '<p class="sport-empty">The knockouts have not been drawn yet.</p>';
+  }
+  return `
+    ${slideHtml(rounds, mine, seeds)}
+    ${ko.placings.length ? `
+      <div class="bracket-places">${ko.placings.map(p => `
+        <div class="bracket__col bracket__col--place">
+          <p class="bracket__label">${escapeHtml(p.label)}</p>
+          ${p.slots.map(s => koBoxHtml(s.game, mine, s.seed, seeds)).join('')}
+        </div>`).join('')}
+      </div>` : ''}
+    ${withGroups ? groupBoxesHtml(tables, mine) : ''}
+    <p class="sport-note">${withGroups ? `${escapeHtml(format.note)} ` : ''}${seeded ? 'A1 = 1st in group A · #1 = 1st in the table · W / L = the winner or loser of that game; a seed becomes its team once its group is played. ' : ''}Tap a match for its details${withGroups ? ', a team in a group for all its matches' : ''}.</p>`;
 }
 
 const gridHtml = (games, mine) =>
@@ -295,7 +449,7 @@ function teamHtml({ team, sport, div, games, row, mine }) {
     </header>
     ${row ? `
       <dl class="team-record">
-        ${stat('Rank', `${row.rank} of ${row.total}`)}${stat('Wins', row.w)}${stat('Losses', row.l)}
+        ${stat(row.group ? `Rank · Group ${row.group}` : 'Rank', `${row.rank} of ${row.total}`)}${stat('Wins', row.w)}${stat('Losses', row.l)}
       </dl>` : ''}
     <p class="sport-note">${following
       ? `You follow ${escapeHtml(team.name)}: their games are at the top of Matches.`
@@ -311,7 +465,8 @@ function teamHtml({ team, sport, div, games, row, mine }) {
  *   sportGames        every game of the sport
  *   divisions, div    its divisions and the chosen one
  *   divGames          the chosen division's games
- *   table, ko         standings() and knockouts() for the division
+ *   format            the division's tournament format (BRACKETS)
+ *   tables, ko        groupTables() and knockouts() for the division
  *   news              posts about the sport, newest first
  *   team              a TEAMS entry for the team view, or null
  *   mine              followed team ids
@@ -320,34 +475,45 @@ function teamHtml({ team, sport, div, games, row, mine }) {
  *   collapsible       false where the list is a swipe row: no button
  */
 export function sportPageHtml({
-  sport, index, sportGames, divisions, div, divGames, table, ko, news, team, mine,
+  sport, index, sportGames, divisions, div, divGames, format, tables, ko, news, team, mine,
   matchesShown = Infinity, collapsible = true,
 }) {
   const head = `${crumbsHtml(sport, team)}`;
   const divs = divisionsHtml(divisions, div, sport);
 
   if (team) {
-    const row = table.find(r => r.id === team.id);
+    // The team's place within its own group.
+    const own = tables.find(t => t.table.some(r => r.id === team.id));
+    const row = own?.table.find(r => r.id === team.id);
     return `
       ${head}
       ${teamHtml({
         team, sport, div, mine,
         games: divGames.filter(g => g.teamIds.includes(team.id)),
-        row: row ? { ...row, total: table.length } : null,
+        row: row ? { ...row, total: own.table.length, group: own.group } : null,
       })}
       ${divs ? `<div class="sport-divs-row">${divs}</div>` : ''}`;
   }
 
+  // Every college at once (races, routines): no table, no bracket.
+  const versus = sport.format !== 'field';
+  // Two groups: once the games say who is in which group, the groups
+  // sit under the bracket in place of a separate standings table.
+  const withGroups = versus && format.groups.length > 0 && tables.some(t => t.group);
+  // A group played to the end puts its teams into the bracket's seeds.
+  const seeds = versus ? seedTeams(tables, divGames) : {};
+  const named = div && div !== 'Open';
   return `
     ${head}
     ${headHtml(sport, sportGames, index)}
     ${divs ? `<div class="sport-divs-row">${divs}</div>` : ''}
     ${sectionHtml('Latest news', newsHtml(news, sport), { id: 'sport-news' })}
     ${sport.photos?.length ? sectionHtml('Photos', photosHtml(sport.photos), { id: 'sport-photos' }) : ''}
-    ${sectionHtml('Standings', standingsHtml(table, { sport, div, mine }), {
-      id: 'sport-standings', extra: `<span class="browse-count">${escapeHtml(div)}</span>` })}
-    ${sectionHtml('Knockouts', knockoutsHtml(ko, mine), { id: 'sport-ko' })}
-    ${sectionHtml(`${div} matches`, divGames.length
+    ${versus && !withGroups ? sectionHtml('Standings', standingsHtml(tables, { sport, div, mine, format }), {
+      id: 'sport-standings', extra: named ? `<span class="browse-count">${escapeHtml(div)}</span>` : '' }) : ''}
+    ${versus ? sectionHtml('Bracket', bracketHtml(ko, format, { mine, tables, seeds, withGroups }), {
+      id: 'sport-ko', extra: named ? `<span class="browse-count">${escapeHtml(div)}</span>` : '' }) : ''}
+    ${sectionHtml(named ? `${div} matches` : 'Matches', divGames.length
       ? matchListHtml([...divGames].sort(byInterest), mine, matchesShown, collapsible)
       : '<p class="sport-empty">No matches yet.</p>', {
       id: 'sport-matches', extra: `<span class="browse-count">${count(divGames.length, 'match')}</span>` })}`;
