@@ -103,8 +103,9 @@
     <div class="site-nav__wrap">
       <a class="brand" href="./" data-nav="landing">
         <span class="brand__mark" style="color: var(--compass-face);">
-          <!-- Inline compass rose so it picks up currentColor -->
-          <svg viewBox="0 0 100 100" role="img" aria-label="Compass Compass">
+          <!-- Inline compass rose so it picks up currentColor. Decorative:
+               the link is named by the words beside it. -->
+          <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
             <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="2.4"/>
             <circle cx="50" cy="50" r="34" fill="none" stroke="currentColor" stroke-width="1"/>
             <polygon points="50,4 54,44 50,48 46,44" fill="currentColor"/>
