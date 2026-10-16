@@ -37,7 +37,7 @@
   ============================================================ */
 
 import {
-  CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, CUP_PHOTOS, GAMES, VENUE_BY_ID,
+  CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, CUP_PHOTOS, CUP_LIVE, GAMES, VENUE_BY_ID,
   allSports, findSport, cupNow, isPreviewClock,
 } from '../data/xavier-cup.js';
 import { TEAM_BY_ID, teamFor } from '../data/teams.js';
@@ -210,6 +210,7 @@ export function initCup(root) {
     // ?game= link, which could not be found before the data arrived.
     let dataSeen = false;
     window.addEventListener('cup:data', () => {
+      liveArrived = true;
       const q = currentQuery();
       if (q.screen === 'cup') {
         render();
@@ -593,6 +594,9 @@ function renderTeamNote(root, mine) {
 /* --- Sports: the grid, a sport's page, or a team inside it --- */
 
 let newsPosts = [];   // every post, once the news feed has loaded (renderNews)
+// True once the live data (lib/live-data.js) has landed. Until then a
+// sport only the tracker lists (Banner Raising) is not known yet.
+let liveArrived = false;
 
 /** Is a post about this sport? Its own `sport`, or a hashtag in its text. */
 function isAbout(p, sport) {
@@ -612,8 +616,12 @@ function renderSports(root, games, mine) {
   const index = sports.findIndex(s => s.id === state.sportsSport);
   const sport = sports[index];
   if (!sport) {
-    state.sportsSport = '';
-    state.sportsTeam = '';
+    // A link to a sport only the tracker lists keeps its sport (and
+    // team) while the live data loads, so its page opens when it lands.
+    if (liveArrived || !CUP_LIVE.enabled) {
+      state.sportsSport = '';
+      state.sportsTeam = '';
+    }
     wrap.innerHTML = sportsIndexHtml({ sports, games, categoriesOf: categoriesFor });
     watchReveals(wrap);
     return;
@@ -1653,7 +1661,11 @@ function openGame(id) {
 /** The Sports view's place from a link: ?sport=<id>&div=<division>&team=<id>. */
 function readSports(q, tab = state.tab) {
   const on = tab === 'sports';
-  state.sportsSport = on ? (findSport(q.sport)?.id || '') : state.sportsSport;
+  // Before the live data lands, a sport not known yet (one only the
+  // tracker lists) keeps the link's id; renderSports drops it after.
+  const waiting = CUP_LIVE.enabled && !liveArrived;
+  const linked = findSport(q.sport)?.id || (waiting ? String(q.sport || '').toLowerCase().replace(/[^a-z0-9-]/g, '') : '');
+  state.sportsSport = on ? linked : state.sportsSport;
   state.sportsDiv = on ? String(q.div || '') : state.sportsDiv;
   state.sportsTeam = (on && state.sportsSport && TEAM_BY_ID[q.team]) ? q.team : (on ? '' : state.sportsTeam);
 }
