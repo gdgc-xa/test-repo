@@ -8,7 +8,6 @@
    ============================================================ */
 
 .settings-btn svg { width: 18px; height: 18px; }
-.settings-btn:hover { transform: rotate(45deg); }
 
 .settings { padding: var(--space-6); }
 

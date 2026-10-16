@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- The phone's address bar colour. A starting value: appearance.js
+       sets it to the ground of the theme and design actually showing. -->
+  <meta name="theme-color" content="#F4F1EC"/>
   <meta name="description" content="Campus Compass — a directory of every student organization at Xavier University – Ateneo de Cagayan."/>
   <title>Campus Compass · Xavier Ateneo</title>
   <link rel="icon" type="image/svg+xml" href="assets/illustrations/compass-rose.svg"/>
@@ -58,8 +61,8 @@
   <link rel="stylesheet" href="src/css/screens/events.css"/>
   <link rel="stylesheet" href="src/css/screens/cup.css"/>
 
-  <!-- Skin layer LAST of the design files: it overrides the beach
-       scene with the World Cup one, so it has to win. -->
+  <!-- Skin layer LAST of the design files: it switches between the
+       Xavier Cup tiles and the Sands of Time beach, so it has to win. -->
   <link rel="stylesheet" href="src/css/skins.css"/>
 
   <link rel="stylesheet" href="src/css/animations.css"/>
@@ -83,7 +86,7 @@
           theme === 'dark' || theme === 'light'
             ? theme
             : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-        if (skin === 'txc' || skin === 'worldcup' || skin === 'sands') d.setAttribute('data-skin', skin);
+        if (skin === 'txc' || skin === 'sands') d.setAttribute('data-skin', skin);
         if (motion === 'full' || motion === 'reduced') d.setAttribute('data-motion', motion);
         else if (matchMedia('(prefers-reduced-motion: reduce)').matches) d.setAttribute('data-motion', 'reduced');
       } catch (e) { /* private mode — defaults in the markup stand */ }
@@ -132,11 +135,14 @@
       </a>
 
       <!-- Labels for the two configurable tabs are stamped from
-           data/site.js by router.js; the text here is the fallback. -->
+           data/site.js by router.js; the text here is the fallback.
+           Events ships hidden and router.js shows it only when site.js
+           turns the tab on, so a switched-off tab never flashes in the
+           nav while the scripts load. -->
       <nav class="nav-links" aria-label="Main">
         <button class="nav-links__item" data-nav="landing" data-nav-item="landing">Discover</button>
         <button class="nav-links__item" data-nav="browse"  data-nav-item="browse">Organizations</button>
-        <button class="nav-links__item" data-nav="events"  data-nav-item="events">Events</button>
+        <button class="nav-links__item" data-nav="events"  data-nav-item="events" hidden>Events</button>
         <button class="nav-links__item" data-nav="cup"     data-nav-item="cup">Xavier Cup</button>
         <button class="nav-links__item" data-nav="about"   data-nav-item="about">About</button>
       </nav>
@@ -144,9 +150,11 @@
       <div class="nav-actions">
         <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"></button>
         <button class="theme-toggle settings-btn" data-open-settings aria-label="Open settings" hidden>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="3.2"/>
-            <path d="M19.4 14a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H4a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 5.6 7.6a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.5V4a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V10a1.7 1.7 0 0 0 1.5 1H20a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+          <!-- A gear: round body, eight square teeth, a hole in the middle. -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="6.2"/>
+            <circle cx="12" cy="12" r="2.4"/>
+            <path stroke-width="3.2" d="M12 5.4V2.4M16.67 7.33L18.79 5.21M18.6 12H21.6M16.67 16.67L18.79 18.79M12 18.6V21.6M7.33 16.67L5.21 18.79M5.4 12H2.4M7.33 7.33L5.21 5.21"/>
           </svg>
         </button>
       </div>
@@ -175,7 +183,7 @@
     <nav class="nav-sheet__links" aria-label="Mobile">
       <button class="nav-sheet__item" data-nav="landing" data-nav-item="landing">Discover</button>
       <button class="nav-sheet__item" data-nav="browse"  data-nav-item="browse">Browse Organizations</button>
-      <button class="nav-sheet__item" data-nav="events"  data-nav-item="events">Events</button>
+      <button class="nav-sheet__item" data-nav="events"  data-nav-item="events" hidden>Events</button>
       <button class="nav-sheet__item" data-nav="cup"     data-nav-item="cup">The Xavier Cup</button>
       <button class="nav-sheet__item" data-nav="about"   data-nav-item="about">About</button>
     </nav>
@@ -565,64 +573,6 @@
       <img class="palm-frond palm-frond--right-2" src="assets/illustrations/palm-frond.svg" alt=""/>
     </div>
 
-    <!-- ============================================================
-         WORLD CUP SCENE — the other design, painted only when
-         data-skin="worldcup". It is a sibling of .hero-scene rather
-         than a rewrite of it, so the Sands of Time beach survives
-         intact and Settings can switch between the two.
-
-         Same three bands as the beach, same offsets, so the lockup
-         still lands on --shore:
-           SKY  →  STANDS (at --horizon)  →  PITCH (at --shore)
-         ============================================================ -->
-    <div class="cup-scene" aria-hidden="true">
-      <div class="cup-scene__sky"></div>
-
-      <!-- Floodlight towers, standing behind the stands -->
-      <span class="floodlight floodlight--left">
-        <span class="floodlight__head"></span>
-        <span class="floodlight__glow"></span>
-      </span>
-      <span class="floodlight floodlight--right">
-        <span class="floodlight__head"></span>
-        <span class="floodlight__glow"></span>
-      </span>
-
-      <!-- Terraces: three tiers of crowd, darkest at the back -->
-      <div class="cup-scene__stands">
-        <span class="stand-tier stand-tier--back"></span>
-        <span class="stand-tier stand-tier--mid"></span>
-        <span class="stand-tier stand-tier--front"></span>
-      </div>
-
-      <!-- Pitch-side hoardings, the band between crowd and grass -->
-      <div class="cup-scene__hoarding"></div>
-
-      <!-- The pitch. Mow stripes are a repeating gradient; the
-           markings are one SVG with non-scaling strokes, so the
-           lines stay the same weight at every viewport width. -->
-      <div class="cup-scene__pitch">
-        <svg class="pitch-lines" viewBox="0 0 1200 420" preserveAspectRatio="none">
-          <g fill="none" stroke="var(--cup-line)" stroke-width="3" vector-effect="non-scaling-stroke">
-            <line x1="0" y1="26" x2="1200" y2="26"/>
-            <ellipse cx="600" cy="26" rx="150" ry="52"/>
-            <circle cx="600" cy="26" r="4" fill="var(--cup-line)"/>
-            <rect x="380" y="330" width="440" height="120"/>
-            <rect x="500" y="392" width="200" height="60"/>
-            <path d="M 470 330 Q 600 404 730 330"/>
-          </g>
-        </svg>
-      </div>
-
-      <!-- Bunting in the corners, where the palms hang on the beach -->
-      <img class="pennant-string pennant-string--left"  src="assets/illustrations/pennants.svg" alt=""/>
-      <img class="pennant-string pennant-string--right" src="assets/illustrations/pennants.svg" alt=""/>
-
-      <!-- A ball on the grass, where the starfish sits on the sand -->
-      <img class="cup-accent cup-accent--ball" src="assets/illustrations/cup-ball.svg" alt=""/>
-      <img class="cup-accent cup-accent--ball2" src="assets/illustrations/cup-ball.svg" alt=""/>
-    </div>
-
     <!-- ==== HERO CONTENT (overlaid on the scene) ==== -->
     <div class="hero-content">
       <div class="wrap">
@@ -679,11 +629,8 @@
                 <circle cx="50" cy="50" r="2.4" fill="currentColor"/>
               </svg>
             </span>
-            <!-- Two centrepieces, one per design. The skin layer shows
-                 exactly one; both are sized by the same rules so the
-                 lockup geometry never moves. -->
+            <!-- The hourglass centrepiece of the Sands of Time design. -->
             <img class="lockup__hourglass lockup__piece lockup__piece--sands" src="assets/illustrations/hero-hourglass.svg" alt="Hourglass"/>
-            <img class="lockup__hourglass lockup__piece lockup__piece--worldcup" src="assets/illustrations/hero-trophy.svg" alt="Trophy"/>
             <span class="lockup__hourglass-shadow" aria-hidden="true"></span>
             <span class="lockup__sand-mound" aria-hidden="true"></span>
           </span>
@@ -1150,7 +1097,7 @@
 
         <article class="about-card about-card--gdg">
           <div class="about-gdg">
-            <img class="about-gdg__mark" src="assets/illustrations/gdg-credit.svg" alt="" aria-hidden="true"/>
+            <img class="about-gdg__mark" src="assets/brand/gdg-xavier-logo.webp" alt="" aria-hidden="true" width="72" height="72" decoding="async"/>
             <div>
               <h2 class="about-card__title">Built by GDG on Campus</h2>
               <p class="about-gdg__org">Google Developer Groups on Campus &mdash; Xavier Ateneo</p>
@@ -1250,11 +1197,10 @@
         <div class="settings__row" data-settings-row="design">
           <div class="settings__label">
             <span class="settings__name">Design</span>
-            <span class="settings__hint">This season&rsquo;s Xavier Cup look, the World Cup pitch, or the original Sands of Time beach.</span>
+            <span class="settings__hint">This season&rsquo;s Xavier Cup look, or the original Sands of Time beach.</span>
           </div>
           <div class="seg" role="group" aria-label="Design">
             <button class="seg__btn" type="button" data-set-skin="txc" aria-pressed="false">Xavier Cup 2026</button>
-            <button class="seg__btn" type="button" data-set-skin="worldcup" aria-pressed="false">World Cup</button>
             <button class="seg__btn" type="button" data-set-skin="sands"    aria-pressed="false">Sands of Time</button>
           </div>
         </div>
@@ -1290,7 +1236,7 @@
 
       <div class="gdg-credit">
         <span class="gdg-credit__label">Created by</span>
-        <img class="gdg-credit__mark" src="assets/illustrations/gdg-credit.svg" alt="GDG"/>
+        <img class="gdg-credit__mark" src="assets/brand/gdg-xavier-logo.webp" alt="Google Developer Groups on Campus Xavier" width="44" height="44" loading="lazy" decoding="async"/>
         <div class="gdg-credit__text">
           <span class="gdg-credit__org">Google Developer Group</span>
           <span>

@@ -7,6 +7,7 @@
 import { COLOR_OF, FULL_LABEL, SHORT_LABEL } from '../data/categories.js';
 import { fbCardHtml } from './facebook-card.js';
 import { venueMapHtml } from './venue-map.js';
+import { SHOW_FAIR_MAP } from '../data/venue.js';
 
 /**
  * boothHtml(org) → HTML for the entire booth interior
@@ -103,7 +104,7 @@ export function boothHtml(org) {
           </div>
         </section>
 
-          ${venueMapHtml(org)}
+          ${SHOW_FAIR_MAP ? venueMapHtml(org) : ''}
         </div>
 
         <div class="booth-aside">
