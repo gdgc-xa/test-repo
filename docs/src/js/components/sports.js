@@ -130,6 +130,43 @@ function crumbsHtml(sport, team) {
     </nav>`;
 }
 
+/* --- Getting back ---
+   Deep in a sport's page (its bracket, its matches) the breadcrumb is
+   far above. So a pill floats at the foot of the screen once the
+   breadcrumb has scrolled away (screens/cup.js → watchSportsBack), and
+   the page ends with the way back and, to carry on, the next sport.
+   Both reuse the breadcrumb's and the grid's own buttons
+   (data-sports-crumb, data-sports-open). */
+const chevron = (points) => `<svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="${points}"/></svg>`;
+const BACK_ICON = chevron('10,3 5,8 10,13');
+const NEXT_ICON = chevron('6,3 11,8 6,13');
+
+/** The floating pill: up one level (a team → its sport, a sport → all sports). */
+function backFloatHtml(sport, team) {
+  return `
+    <button class="btn btn--primary sports-float" type="button" data-sports-float
+            data-sports-crumb="${team ? 'sport' : 'index'}"
+            aria-label="${escapeAttr(team ? `Back to ${sport.name}` : 'Back to all sports')}">
+      ${BACK_ICON}<span>${escapeHtml(team ? sport.name : 'All sports')}</span>
+    </button>`;
+}
+
+/** The end of the page: back, and the next sport (a team's page: its sport, and all sports). */
+function endNavHtml(sport, team, next) {
+  const back = team
+    ? `<button class="btn btn--ghost" type="button" data-sports-crumb="sport">${BACK_ICON}${escapeHtml(sport.name)}</button>`
+    : `<button class="btn btn--ghost" type="button" data-sports-crumb="index">${BACK_ICON}All sports</button>`;
+  const onward = team
+    ? `<button class="btn btn--ghost" type="button" data-sports-crumb="index">All sports</button>`
+    : (next && next.id !== sport.id
+      ? `<button class="btn btn--primary sports-endnav__next" type="button" data-sports-open="${escapeAttr(next.id)}"
+                 aria-label="${escapeAttr(`Next sport: ${next.name}`)}">
+           <span class="sports-endnav__kicker">Next</span>${escapeHtml(next.name)}${NEXT_ICON}
+         </button>`
+      : '');
+  return `<nav class="sports-endnav" aria-label="Keep browsing" data-sports-endnav>${back}${onward}</nav>`;
+}
+
 /* The categories to switch between: a two- or three-way switch (Men /
    Women), or for a sport with many (Athletics' events, Esports'
    games) a row of small chips that scrolls sideways. */
@@ -476,10 +513,11 @@ function teamHtml({ team, sport, div, games, row, mine }) {
  */
 export function sportPageHtml({
   sport, index, sportGames, divisions, div, divGames, format, tables, ko, news, team, mine,
-  matchesShown = Infinity, collapsible = true,
+  matchesShown = Infinity, collapsible = true, next = null,
 }) {
   const head = `${crumbsHtml(sport, team)}`;
   const divs = divisionsHtml(divisions, div, sport);
+  const foot = `${endNavHtml(sport, team, next)}${backFloatHtml(sport, team)}`;
 
   if (team) {
     // The team's place within its own group.
@@ -492,7 +530,8 @@ export function sportPageHtml({
         games: divGames.filter(g => g.teamIds.includes(team.id)),
         row: row ? { ...row, total: own.table.length, group: own.group } : null,
       })}
-      ${divs ? `<div class="sport-divs-row">${divs}</div>` : ''}`;
+      ${divs ? `<div class="sport-divs-row">${divs}</div>` : ''}
+      ${foot}`;
   }
 
   // Every college at once (races, routines): no table, no bracket.
@@ -516,7 +555,8 @@ export function sportPageHtml({
     ${sectionHtml(named ? `${div} matches` : 'Matches', divGames.length
       ? matchListHtml([...divGames].sort(byInterest), mine, matchesShown, collapsible)
       : '<p class="sport-empty">No matches yet.</p>', {
-      id: 'sport-matches', extra: `<span class="browse-count">${count(divGames.length, 'match')}</span>` })}`;
+      id: 'sport-matches', extra: `<span class="browse-count">${count(divGames.length, 'match')}</span>` })}
+    ${foot}`;
 }
 
 /** The first few matches (live and next first), and a button for the rest. */

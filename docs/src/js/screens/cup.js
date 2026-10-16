@@ -624,6 +624,7 @@ function renderSports(root, games, mine) {
     }
     wrap.innerHTML = sportsIndexHtml({ sports, games, categoriesOf: categoriesFor });
     watchReveals(wrap);
+    sportsBack?.disconnect();
     return;
   }
 
@@ -650,8 +651,11 @@ function renderSports(root, games, mine) {
     // (all of them in a swipe row).
     matchesShown: (state.sportsAll || isSwipe()) ? Infinity : 6,
     collapsible: !isSwipe(),
+    // A to Z, so "Next" carries on through the grid's order.
+    next: sports[(index + 1) % sports.length],
   });
   watchReveals(wrap);
+  watchSportsBack(wrap);
 
   // A long row of categories starts back at its first chip once
   // redrawn; bring the chosen one to the middle of the row instead.
@@ -676,6 +680,38 @@ function renderSports(root, games, mine) {
     }, { passive: true });
     slideFit.observe(frame);
   });
+}
+
+/* The floating way back on a sport's page (components/sports.js →
+   backFloatHtml): shown once the breadcrumb has gone up under the
+   sticky bars, put away while the end of the page (its own way back)
+   is on screen, and never above the sport's page (the banner). */
+let sportsBack = null;
+
+function watchSportsBack(wrap) {
+  sportsBack?.disconnect();
+  const crumbs = wrap.querySelector('.sports-crumbs');
+  const float = wrap.querySelector('[data-sports-float]');
+  const end = wrap.querySelector('[data-sports-endnav]');
+  if (!crumbs || !float) return;
+  const top = stuckHeight();
+  const crumbsAbove = (r) => r.bottom <= top;
+  const endInView = (r) => r.top < innerHeight && r.bottom > top;
+  let above = crumbsAbove(crumbs.getBoundingClientRect());
+  let atEnd = end ? endInView(end.getBoundingClientRect()) : false;
+  // Set at once from where the page is, so a redraw (the clock, live
+  // data) never blinks it.
+  const update = () => float.classList.toggle('is-shown', above && !atEnd);
+  update();
+  sportsBack = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.target === crumbs) above = !e.isIntersecting && crumbsAbove(e.boundingClientRect);
+      else atEnd = e.isIntersecting;
+    }
+    update();
+  }, { rootMargin: `-${top}px 0px 0px 0px` });
+  sportsBack.observe(crumbs);
+  if (end) sportsBack.observe(end);
 }
 
 /* The bracket (components/sports.js → slideHtml): one column per round,

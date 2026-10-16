@@ -103,6 +103,50 @@
 .sports-crumbs [aria-current="page"] { font-weight: 700; color: var(--ink); }
 .sports-crumbs__sep { opacity: 0.6; }
 
+/* ---------- Getting back ----------
+   components/sports.js → backFloatHtml / endNavHtml. The pill floats
+   at the foot of the screen while the breadcrumb is out of sight
+   (screens/cup.js → watchSportsBack adds .is-shown); the end of the
+   page has the way back and the next sport. */
+.sports-float {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  z-index: 36;              /* over the page; under the menu sheet (38) and pop-ups (100) */
+  width: max-content;
+  margin-inline: auto;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;       /* and out of the tab order while put away */
+  transform: translateY(16px);
+  transition: opacity 200ms ease, transform 200ms ease, visibility 0s linear 200ms, background 160ms;
+}
+.sports-float.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 200ms ease, transform 200ms ease, visibility 0s, background 160ms;
+}
+.sports-float.is-shown:hover { transform: translateY(-1px); }
+
+.sports-endnav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+.sports-endnav__kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
 /* Header: the sport's photo (or its placeholder), name on a fade. */
 .sport-head {
   position: relative;
