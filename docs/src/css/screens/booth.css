@@ -69,6 +69,10 @@
   color: var(--ink);
   letter-spacing: -1.2px;
   line-height: 1.05;
+  /* A word too long for a phone ("Communications" at 30px) breaks,
+     hyphenated where it can, instead of running past the card. */
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 .booth-hero__tagline {

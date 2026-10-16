@@ -56,10 +56,13 @@
 }
 
 /* Booth split — the org's own card beside the Facebook preview + contact.
-   The hero itself is a plain card now and owns its own box in booth.css. */
+   The hero itself is a plain card now and owns its own box in booth.css.
+   minmax(0, …): a long unbroken line inside (a Page address with no
+   handle, e.g. DevCom's) is cut off with "…" instead of widening the
+   column and with it the whole pop-up. */
 .booth-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   align-items: start;
   gap: var(--space-5);
   margin-top: var(--space-5);
@@ -114,7 +117,7 @@
 
 /* Tablet — 900px and below drops booth to 1 column, hides screen-index */
 @media (max-width: 900px) {
-  .booth-grid { grid-template-columns: 1fr; }
+  .booth-grid { grid-template-columns: minmax(0, 1fr); }
   .theme-block-grid { grid-template-columns: 1fr; gap: var(--space-5); }
   .explore-head { grid-template-columns: 1fr; }
 }
