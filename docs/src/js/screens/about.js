@@ -6,13 +6,15 @@
    ============================================================ */
 
 import { TEAM, initialsOf } from '../data/team.js';
-import { SITE } from '../data/site.js';
+import { SITE, tabEnabled } from '../data/site.js';
+import { SHOW_FAIR_MAP } from '../data/venue.js';
 import { watchReveals } from '../reveal-observer.js';
 
 /** Four site hues, cycled so the tiles do not read as one block. */
 const HUES = ['blue', 'red', 'yellow', 'green'];
 
 export function initAbout(root) {
+  dropSwitchedOff(root);
   hydrateContact(root);
 
   const grid = root.querySelector('[data-team-grid]');
@@ -25,6 +27,17 @@ export function initAbout(root) {
 
   grid.innerHTML = ordered.map((p, i) => personHtml(p, i)).join('');
   watchReveals(grid);
+}
+
+/* "What you can do here" lines about a feature that is switched off
+   go, so the page never sends anyone to a tab or map that isn't there:
+   the Events tab (data/site.js → tabs.events) and the org-fair tent
+   map (data/venue.js → SHOW_FAIR_MAP). */
+function dropSwitchedOff(root) {
+  const on = { events: tabEnabled('events'), 'fair-map': SHOW_FAIR_MAP };
+  root.querySelectorAll('[data-about-feature]').forEach(li => {
+    if (!on[li.dataset.aboutFeature]) li.remove();
+  });
 }
 
 /* ---------- Contact ----------
