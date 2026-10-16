@@ -1428,3 +1428,41 @@
   .cup-results { padding: var(--space-4); }
   .cup-results__head { flex-direction: column; align-items: flex-start; }
 }
+
+/* ============================================================
+   ADAPTIVE TONE — set by js/lib/adaptive-tone.js.
+   A light picture gets a light fade and dark text; a dark one
+   keeps the default dark fade and white text. Covers the News
+   hero, the Discover slideshow and the post cards alike.
+   ============================================================ */
+.news-hero__slide[data-tone="light"]::after {
+  background:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.72) 45%, transparent 78%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.6) 0%, transparent 60%);
+}
+.news-hero__slide[data-tone="light"] .news-hero__kicker { color: rgba(11, 27, 51, 0.9); }
+.news-hero__slide[data-tone="light"] .news-hero__date { color: rgba(11, 27, 51, 0.72); }
+.news-hero__slide[data-tone="light"] .news-hero__title { color: #0B1B33; }
+.news-hero__slide[data-tone="light"] .news-hero__body { color: rgba(11, 27, 51, 0.85); }
+.news-hero__slide[data-tone="light"] .news-hero__cta { background: #0B1B33; color: #FFFFFF; }
+.news-hero__slide[data-tone="light"] .news-hero__cta:hover { background: var(--tx-accent); color: #0B1B33; }
+
+/* The progress bars and Discover's arrows sit on the same fade. */
+.news-hero:has(.news-hero__slide.is-active[data-tone="light"]) .news-hero__bar {
+  background: linear-gradient(rgba(11, 27, 51, 0.28), rgba(11, 27, 51, 0.28)) center / 100% 3px no-repeat;
+}
+.news-hero:has(.news-hero__slide.is-active[data-tone="light"]) .news-hero__fill { background: #0B1B33; }
+.news-hero:has(.news-hero__slide.is-active[data-tone="light"]) .du-nav { color: #0B1B33; }
+.news-hero:has(.news-hero__slide.is-active[data-tone="light"]) .du-step {
+  border-color: rgba(11, 27, 51, 0.4);
+  background: rgba(255, 255, 255, 0.55);
+  color: #0B1B33;
+}
+.news-hero:has(.news-hero__slide.is-active[data-tone="light"]) .du-step:hover { background: var(--tx-accent); color: var(--tx-on-accent); }
+
+.news-card[data-tone="light"],
+.news-card[data-tone="light"]:hover { color: #0B1B33; }
+.news-card[data-tone="light"]::after {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.72) 38%, transparent 64%);
+}
+.news-card[data-tone="light"] .news-card__meta { color: rgba(11, 27, 51, 0.75); }

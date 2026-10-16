@@ -18,6 +18,7 @@ import './components/discover-games.js';
 import './components/discover-flow.js';
 import './components/discover-teams.js';
 import './components/discover-hero.js';
+import './lib/adaptive-tone.js';
 
 function boot() {
   // Live Xavier Cup data: clears the sample fixtures before anything
