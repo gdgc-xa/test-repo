@@ -1368,19 +1368,8 @@
 .cup-event__desc { font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
 
 @media (max-width: 560px) {
-  /* Hero on a phone: the same layout as on desktop and on Discover —
-     the picture fills the card and the story sits over a fade at its
-     foot (light or dark, see ADAPTIVE TONE), bars underneath. */
-  .news-hero__slide { min-height: clamp(440px, 116vw, 540px); }
-  .news-hero__panel {
-    max-width: none;
-    gap: 8px;
-    padding: 20px 20px 56px;
-  }
-  .news-hero__title { font-size: clamp(22px, 6vw, 28px); line-height: 1.15; }
-  .news-hero__body { -webkit-line-clamp: 2; }
-  .news-hero__cta { min-height: 42px; padding: 0 22px; font-size: 14px; }
-  .news-hero__bars { left: 20px; right: 20px; bottom: 18px; }
+  /* The News hero on a phone (picture first, story on its own panel)
+     is styled in mobile.css, under PHONE FIT. */
   .news-ph--hero .news-ph__mark { transform: none; font-size: 20px; }
   .news-ph--hero .news-ph__mark svg { width: 32px; height: 32px; }
   .news-track .news-card { width: 210px; }
@@ -1508,8 +1497,22 @@
    fade and white words stay. Covers the News hero, the Discover
    slideshow and the post cards alike.
    ============================================================ */
-.news-hero__slide[data-tone]::after,
+/* The post cards: their words always sit over the picture. */
 .news-card[data-tone]::after {
+  background:
+    linear-gradient(0deg,
+      rgb(var(--scrim) / var(--scrim-a)) 0%,
+      rgb(var(--scrim) / var(--scrim-a)) var(--scrim-hold),
+      transparent calc(var(--scrim-hold) + 30%)),
+    linear-gradient(90deg, rgb(var(--scrim) / calc(var(--scrim-a) * 0.5)) 0%, transparent 60%);
+}
+.news-card[data-tone] .news-card__caption { text-shadow: 0 0 18px rgb(var(--scrim) / 0.7), 0 0 4px rgb(var(--scrim) / 0.5); }
+
+/* The News hero and Discover's slideshow: only where the story sits
+   over the picture. On a phone it sits on its own panel (mobile.css,
+   PHONE FIT), so none of this applies there. */
+@media (min-width: 721px) {
+.news-hero__slide[data-tone]::after {
   background:
     linear-gradient(0deg,
       rgb(var(--scrim) / var(--scrim-a)) 0%,
@@ -1521,8 +1524,7 @@
    whatever detail is left in the picture. */
 .news-hero__slide[data-tone] .news-hero__kicker,
 .news-hero__slide[data-tone] .news-hero__title,
-.news-hero__slide[data-tone] .news-hero__body,
-.news-card[data-tone] .news-card__caption { text-shadow: 0 0 18px rgb(var(--scrim) / 0.7), 0 0 4px rgb(var(--scrim) / 0.5); }
+.news-hero__slide[data-tone] .news-hero__body { text-shadow: 0 0 18px rgb(var(--scrim) / 0.7), 0 0 4px rgb(var(--scrim) / 0.5); }
 .news-hero__slide[data-tone] .news-hero__kicker { color: var(--tone-accent); }
 .news-hero__slide[data-tone] .news-hero__date { color: var(--tone-ink-soft); }
 .news-hero__slide[data-tone] .news-hero__title { color: var(--tone-ink); }
@@ -1542,15 +1544,8 @@
   color: #0B1B33;
 }
 .news-hero:has(.news-hero__slide.is-active[data-tone="light"]) .du-step:hover { background: var(--tx-accent); color: var(--tx-on-accent); }
+}
 
 .news-card[data-tone],
 .news-card[data-tone]:hover { color: var(--tone-ink); }
 .news-card[data-tone] .news-card__meta { color: var(--tone-accent); }
-
-/* On a phone the story covers more of the picture, so the default
-   fade (a picture that couldn't be read) runs higher and stronger. */
-@media (max-width: 560px) {
-  .news-hero__slide::after {
-    background: linear-gradient(0deg, rgba(4, 12, 28, 0.95) 0%, rgba(4, 12, 28, 0.82) 52%, rgba(4, 12, 28, 0.25) 82%, transparent 100%);
-  }
-}
