@@ -1,13 +1,11 @@
 /* ============================================================
    tweaks.css — hand adjustments, loaded last so they win.
 
-   Made with the layout tool (src/js/tweak.js): add ?tweak to the
-   site's address (or press Ctrl+Alt+T), pick a word or a box, move
-   it or change its margins, then "Copy CSS" and paste the result
-   over this whole file. A rule names the element's own class, so it
-   moves every copy of that element (every sport page's "Next"), on
-   the screen sizes its @media says.
+   Written by the layout tool (src/js/tweak.js): add ?tweak to the
+   site's address while it runs on your computer, pick a word or a
+   box, change it and press Save. Every Save is also listed in
+   tweaks-history.json, and the tool can go back to any of them.
 
-   To undo one change: delete its line. To undo all: keep only this
-   comment.
+   A rule names the element's own class, so it changes every copy of
+   it (every sport page's "Next"), on the screens its @media says.
    ============================================================ */
