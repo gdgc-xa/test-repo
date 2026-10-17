@@ -592,6 +592,42 @@
   object-fit: cover;
 }
 .cup-photo.is-active .cup-photo__img { animation: heroDrift var(--hero-ms) ease-out both; }
+/* A tall photo (a 4:5 poster: .is-tall, from screens/cup.js). In a
+   frame about as tall as it is (a tall phone card) it fills it like
+   any photo; where the banner is wider (a desktop's full screen, a
+   phone's or tablet's card), it stands whole at the right, its left
+   edge fading into a blurred, darker copy of itself that fills the
+   rest, so no face or word of it is cut off. */
+.cup-photos { container: cup-photos / size; }
+.cup-photo__fill { display: none; }
+@container cup-photos (min-aspect-ratio: 19 / 20) {
+  .cup-photo.is-tall .cup-photo__fill {
+    display: block;
+    position: absolute;
+    inset: -48px;                 /* the blur's soft edge stays outside the frame */
+    width: calc(100% + 96px);
+    height: calc(100% + 96px);
+    object-fit: cover;
+    filter: blur(40px) brightness(0.75);
+  }
+  .cup-photo.is-tall .cup-photo__img {
+    left: auto;
+    width: auto;                  /* as wide as the photo is at full height */
+    max-width: 100%;
+    transform-origin: right center;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%);
+            mask-image: linear-gradient(90deg, transparent, #000 22%);
+  }
+  /* A poster has words of its own in the middle; dim the part of it the
+     title runs over, so the title reads first. */
+  .cup-photo.is-tall::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(4, 12, 28, 0.5) 45%, rgba(4, 12, 28, 0.3) 72%, transparent 90%);
+    pointer-events: none;
+  }
+}
 .cup-photo .news-ph__mark { font-size: 15px; }
 .cup-photo .news-ph__mark svg { width: 26px; height: 26px; }
 .cup-photo__caption {

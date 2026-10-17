@@ -398,8 +398,12 @@ function mountHeroPhotos(root) {
   const slide = (s, i) => {
     const src = safeImage(s.src);
     const label = `${i + 1} of ${n}${s.caption ? `: ${s.caption}` : ''}`;
+    const lazy = i ? ' loading="lazy"' : '';
+    // A blurred copy behind the photo, shown only around a tall one on a
+    // wide banner (.is-tall below; cup.css).
     const media = src
-      ? `<img class="cup-photo__img" src="${escapeAttr(src)}" alt="${escapeAttr(s.alt || '')}" decoding="async"${i ? ' loading="lazy"' : ''}>`
+      ? `<img class="cup-photo__fill" src="${escapeAttr(src)}" alt="" aria-hidden="true" decoding="async"${lazy}>
+         <img class="cup-photo__img" src="${escapeAttr(src)}" alt="${escapeAttr(s.alt || '')}" decoding="async"${lazy}>`
       : `<span class="cup-photo__img news-ph news-ph--${i % 4} news-ph--hero" role="img"
                aria-label="${escapeAttr(`Photo coming soon${s.alt ? `: ${s.alt}` : ''}`)}">
            <span class="news-ph__mark" aria-hidden="true">${camera}<span>TXC photo</span></span>
@@ -422,6 +426,14 @@ function mountHeroPhotos(root) {
             <span class="news-hero__fill"></span>
           </button>`).join('')}
       </div>` : ''}`;
+
+  // A photo taller than it is wide (the 4:5 posters) is marked once it
+  // loads, so a wide banner shows it whole instead of cropping it.
+  wrap.querySelectorAll('img.cup-photo__img').forEach(img => {
+    const mark = () => img.closest('.cup-photo').classList.toggle('is-tall', img.naturalHeight > img.naturalWidth * 1.05);
+    if (img.complete && img.naturalWidth) mark();
+    else img.addEventListener('load', mark, { once: true });
+  });
 
   // The whole tile pauses on hover and focus, the title included.
   wireHero(tile, { ms: Math.max(3, Number(CUP_PHOTOS.secondsPerSlide) || 6) * 1000 });

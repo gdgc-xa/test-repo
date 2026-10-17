@@ -538,22 +538,27 @@ export const CUP_EVENTS = {
    title. Slides show in this order, one every `secondsPerSlide`;
    CUP_CONFIG.showHeroPhotos switches it off.
 
-   src      a photo in assets/cup/photos/ — landscape, about
-            1600×900, kept under ~300 KB. null = a placeholder
-            graphic in the same frame.
+   src      a photo in assets/cup/photos/, kept under ~300 KB:
+            landscape, about 1600×900, or a portrait poster (4:5,
+            1600×2000), which fills the tall phone banner and on a
+            wide screen stands whole at the right over a blurred copy
+            of itself. null = a placeholder graphic in the same frame.
    alt      what the photo shows, for screen readers
    caption  the short label on the slide (optional)
 
-   PLACEHOLDERS: swap in real TXC photos before launch.
+   The Xavier Cup's 17.10.26 posters (its Facebook page), one sport each.
    ============================================================ */
 export const CUP_PHOTOS = {
   secondsPerSlide: 6,
   slides: [
-    { src: null, caption: 'Parade of colleges', alt: 'The colleges marching in the opening parade at the SBM steps' },
-    { src: null, caption: 'Basketball · University Gym', alt: 'A basketball game at the Xavier University Gym' },
-    { src: null, caption: 'Volleyball · Covered Court', alt: 'A volleyball rally at the XU Covered Court' },
-    { src: null, caption: 'Football · XU Soccer Field', alt: 'A football match at the XU Soccer Field' },
-    { src: null, caption: 'The crowd', alt: 'Students cheering for their college' },
+    { src: 'assets/cup/photos/txc26-ultimate-frisbee.webp', caption: 'Ultimate Frisbee',
+      alt: 'Two Ultimate Frisbee players in team shirts holding a disc under green light; The Xavier Cup 2026, 17.10.26' },
+    { src: 'assets/cup/photos/txc26-volleyball.webp', caption: 'Volleyball',
+      alt: 'Two volleyball players, one in a Medicine Wolves jersey, one holding a ball up high, in blue light; The Xavier Cup 2026, 17.10.26' },
+    { src: 'assets/cup/photos/txc26-football.webp', caption: 'Football',
+      alt: 'Two football players with a ball in red light; The Xavier Cup 2026, 17.10.26' },
+    { src: 'assets/cup/photos/txc26-taekwondo.webp', caption: 'Taekwondo',
+      alt: 'Two taekwondo athletes in white uniforms, one in a guard stance, one mid high kick; The Xavier Cup 2026, 17.10.26' },
   ],
 };
 
