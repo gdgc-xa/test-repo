@@ -56,7 +56,7 @@ import { calendarHtml, gameMonths } from '../components/cup-calendar.js';
 import { openDetail, closeDetail } from '../components/detail-modal.js';
 import { sportsIndexHtml, sportPageHtml } from '../components/sports.js';
 import { myTeams, toggleMyTeam, onMyTeamChange } from '../lib/my-team.js';
-import { categoryIn, categoriesFor, categoryFromLink, sameCategory, groupTables, bracketFor, knockouts, winnerOf } from '../lib/standings.js';
+import { categoryIn, categoriesFor, categoryFromLink, sameCategory, groupTables, bracketFor, groupsFor, inGroups, knockouts, winnerOf } from '../lib/standings.js';
 import { watchReveals } from '../reveal-observer.js';
 import { currentQuery } from '../router.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
@@ -650,7 +650,9 @@ function renderSports(root, games, mine) {
   if (sportGames.length) state.sportsDiv = div;
   // Each game under the listed category it means (categoryIn), so the
   // tracker's own wording never makes a second chip for the same thing.
-  const divGames = sportGames.filter(g => sameCategory(categoryIn(sport, g), div));
+  // Its group games in their group: the tracker has no group column, so
+  // the group comes from the schedule's draw (SPORTS[].groups).
+  const divGames = inGroups(sportGames.filter(g => sameCategory(categoryIn(sport, g), div)), groupsFor(sport, div));
   // How this category's schedule runs (groups, crossovers, placings).
   const format = bracketFor(sport, div);
 
@@ -756,18 +758,24 @@ function layoutSlide(slide, active) {
   if (all) active = 0;
   slide.dataset.active = String(active);
 
-  let prev = [];   // the centres of the column before, px from its top
+  const centres = [];   // each column's match centres, px from its top
   cols.forEach((col, i) => {
+    const prev = centres[i - 1] || [];
     const matches = [...col.children];
     const h = matches[0]?.offsetHeight || 0;
     const teams = matches[0]?.querySelector('.kmatch__teams');
     const mid = teams ? teams.offsetTop + teams.offsetHeight / 2 : h / 2;   // where the lines meet it
     let last = -Infinity;
-    const centres = matches.map((m, k) => {
-      const feeders = (m.dataset.from || '').split(',').filter(Boolean).map(Number).filter(j => prev[j] !== undefined);
+    centres[i] = matches.map((m, k) => {
+      const near = (m.dataset.from || '').split(',').filter(Boolean).map(Number).filter(j => prev[j] !== undefined);
+      // A winner from further back (double elimination's upper final),
+      // while its round is in view; slid past, it is left out.
+      const far = (m.dataset.far || '').split(',').filter(Boolean).map(s => s.split(':').map(Number))
+        .filter(([r, j]) => r >= active && centres[r]?.[j] !== undefined);
+      const fed = [...near.map(j => prev[j]), ...far.map(([r, j]) => centres[r][j])];
       // The round in view (and those before it) stack close; later ones line up with their feeders.
-      let top = i > active && feeders.length
-        ? feeders.reduce((sum, j) => sum + prev[j], 0) / feeders.length - mid
+      let top = i > active && fed.length
+        ? fed.reduce((sum, y) => sum + y, 0) / fed.length - mid
         : k * (h + SLIDE_GAP);
       top = Math.max(top, last + h + SLIDE_GAP);
       last = top;
@@ -776,20 +784,24 @@ function layoutSlide(slide, active) {
       // The line from the feeders: a bracket on the right of the round
       // before, then across to this match. None for the third-place game.
       const link = m.querySelector('.kmatch__link');
-      if (i > 0 && feeders.length && !('losers' in m.dataset)) {
-        const ys = feeders.map(j => prev[j] - top);
+      if (i > 0 && fed.length && !('losers' in m.dataset)) {
+        const ys = fed.map(y => y - top);
         const y1 = Math.min(...ys);
+        const y2 = Math.max(...ys);
+        // The far feeder's line runs on across the round between (--krun).
+        const run = far.length ? (i - 1 - far[0][0]) * step : 0;
+        const runY = far.length ? centres[far[0][0]][far[0][1]] - top : 0;
         link.style.cssText = `display: block; left: ${-gapX}px; width: ${gapX / 2}px; top: ${y1}px;`
-          + ` height: ${Math.max(...ys) - y1}px; --kmid: ${mid - y1}px;`
+          + ` height: ${y2 - y1}px; --kmid: ${mid - y1}px;`
+          + (run ? ` --krun: ${run}px; --krun-y: ${runY === y1 ? 0 : y2 - y1 - 2}px;` : '')
           // One feeder (a bye on the other side): a plain line across.
-          + (feeders.length === 1 ? ' border-right: 0; border-bottom: 0; border-radius: 0;' : '');
+          + (fed.length === 1 ? ' border-right: 0; border-bottom: 0; border-radius: 0;' : '');
       } else {
         link.style.cssText = 'display: none;';
       }
       return top + mid;
     });
     col.style.height = `${last + h}px`;
-    prev = centres;
   });
   // Only as tall as the rounds in view, not the longest round (and a
   // couple of pixels more, so the lowest bubble keeps its bottom edge).

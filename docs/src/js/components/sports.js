@@ -351,10 +351,15 @@ const teamBubbleHtml = (team, mine, extra = '') => `
     <b class="kteam__score"></b>
   </span>`;
 
-/** Entrant k of a match: its game's team and score; before that, who
-    comes through from the round before, a seed's team once its group
-    is played, or the seed itself. */
-function slideTeamHtml(m, k, prev, mine, seeds) {
+/** Where entrant k of match m (in round r) comes from: { r, i, loser }
+    (bracketRounds: its own `src`, else `from` in the round before), or null. */
+const sourceOf = (m, k, r) => m.src?.[k]
+  || (m.from?.[k] != null ? { r: r - 1, i: m.from[k], loser: !!m.losers } : null);
+
+/** Entrant k of a match in round r: its game's team and score; before
+    that, who comes through from the match that feeds it, a seed's team
+    once its group is played, or the seed itself. */
+function slideTeamHtml(m, k, r, rounds, mine, seeds) {
   const g = m.game;
   if (g) {
     const w = wonBy(g);
@@ -369,16 +374,17 @@ function slideTeamHtml(m, k, prev, mine, seeds) {
         <b class="kteam__score">${escapeHtml(String(score))}</b>
       </span>`;
   }
-  const feeder = m.from?.[k] != null ? prev?.matches[m.from[k]] : null;
+  const src = sourceOf(m, k, r);
+  const feeder = src ? rounds[src.r]?.matches[src.i] : null;
   const fw = feeder ? wonBy(feeder.game) : -1;
-  if (fw >= 0) return teamBubbleHtml(sideOf(feeder.game, m.losers ? 1 - fw : fw), mine);
+  if (fw >= 0) return teamBubbleHtml(sideOf(feeder.game, src.loser ? 1 - fw : fw), mine);
   if (seeds[m.seeds[k]]) return teamBubbleHtml(seeds[m.seeds[k]], mine);
   const label = m.seeds[k]
-    || (feeder && feeder.seeds.every(Boolean) ? `${m.losers ? 'L' : 'W'} ${feeder.seeds.join('/')}` : 'To be decided');
+    || (feeder && feeder.seeds.every(Boolean) ? `${src.loser ? 'L' : 'W'} ${feeder.seeds.join('/')}` : 'To be decided');
   return `<span class="kteam is-seed"><span class="kteam__name">${escapeHtml(label)}</span></span>`;
 }
 
-function slideMatchHtml(m, prev, mine, seeds) {
+function slideMatchHtml(m, r, rounds, mine, seeds) {
   const g = m.game;
   const status = !g ? 'To be decided'
     : g.status === 'finished' ? 'Full time'
@@ -386,11 +392,14 @@ function slideMatchHtml(m, prev, mine, seeds) {
   const head = `${m.label ? `${escapeHtml(m.label)} · ` : ''}${escapeHtml(status)}`;
   const body = `
     <span class="kmatch__head${g?.status === 'ongoing' ? ' is-live' : ''}">${head}</span>
-    <span class="kmatch__teams">${slideTeamHtml(m, 0, prev, mine, seeds)}${slideTeamHtml(m, 1, prev, mine, seeds)}</span>
+    <span class="kmatch__teams">${slideTeamHtml(m, 0, r, rounds, mine, seeds)}${slideTeamHtml(m, 1, r, rounds, mine, seeds)}</span>
     <span class="kmatch__link" aria-hidden="true"></span>`;
   // Which matches before feed this one (for its place and its line); the
-  // third-place game takes the losers, so it gets no line.
-  const from = `data-from="${(m.from || []).filter(i => i != null).join(',')}"${m.losers ? ' data-losers' : ''}`;
+  // third-place game takes the losers, so it gets no line. A winner from
+  // further back (data-far, "round:match") gets a line across the round
+  // between; a loser dropping down from another round gets none.
+  const far = (m.src || []).filter(s => s && !s.loser && s.r < r - 1).map(s => `${s.r}:${s.i}`).join(',');
+  const from = `data-from="${(m.from || []).filter(i => i != null).join(',')}"${far ? ` data-far="${far}"` : ''}${m.losers ? ' data-losers' : ''}`;
   return g
     ? `<button class="kmatch" type="button" data-game-id="${escapeAttr(g.id)}" ${from}
                aria-label="${escapeAttr(`${m.label || g.round}: ${g.title}. ${status}. Open match details`)}">${body}</button>`
@@ -411,7 +420,7 @@ function slideHtml(rounds, mine, seeds) {
         <div class="kslide__track">
           ${rounds.map((r, i) => `
             <div class="kslide__col" data-kslide-col="${i}" aria-label="${escapeAttr(r.label)}">
-              ${r.matches.map(m => slideMatchHtml(m, rounds[i - 1], mine, seeds)).join('')}
+              ${r.matches.map(m => slideMatchHtml(m, i, rounds, mine, seeds)).join('')}
             </div>`).join('')}
         </div>
       </div>

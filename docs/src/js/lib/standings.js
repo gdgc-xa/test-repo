@@ -117,10 +117,12 @@ export function winnerOf(g) {
   return g.teamIds[o.winner === 'home' ? 0 : 1];
 }
 
-const isGroupGame = (g) => /^elimination$/i.test(g.round || '');
+// The games before the knockouts, as the schedules and the tracker name
+// them: 'Elimination', 'Group stage', 'Group A', 'Round 1'.
+const isGroupGame = (g) => /^(elimination|group(\s+stage|\s+[a-z])?|round\s*\d+)$/i.test(g.round || '');
 
 /**
- * standings(games) — the table from the Elimination games.
+ * standings(games) — the table from the group games (isGroupGame).
  * One row for every team drawn in one, whether it has played yet:
  *   { id, team, p, w, d, l, for, against, diff, rank }
  * Order: most wins, then fewest losses; score difference, score
@@ -173,17 +175,46 @@ export function groupTables(games) {
   return groups.map(group => ({ group, table: standings(games.filter(g => g.group === group)) }));
 }
 
+/** The event a category is of: '3x3' in '3x3 · Men', 'CODM' for 'CODM'. */
+const eventOf = (category) => String(category).split(' · ')[0];
+
 /**
  * bracketFor(sport, category) — the tournament format a category
  * plays (data/xavier-cup.js → BRACKETS): the sport's own, or the one
- * for its event ('3x3' in '3x3 · Men'); the original 'round' when
- * the sport names none.
+ * for its event ('3x3' in '3x3 · Men', 'CODM'); the original 'round'
+ * when the sport names none.
  */
 export function bracketFor(sport, category = '') {
   const pick = sport?.bracket;
-  const event = String(category).includes(' · ') ? String(category).split(' · ')[0] : '';
-  const name = typeof pick === 'string' ? pick : (pick?.[event] || pick?.default);
+  const name = typeof pick === 'string' ? pick : (pick?.[eventOf(category)] || pick?.default);
   return BRACKETS[name] || BRACKETS.round;
+}
+
+/**
+ * groupsFor(sport, category) — who the schedule draws in which group
+ * for a category (SPORTS[].groups, by event like `bracket`):
+ * { A: [team ids], B: [team ids] }, or null when it doesn't say.
+ */
+export function groupsFor(sport, category = '') {
+  const pick = sport?.groups;
+  return pick?.[eventOf(category)] || pick?.default || null;
+}
+
+/**
+ * inGroups(games, groups) — the games, each group game with its group
+ * letter when it has none (the tracker has no group column): the group
+ * its round names ('Group A'), else the one groupsFor() draws both its
+ * teams in. Games that already say, or can't be placed, are unchanged.
+ */
+export function inGroups(games, groups = null) {
+  const drawnIn = (id) => (groups ? Object.keys(groups).find(k => groups[k].includes(id)) : null);
+  return games.map(g => {
+    if (g.group || !isGroupGame(g)) return g;
+    const named = /^group\s+([a-z])$/i.exec(g.round || '')?.[1].toUpperCase();
+    const [a, b] = (g.teamIds || []).map(drawnIn);
+    const group = named || (g.teamIds?.length === 2 && a && a === b ? a : null);
+    return group ? { ...g, group } : g;
+  });
 }
 
 /**
@@ -193,31 +224,52 @@ export function bracketFor(sport, category = '') {
  * A slot is { game, seed }: the game once it is in GAMES (matched by
  * round, in kickoff order), and until then the schedule's wording
  * for it ('A1 vs B2'). `drawn` is true once any knockout game exists.
+ * A double-elimination format (format.double) adds
+ *   double: { upper, lower1, lowerFinal }   each a game or null
+ * from rounds named as its schedule names them ('Upper finals',
+ * 'Lower round 1', 'Lower finals'), or 'Upper bracket' / 'Lower
+ * bracket' for all of them, in kickoff order; its last game is the
+ * 'Grand finals'.
  */
 export function knockouts(games, format = BRACKETS.round) {
-  const slots = (inRound, seeds = []) => {
-    const found = games.filter(g => inRound(g.round || ''))
-      .sort((a, b) => (a.start?.getTime() ?? 0) - (b.start?.getTime() ?? 0));
-    return Array.from({ length: Math.max(seeds.length, found.length) },
-      (_, i) => ({ game: found[i] || null, seed: seeds[i] || null }));
-  };
-  const matches = (re) => (round) => re.test(round);
+  const byKickoff = (a, b) => (a.start?.getTime() ?? 0) - (b.start?.getTime() ?? 0);
+  const inRound = (re) => games.filter(g => re.test(g.round || '')).sort(byKickoff);
+  const slots = (found, seeds = []) => Array.from({ length: Math.max(seeds.length, found.length) },
+    (_, i) => ({ game: found[i] || null, seed: seeds[i] || null }));
+
+  let semis = inRound(/^semi/i);
+  let double = null;
+  if (format.double) {
+    const named = (g) => /final/i.test(g.round);
+    const upper = inRound(/^upper/i);
+    const lower = inRound(/^lower/i);
+    let upperRest = upper.filter(g => !named(g));
+    // Every upper game called 'Upper bracket': the first two are the semifinals.
+    if (!semis.length) { semis = upperRest.slice(0, 2); upperRest = upperRest.slice(2); }
+    const lowerRest = lower.filter(g => !named(g));
+    double = {
+      upper: upper.find(named) || upperRest[0] || null,
+      lower1: lowerRest[0] || null,
+      lowerFinal: lower.find(named) || lowerRest[1] || null,
+    };
+  }
 
   const columns = [];
   if (format.quarters?.length) {
-    columns.push({ label: 'Quarterfinals', slots: slots(matches(/^quarter/i), format.quarters) });
+    columns.push({ label: 'Quarterfinals', slots: slots(inRound(/^quarter/i), format.quarters) });
   }
-  columns.push({ label: 'Semifinals', slots: slots(matches(/^semi/i), format.semis) });
+  columns.push({ label: 'Semifinals', slots: slots(semis, format.semis) });
 
   return {
     columns,
-    final: slots(matches(/^final$/i), [format.final])[0],
+    final: slots(inRound(/^(grand\s*)?finals?$/i), [format.final])[0],
     // 'Bronze' is the older name for the same game.
-    third: slots(matches(/^(third|3rd|bronze)/i), format.third ? [format.third] : [])[0] || null,
+    third: slots(inRound(/^(third|3rd|bronze)/i), format.third ? [format.third] : [])[0] || null,
     placings: (format.placings || []).map(p => ({
       label: p.round,
-      slots: slots(round => round.toLowerCase() === p.round.toLowerCase(), p.games),
+      slots: slots(games.filter(g => (g.round || '').toLowerCase() === p.round.toLowerCase()).sort(byKickoff), p.games),
     })),
+    double,
     drawn: games.some(g => g.round && !isGroupGame(g)),
   };
 }
@@ -226,13 +278,15 @@ export function knockouts(games, format = BRACKETS.round) {
  * seedTeams(tables, games) — the bracket's seeds that the standings
  * now settle: { A1: team, B2: team } for a group, { '#1': team } for
  * one table. A group counts only once every one of its group games in
- * GAMES has a result, so a seed never names a team too early.
+ * GAMES has a result and every team in it has played all the others
+ * (the tracker adds games as they come, so the ones in GAMES may not
+ * be all of them), so a seed never names a team too early.
  */
 export function seedTeams(tables, games) {
   const seeds = {};
   for (const { group, table } of tables) {
     const own = games.filter(g => isGroupGame(g) && (!group || g.group === group) && g.teamIds?.length === 2);
-    if (!own.length || !own.every(g => outcome(g))) continue;
+    if (!own.length || !own.every(g => outcome(g)) || table.some(r => r.p < table.length - 1)) continue;
     table.forEach(r => { seeds[group ? `${group}${r.rank}` : `#${r.rank}`] = r.team || null; });
   }
   return seeds;
@@ -268,10 +322,14 @@ export function bracketTree(ko, format) {
  * phone bracket you slide through (one column per round):
  *   [{ label, matches: [match] }]
  *   match   { game, seeds: [a, b], from: [i | null, i | null],
- *             losers: true for the third-place game, label }
+ *             losers: true for the third-place game, label,
+ *             src: [{ r, i, loser } | null, …] }
  * `from` points at the matches of the round before that send their
- * winner (their loser, with `losers`) into this match; a seed is
- * shown while no game says who plays.
+ * winner (their loser, with `losers`) into this match; `src`, where
+ * given, points at any round's match instead, for one entrant (double
+ * elimination: the upper final's loser drops to the lower final, its
+ * winner waits two rounds for the grand final). A seed is shown while
+ * no game says who plays.
  */
 export function bracketRounds(ko, format) {
   const split = (seed) => (seed ? String(seed).split(' vs ') : [null, null]);
@@ -303,6 +361,26 @@ export function bracketRounds(ko, format) {
         game: s.game, seeds: split(s.seed), from: ci === 0 ? [null, null] : [2 * i, 2 * i + 1],
       })),
     }));
+  }
+  if (ko.double) {
+    // Double elimination after the semifinals (CODM): the winners meet
+    // in the upper final while the losers play lower round 1; the upper
+    // final's loser plays the lower final, its winner the grand final.
+    const up = rounds.length;   // the round of the upper final
+    const { upper, lower1, lowerFinal } = ko.double;
+    return [
+      ...rounds,
+      { label: 'Upper & lower', matches: [
+        { game: upper, seeds: ['Semifinal winner', 'Semifinal winner'], from: [0, 1], label: 'Upper final' },
+        { game: lower1, seeds: ['Semifinal loser', 'Semifinal loser'], from: [0, 1], losers: true, label: 'Lower round 1' },
+      ] },
+      { label: 'Lower final', matches: [
+        { game: lowerFinal, seeds: ['Upper final loser', 'Lower round 1 winner'], from: [null, 1], src: [{ r: up, i: 0, loser: true }, null] },
+      ] },
+      { label: 'Grand final', matches: [
+        { game: ko.final.game, seeds: ['Upper final winner', 'Lower final winner'], from: [null, 0], src: [{ r: up, i: 0 }, null] },
+      ] },
+    ];
   }
   const last = { label: 'Final', matches: [final] };
   if (ko.third) {

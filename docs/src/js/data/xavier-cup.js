@@ -205,15 +205,20 @@ export const CUP_LIVE = {
   },
 
   /* College codes in the sheet → team ids in data/teams.js.
-     PRIMUS was COLOSSUS until Oct 15; both point to the same team. */
+     PRIMUS was COLOSSUS until Oct 15; both point to the same team.
+     NSG, COE, SOL and SOM are the codes some schedules use (CODM's). */
   colleges: {
     CCS: 'ccs',
     NURSING: 'nsg',
+    NSG: 'nsg',
     SBM: 'sbm',
     ENG: 'eng',
+    COE: 'eng',
     CAS: 'cas',
     LAW: 'law',
+    SOL: 'law',
     MED: 'med',
+    SOM: 'med',
     PRIMUS: 'agsoe',
     COLOSSUS: 'agsoe',
   },
@@ -245,14 +250,16 @@ export const CUP_LIVE = {
    division  optional ('Men', 'Women', 'Mixed', 'Open'). With `event`
              it makes the category: event '100m' + division 'Men' is
              "100m · Men"; an Esports game needs only its event.
-   round     optional ('Elimination', 'Quarterfinal', 'Semifinal', 'Final',
-             'Third place', and placing games: '5th place', '7th place',
-             'Ranking'). Finished Elimination games make the standings
-             on the Sports tab; the others fill its bracket, in
-             kickoff order within a round (see BRACKETS).
-   group     optional, for Elimination games: the group letter ('A',
-             'B') in the sport's schedule. Games with a group make one
-             standings table per group.
+   round     optional ('Elimination' or 'Round 1', 'Quarterfinal',
+             'Semifinal', 'Final', 'Third place', placing games: '5th
+             place', '7th place', 'Ranking'; for double elimination
+             'Upper finals', 'Lower round 1', 'Lower finals', 'Grand
+             finals'). Finished group games (Elimination, Round 1…)
+             make the standings on the Sports tab; the others fill its
+             bracket, in kickoff order within a round (see BRACKETS).
+   group     optional, for group games: the group letter ('A', 'B') in
+             the sport's schedule (else SPORTS[].groups decides). Games
+             with a group make one standings table per group.
    teams     [home, away] as ids from data/teams.js ('ccs', 'eng').
              Anything that is not a team id prints as written, so
              ['All colleges'] works for a solo or all-in event.
@@ -609,7 +616,10 @@ export const SPORTS = [
   { id: 'football',   name: 'Football',   icon: 'assets/sports/soccer.webp',     photo: null, photos: [], categories: MW },   // 8-a-side
   { id: 'softball',   name: 'Softball',   icon: 'assets/sports/softball.webp',   photo: null, photos: [], categories: MW, bracket: 'crossover' },
   { id: 'ultimate-frisbee', name: 'Ultimate Frisbee', icon: 'assets/sports/frisbee.webp', photo: null, photos: [], categories: ['Mixed'], bracket: 'seeded' },
-  { id: 'esports',    name: 'Esports',    icon: null, photo: null, photos: [], categories: ['ML', 'CODM', 'Valorant', 'Dota 2'] },   // each Open
+  { id: 'esports',    name: 'Esports',    icon: null, photo: null, photos: [], categories: ['ML', 'CODM', 'Valorant', 'Dota 2'],   // each Open
+    // CODM's schedule (Oct 20–22): two groups of four, then double elimination.
+    bracket: { CODM: 'double-crossover' },
+    groups: { CODM: { A: ['med', 'agsoe', 'law', 'ccs'], B: ['cas', 'nsg', 'eng', 'sbm'] } } },
   { id: 'cheerdance', name: 'Cheerdance', icon: null, photo: null, photos: [], categories: ['Mixed'], format: 'field' },
   { id: 'megacrew',   name: 'Megacrew',   icon: null, photo: null, photos: [], format: 'field' },   // Open
   // Minor events (team 20 / 14 / 10, individual 10 / 7 / 5)
@@ -635,6 +645,9 @@ export const SPORTS = [
    { default: name, '<event>': name } when its events run
    differently. A sport with none (no schedule in the folder yet)
    keeps 'round': one table, then semifinals and a final.
+   SPORTS[].groups (by event the same way) lists the teams the
+   schedule draws in each group, { A: [team ids], B: [...] }, for
+   the tracker's games, which don't say their group.
 
    groups    group letters; games carry the same letter in
              GAMES[].group. [] = one table for everyone.
@@ -652,7 +665,12 @@ export const SPORTS = [
              final, drawn like a printed bracket. One entry per
              semifinal (left, right), each its two entrants: a seed
              ('A1') or { quarter: i }, the winner of quarters[i].
-   placings  games for places below the podium, by GAMES round. */
+   placings  games for places below the podium, by GAMES round.
+   double    true: double elimination after the semifinals. Winners
+             play the upper final ('Upper finals'), losers lower round
+             1 ('Lower round 1'); the upper final's loser plays the
+             lower final ('Lower finals'), and its winner meets the
+             lower final's in the grand final ('Grand finals'). */
 export const BRACKETS = {
   // No schedule to follow: the original bracket.
   round: {
@@ -705,6 +723,19 @@ export const BRACKETS = {
     final: 'Semifinal winners',
     third: 'Semifinal losers',
     placings: [{ round: 'Ranking', games: ['L 1v8 vs L 2v7', 'L 3v6 vs L 4v5'] }],
+  },
+  // Esports CODM (its Oct 20–22 schedule): groups A and B of four play
+  // three rounds, the top two cross over (A1 v B2, B1 v A2), then a team
+  // is out after its second loss.
+  'double-crossover': {
+    groups: ['A', 'B'],
+    note: 'The top two of each group cross over to the semifinals; from there a team is out after its second loss.',
+    semis: ['A1 vs B2', 'B1 vs A2'],
+    tree: [['A1', 'B2'], ['B1', 'A2']],
+    final: 'Upper final winner vs Lower final winner',
+    third: null,
+    placings: [],
+    double: true,
   },
 };
 

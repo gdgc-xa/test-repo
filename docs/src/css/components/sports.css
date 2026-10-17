@@ -586,6 +586,16 @@ button.kmatch:hover .kteam { border-color: var(--border-strong); }
   width: calc(100% + 2px);
   border-top: 2px solid var(--border-strong);
 }
+/* A winner from two rounds back (double elimination: the upper final
+   into the grand final): its line runs on across the round between. */
+.kmatch__link::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: calc(var(--krun-y, 0px) - 2px);
+  width: var(--krun, 0px);
+  border-top: 2px solid var(--border-strong);
+}
 /* Wider screens: a size up. */
 @container kslide (min-width: 560px) {
   .kteam { height: 36px; gap: 8px; font-size: 14px; }
