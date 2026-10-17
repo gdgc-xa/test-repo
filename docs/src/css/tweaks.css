@@ -1,0 +1,13 @@
+/* ============================================================
+   tweaks.css — hand adjustments, loaded last so they win.
+
+   Made with the layout tool (src/js/tweak.js): add ?tweak to the
+   site's address (or press Ctrl+Alt+T), pick a word or a box, move
+   it or change its margins, then "Copy CSS" and paste the result
+   over this whole file. A rule names the element's own class, so it
+   moves every copy of that element (every sport page's "Next"), on
+   the screen sizes its @media says.
+
+   To undo one change: delete its line. To undo all: keep only this
+   comment.
+   ============================================================ */

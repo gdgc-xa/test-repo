@@ -22,6 +22,9 @@ import './components/discover-hero.js';
 import './lib/adaptive-tone.js';
 
 function boot() {
+  // Read before the router tidies the address (see the layout tool below).
+  const wantsTweak = new URLSearchParams(location.search).has('tweak');
+
   // Live Xavier Cup data: clears the sample fixtures before anything
   // draws them, then fills them in from the tracker.
   startLiveData();
@@ -45,6 +48,18 @@ function boot() {
 
   // The gear button and its panel
   initSettings();
+
+  // The layout tool for moving things by hand (tweak.js → tweaks.css):
+  // ?tweak in the address or Ctrl+Alt+T; it stays on for the visit
+  // until closed. Not downloaded otherwise.
+  let tweakOn = false;
+  try { tweakOn = Boolean(sessionStorage.getItem('cc-tweak')); } catch { /* no storage */ }
+  if (tweakOn || wantsTweak) {
+    import('./tweak.js').then(m => m.openTweak());
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.altKey && e.code === 'KeyT') import('./tweak.js').then(m => m.toggleTweak());
+  });
 }
 
 if (document.readyState === 'loading') {
