@@ -56,7 +56,7 @@ import { calendarHtml, gameMonths } from '../components/cup-calendar.js';
 import { openDetail, closeDetail } from '../components/detail-modal.js';
 import { sportsIndexHtml, sportPageHtml } from '../components/sports.js';
 import { myTeams, toggleMyTeam, onMyTeamChange } from '../lib/my-team.js';
-import { categoryOf, categoriesFor, groupTables, bracketFor, knockouts, winnerOf } from '../lib/standings.js';
+import { categoryIn, categoriesFor, categoryFromLink, sameCategory, groupTables, bracketFor, knockouts, winnerOf } from '../lib/standings.js';
 import { watchReveals } from '../reveal-observer.js';
 import { currentQuery } from '../router.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
@@ -639,15 +639,18 @@ function renderSports(root, games, mine) {
     return;
   }
 
-  // The category asked for (by its link form, "100m-men"), if the
-  // sport has it; else its first.
+  // The category asked for (by its link form, "100m-men"; an older link
+  // to one now folded into a listed category finds that), if the sport
+  // has it; else its first.
   const sportGames = games.filter(g => g.sport === sport.name);
   const divisions = categoriesFor(sport, sportGames);
-  const div = divisions.find(d => catSlug(d) === catSlug(state.sportsDiv)) || divisions[0] || 'Open';
+  const div = categoryFromLink(divisions, catSlug(state.sportsDiv)) || divisions[0] || 'Open';
   // With no games yet (live data still loading), keep the category the
   // link asked for so it still applies when the games arrive.
   if (sportGames.length) state.sportsDiv = div;
-  const divGames = sportGames.filter(g => categoryOf(g) === div);
+  // Each game under the listed category it means (categoryIn), so the
+  // tracker's own wording never makes a second chip for the same thing.
+  const divGames = sportGames.filter(g => sameCategory(categoryIn(sport, g), div));
   // How this category's schedule runs (groups, crossovers, placings).
   const format = bracketFor(sport, div);
 

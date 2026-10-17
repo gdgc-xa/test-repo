@@ -24,18 +24,72 @@ export function categoryOf(g) {
   return g.division || 'Open';
 }
 
+/** A category as one plain word, for matching: "Valorant · Mixed" → "valorantmixed". */
+const plainKey = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+const DIVISION_KEYS = DIVISION_ORDER.map(plainKey);
+
+/** Two categories that are the same but for capitals, spaces or punctuation ("Tekken", "tekken"). */
+export const sameCategory = (a, b) => plainKey(a) === plainKey(b);
+
+/**
+ * categoryIn(sport, g) — the category a game counts under on its
+ * sport's page. The tracker often writes a listed category its own way,
+ * so a game takes the SPORTS[].categories entry that means the same:
+ *   1. the same words, whatever the capitals, spaces or punctuation
+ *      ("valorant · mixed", "Dota-2" → "Dota 2");
+ *   2. its event listed on its own: "Valorant" takes Valorant games
+ *      in whatever division they come ("Valorant · Mixed");
+ *   3. its division, for a sport listed by division only ("Mixed"
+ *      takes a "Relay · Mixed" game).
+ * Only a game none of these place keeps its own category, a new chip.
+ * The game itself is not changed: its card still says what was sent.
+ */
+export function categoryIn(sport, g) {
+  const own = categoryOf(g);
+  const listed = sport?.categories || [];
+  if (!listed.length) return own;
+  const find = (word) => listed.find(c => plainKey(c) === plainKey(word));
+  const byDivisionOnly = listed.every(c => DIVISION_KEYS.includes(plainKey(c)));
+  return find(own)
+    || (g.event && find(g.event))
+    || (byDivisionOnly && g.event && g.division && find(g.division))
+    || own;
+}
+
 /**
  * categoriesFor(sport, games) — a sport's categories in page order:
  * the ones listed in SPORTS first, then any its games use that the
- * list leaves out (Men, Women, Mixed, Open first among those).
+ * list doesn't cover (categoryIn), Men, Women, Mixed, Open first among
+ * those. Two that differ only in capitals or spacing are one.
  */
 export function categoriesFor(sport, games) {
   const listed = sport?.categories || [];
   const rank = (d) => { const i = DIVISION_ORDER.indexOf(d); return i < 0 ? DIVISION_ORDER.length : i; };
-  const extra = [...new Set(games.map(categoryOf))]
-    .filter(c => !listed.includes(c))
-    .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+  const seen = new Set(listed.map(plainKey));
+  const extra = [];
+  for (const c of games.map(g => categoryIn(sport, g))) {
+    if (seen.has(plainKey(c))) continue;
+    seen.add(plainKey(c));
+    extra.push(c);
+  }
+  extra.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
   return [...listed, ...extra];
+}
+
+/**
+ * categoryFromLink(categories, slug) — the category a link's ?div=
+ * names ("valorant", "100m-men"). An older link to a category that is
+ * now folded into a listed one still finds it: "valorant-mixed" opens
+ * Valorant, "relay-mixed" opens Mixed. Null when nothing matches.
+ */
+export function categoryFromLink(categories, slug) {
+  const s = String(slug || '').toLowerCase();
+  if (!s) return null;
+  const dash = (c) => String(c).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return categories.find(c => dash(c) === s)
+    || categories.find(c => s.startsWith(`${dash(c)}-`))
+    || categories.find(c => s.endsWith(`-${dash(c)}`))
+    || null;
 }
 
 /**
