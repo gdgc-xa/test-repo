@@ -15,6 +15,7 @@ import { initNavSheet }     from './nav-sheet.js';
 import { startLiveData }    from './lib/live-data.js';
 import './components/discover-updates.js';
 import './components/discover-games.js';
+import './components/discover-map.js';
 import './components/discover-flow.js';
 import './components/discover-teams.js';
 import './components/discover-hero.js';

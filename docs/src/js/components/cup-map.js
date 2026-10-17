@@ -115,7 +115,7 @@ export function sportIcon(sport) {
  * inline SVG. Venue footprints carry data-map-venue so the big map
  * can take clicks on the building itself, not only on its tag.
  */
-function drawingSvg({ stats = {}, selected = null, interactive = false, extra = '' } = {}) {
+function drawingSvg({ stats = {}, selected = null, interactive = false, extra = '', view = null } = {}) {
   const uid = `campus-${++drawingCount}`;
 
   const walkways = CAMPUS_WALKWAYS.map(w =>
@@ -156,7 +156,8 @@ function drawingSvg({ stats = {}, selected = null, interactive = false, extra = 
 
   const road = CAMPUS_ROAD;
   return `
-    <svg class="campus" viewBox="0 ${TOP} ${W} ${H}" aria-hidden="true" focusable="false">
+    <svg class="campus" viewBox="${view ? view.join(' ') : `0 ${TOP} ${W} ${H}`}"${view ? ' preserveAspectRatio="xMidYMid slice"' : ''}
+         aria-hidden="true" focusable="false">
       <defs>
         <pattern id="${uid}-stripes" width="24" height="80" patternUnits="userSpaceOnUse">
           <rect class="campus__stripe" width="12" height="80"/>
@@ -286,6 +287,43 @@ export function cupMapHtml(stats = {}, { selected = null, sport = null } = {}) {
     <div class="cup-map-mini" role="img" aria-label="${escapeAttr(label)}">
       ${drawingSvg({ stats, selected, extra })}
     </div>`;
+}
+
+/* ============================================================
+   The preview (the Map Hub tile on Discover)
+   ============================================================ */
+
+/* The part of the campus the preview frames ([x, y, width, height] in
+   drawing units): the three venues in the middle band, room above for
+   the tile's heading and below for its button. It fills the tile and
+   crops at the edges, never at a venue. */
+const PREVIEW_VIEW = [102, 88, 506, 344];
+
+/**
+ * cupMapPreviewHtml(stats) — a still of the campus around the Cup's
+ * venues: their buildings lit, each one named, the icons of the sports
+ * played there, and the name in red with a pulsing dot while a game is
+ * on there. Decorative: the tile around it is the link to the map.
+ */
+export function cupMapPreviewHtml(stats = {}) {
+  const venues = CUP_MAP.venues.filter(hasCampusPoint);
+  const icons = venues.flatMap(v => Object.entries(v.icons || {}))
+    .filter(([sport, spot]) => spot.at && sportIcon(sport))
+    .map(([sport, { at: [x, y] }]) =>
+      `<image href="${escapeAttr(sportIcon(sport))}" x="${x - 12}" y="${y - 12}" width="24" height="24"/>`).join('');
+  const tags = venues.map(v => {
+    const [lx, ly] = v.label;
+    const name = v.short || v.name;
+    const w = name.length * 6.4 + 18;
+    const live = (stats[v.id]?.ongoing ?? 0) > 0;
+    return `
+      <g class="campus__mini-tag campus__mini-tag--preview${live ? ' is-live' : ''}">
+        <rect x="${lx - w / 2}" y="${ly - 8.5}" width="${w}" height="17" rx="8.5"/>
+        <text x="${lx}" y="${ly + 0.5}">${escapeHtml(name)}</text>
+        ${live ? `<circle class="campus__pulse" cx="${lx - w / 2 + 3}" cy="${ly - 6}" r="4"/>` : ''}
+      </g>`;
+  }).join('');
+  return drawingSvg({ stats, view: PREVIEW_VIEW, extra: icons + tags });
 }
 
 /** The key under the big map. */

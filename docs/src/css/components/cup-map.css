@@ -368,6 +368,22 @@
   dominant-baseline: middle;
 }
 
+/* ---------- Preview (the Map Hub tile on Discover) ---------- */
+.campus__mini-tag--preview text { font-size: 10px; }
+.campus__mini-tag.is-live rect { fill: var(--campus-live); }
+.campus__mini-tag.is-live text { fill: var(--campus-on-live); }
+.campus__pulse {
+  fill: var(--campus-live);
+  stroke: var(--campus-on-live);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: campusPulse 1.6s ease-in-out infinite;
+}
+@keyframes campusPulse { 50% { transform: scale(1.5); opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .campus__pulse { animation: none; } }
+:root[data-motion="reduced"] .campus__pulse { animation: none; }
+
 /* ---------- Legend ---------- */
 .cup-legend {
   display: flex;
