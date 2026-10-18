@@ -59,7 +59,7 @@ export const CUP_CONFIG = {
   showSchedule: true,      // Matches: the list, grouped by day
   showCalendar: true,      // Matches: the List / Calendar switch (off = list only)
   showSports: true,        // the Sports view: one page per sport (SPORTS)
-  showBracket: true,       // Sports: each sport's knockout bracket (off: its standings show the groups instead)
+  showBracket: false,      // Sports: each sport's knockout bracket (off: its standings show the groups instead)
   showMap: true,           // the Map view
   showNews: true,          // News & Updates from the Facebook page
   showEvents: true,        // News & Updates: the Upcoming Events cards under the news (CUP_EVENTS)
