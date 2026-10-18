@@ -55,7 +55,8 @@
    ============================================================ */
 
 export const FEATURED = [
-  { id: 'gdgoc-xa', note: 'Example: Accepting Partnerships', cta: 'Example: Apply now →' },
+  { id: 'gdgoc-xa', note: 'Campus Compass TXC!!', cta: 'View Now →' },
+  { id: 'csg', note: 'Check Out The Xavier Cup!', cta: 'View CSG →' }
   // Add more featured orgs above this line, e.g.:
   // { id: 'jpia', note: 'New this term' },
 ];
