@@ -16,7 +16,9 @@ const ORG_BY_ID = Object.fromEntries(ORGS.map(o => [o.id, o]));
 /**
  * Resolves data/featured.js entries against the ORGS roster.
  * Unknown ids are dropped (with a console.warn) instead of
- * breaking whichever screen is reading the list.
+ * breaking whichever screen is reading the list. A featured card's
+ * button names its org ("View GDGoC-XA →") unless the entry sets
+ * its own `cta`.
  * @returns {{org: Org, note?: string, cta?: string}[]}
  *          in the order given by data/featured.js
  */
@@ -32,7 +34,7 @@ export function resolveFeatured() {
       );
       continue;
     }
-    resolved.push({ org, note: entry.note, cta: entry.cta });
+    resolved.push({ org, note: entry.note, cta: entry.cta || `View ${org.short || org.name} →` });
   }
   return resolved;
 }

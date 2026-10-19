@@ -12,6 +12,7 @@
    Orgs in neither are simply not placed yet; the booth says so
    rather than guessing.
    ============================================================ */
+export const SHOW_FAIR_MAP = false;   // true brings the org-fair tent map back 
 
 export const VENUE = {
   viewBox: '0 0 960 720',

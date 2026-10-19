@@ -13,7 +13,6 @@
    data/xavier-cup.js → CUP_MAP, so the people editing the schedule
    never need to open this file.
 
-   The 3D view reads CAMPUS_GEO at the bottom (real coordinates).
    ============================================================ */
 
 /* The drawing's viewBox is `0 ${top} ${width} ${height}`. */
@@ -106,31 +105,3 @@ export const CAMPUS_LANDMARKS = [
   { text: 'MORTOLA GATE 2', x: 35, y: 190, size: 3.5, tick: 'M 20 227 L 24 236' },
   { text: 'MORTOLA GATE 1', x: 73, y: 302, size: 3.5, tick: 'M 66 286 L 72 293' },
 ];
-
-/* ------------------------------------------------------------
-   The real campus, for the 3D view (Mapbox).
-   Coordinates are [longitude, latitude].
-   ------------------------------------------------------------ */
-export const CAMPUS_GEO = {
-  center: [124.6469, 8.4766],
-  // Campus box with ~80 m of slack so edge buildings fit on a phone
-  bounds: [[124.6437, 8.4738], [124.6503, 8.4795]],
-  minZoom: 16.2,
-  maxZoom: 19.5,
-  view: { zoom: 17.5, pitch: 55, bearing: -22 },
-  // Below this zoom the sport labels hide so markers don't collide
-  labelZoom: 17,
-
-  // Campus boundary from OpenStreetMap way 141597395 (closed ring)
-  boundary: [
-    [124.647338, 8.477064], [124.646781, 8.477657], [124.646734, 8.477691],
-    [124.646699, 8.477721], [124.646561, 8.477763], [124.646404, 8.477812],
-    [124.646243, 8.477821], [124.645973, 8.476674], [124.645808, 8.475791],
-    [124.646540, 8.475596], [124.646626, 8.475574], [124.646801, 8.475537],
-    [124.647102, 8.475523], [124.647894, 8.475495], [124.648275, 8.475511],
-    [124.649372, 8.475571], [124.649397, 8.475596], [124.649412, 8.475662],
-    [124.649402, 8.475718], [124.648948, 8.476548], [124.648680, 8.476328],
-    [124.648293, 8.477053], [124.648143, 8.476957], [124.647945, 8.477216],
-    [124.647679, 8.477446], [124.647338, 8.477064],
-  ],
-};

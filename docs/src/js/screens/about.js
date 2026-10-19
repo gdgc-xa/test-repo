@@ -1,30 +1,73 @@
 /* ============================================================
-   screens/about.js — hydrates the About screen's team grid.
+   screens/about.js — hydrates the About screen's team.
    The prose and the GDG card are static markup in index.html;
    only the people come from data, so they stay in one place
-   when someone joins or a photo arrives.
+   when someone joins.
    ============================================================ */
 
-import { TEAM, initialsOf } from '../data/team.js';
-import { SITE } from '../data/site.js';
+import { TEAM_GROUPS } from '../data/team.js';
+import { SITE, tabEnabled } from '../data/site.js';
+import { SHOW_FAIR_MAP } from '../data/venue.js';
 import { watchReveals } from '../reveal-observer.js';
 
-/** Four site hues, cycled so the tiles do not read as one block. */
+/** Four site hues, one per developers' department, in the order they first appear. */
 const HUES = ['blue', 'red', 'yellow', 'green'];
 
 export function initAbout(root) {
+  dropSwitchedOff(root);
   hydrateContact(root);
+  hydrateTeam(root);
+}
 
-  const grid = root.querySelector('[data-team-grid]');
-  if (!grid || grid.__wired) return;
-  grid.__wired = true;
+/* ---------- The team ----------
+   A "who we are" list: each group (CEO, founders, developers) under
+   its own small heading, three people a row, each a name with a small
+   dot (a developer's in their department's hue) over their position.
+   Names only, no photos. */
+function hydrateTeam(root) {
+  const groups = root.querySelector('[data-team-groups]');
+  if (!groups || groups.__wired) return;
+  groups.__wired = true;
 
-  // Leads (CEO, Project Head, Tech Lead) surface first and get the
-  // bigger treatment; everyone else follows in their normal order.
-  const ordered = [...TEAM].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+  const depts = [...new Set(TEAM_GROUPS.flatMap(g => g.people.map(p => p.dept).filter(Boolean)))];
+  const hueOf = (dept) => HUES[depts.indexOf(dept) % HUES.length];
+  groups.innerHTML = TEAM_GROUPS.map(g => groupHtml(g, hueOf)).join('');
+  watchReveals(groups);
+}
 
-  grid.innerHTML = ordered.map((p, i) => personHtml(p, i)).join('');
-  watchReveals(grid);
+function groupHtml(g, hueOf) {
+  const id = `team-group-${g.id}`;
+  return `
+    <section class="team-group team-group--${escapeAttr(g.id)}" data-team-group="${escapeAttr(g.id)}"
+             aria-labelledby="${escapeAttr(id)}">
+      <h3 class="team-group__name" id="${escapeAttr(id)}">${escapeHtml(g.name)}</h3>
+      <ul class="team-list">${g.people.map((p, i) => personHtml(p, i, hueOf)).join('')}
+      </ul>
+    </section>`;
+}
+
+/** One person: name and dot, then their position (a developer's with
+    their department), and a second position if any. */
+function personHtml(p, i, hueOf) {
+  const hue = p.dept ? hueOf(p.dept) : null;
+  const role = [p.role, p.dept].filter(Boolean).join(' · ');
+  return `
+        <li class="team-person reveal" style="--reveal-delay: ${Math.min(i * 40, 320)}ms;${hue ? ` --dot: var(--${hue}-ink);` : ''}">
+          <p class="team-person__name">${escapeHtml(p.name)}<span class="team-person__dot" aria-hidden="true"></span></p>
+          <p class="team-person__role">${escapeHtml(role)}</p>
+          ${p.title ? `<p class="team-person__title">${escapeHtml(p.title)}</p>` : ''}
+        </li>`;
+}
+
+/* "What you can do here" lines about a feature that is switched off
+   go, so the page never sends anyone to a tab or map that isn't there:
+   the Events tab (data/site.js → tabs.events) and the org-fair tent
+   map (data/venue.js → SHOW_FAIR_MAP). */
+function dropSwitchedOff(root) {
+  const on = { events: tabEnabled('events'), 'fair-map': SHOW_FAIR_MAP };
+  root.querySelectorAll('[data-about-feature]').forEach(li => {
+    if (!on[li.dataset.aboutFeature]) li.remove();
+  });
 }
 
 /* ---------- Contact ----------
@@ -62,26 +105,6 @@ function hydrateContact(root) {
       </a>
     </div>`;
   watchReveals(section);
-}
-
-function personHtml(p, i) {
-  const hue = HUES[i % HUES.length];
-  const avatar = p.photo
-    ? `<img class="person__photo" src="${escapeAttr(p.photo)}" alt=""/>`
-    : escapeHtml(initialsOf(p.name));
-  const featuredClass = p.featured ? ' person--featured' : '';
-
-  return `
-    <article class="person${featuredClass} reveal" style="--reveal-delay: ${i * 60}ms;">
-      <div class="person__avatar"
-           style="background: var(--${hue}-soft); color: var(--${hue}-ink);"
-           aria-hidden="true">${avatar}</div>
-      <div class="person__text">
-        <p class="person__role">${escapeHtml(p.role)}</p>
-        <h3 class="person__name">${escapeHtml(p.name)}</h3>
-        ${p.title ? `<p class="person__title">${escapeHtml(p.title)}</p>` : ''}
-      </div>
-    </article>`;
 }
 
 function escapeHtml(s) {

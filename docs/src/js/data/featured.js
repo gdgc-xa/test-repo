@@ -45,8 +45,10 @@
      note     (optional) Short "advertisement" badge shown on the
               card, e.g. 'Recruiting now', 'New this term',
               'Apply by Sept 5'. Leave it out for no badge.
-     cta      (optional) Overrides the default "Know more →"
-              button text, e.g. 'Join now →', 'Visit booth →'.
+     cta      (optional) The button text. Leave it out and the
+              button names the org by its short name from
+              organizations.js: "View GDGoC-XA →", "View CSG →".
+              Set it for other wording, e.g. 'Join now →'.
 
    GOOD PRACTICE:
      Keep this to roughly 4–8 orgs. The strip/section is designed
@@ -55,7 +57,8 @@
    ============================================================ */
 
 export const FEATURED = [
-  { id: 'gdgoc-xa', note: 'Example: Accepting Partnerships', cta: 'Example: Apply now →' },
+  { id: 'gdgoc-xa', note: 'Campus Compass TXC!!' },
+  { id: 'csg', note: 'Check Out The Xavier Cup!' }
   // Add more featured orgs above this line, e.g.:
   // { id: 'jpia', note: 'New this term' },
 ];

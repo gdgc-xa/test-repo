@@ -27,12 +27,21 @@
   to   { opacity: 1; }
 }
 
-/* --- Compass rose gentle rotation toward current section
-       Applied via a CSS variable set from JS: --compass-rot. --- */
-@keyframes compassIdle {
-  0%, 100% { transform: rotate(calc(var(--compass-rot, 0deg) - 1.5deg)); }
-  50%      { transform: rotate(calc(var(--compass-rot, 0deg) + 1.5deg)); }
+/* --- Compass rose: a soft wobble while it idles. Its heading (toward
+       the current screen, --compass-rot from compass-orientation.js)
+       is the separate `rotate` property, so a change of screen can
+       swing it there with a transition: a running animation can't
+       ease from one value of a variable to the next, it snaps. --- */
+@keyframes compassWobble {
+  0%, 100% { transform: rotate(-1.5deg); }
+  50%      { transform: rotate(1.5deg); }
 }
+/* The swing to a new heading: a needle that overshoots a little and settles. */
+:root {
+  --compass-swing: rotate 1.1s cubic-bezier(0.34, 1.45, 0.5, 1);
+}
+.compass-still .brand__mark,
+.compass-still .lockup__rose svg { transition: none; }
 
 /* --- Palm tree tropical-breeze sway. Rotation origin sits
        at the base of the trunk (right side of sea scene). --- */

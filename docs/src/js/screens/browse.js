@@ -197,10 +197,13 @@ function render(root) {
       // leave the main grid empty rather than showing nothing at all.
       grid.innerHTML = '';
     } else {
-      const cards = filtered.map((org, i) => cardHtml(org, i)).join('');
-      const ghosts = Array.from({ length: hiddenCount }, () => ghostCardHtml()).join('');
-      grid.innerHTML = cards + ghosts;
+      grid.innerHTML = filtered.map((org, i) => cardHtml(org, i)).join('');
     }
+    // Ghost cards for what the filter hides only finish the last row:
+    // one for every hidden org left a screen-long run of empty boxes
+    // below the results.
+    grid.dataset.hidden = filtered.length ? String(hiddenCount) : '0';
+    fillLastRow(grid);
     watchReveals(grid);
     wireCardClicks(grid);
   }
@@ -208,7 +211,7 @@ function render(root) {
   // Footnote (ghost cards only ever come from an active chip/search)
   if (foot) {
     if (hiddenCount > 0 && filtered.length > 0) {
-      foot.textContent = `Ghost cards indicate the ${hiddenCount} org${hiddenCount === 1 ? '' : 's'} filtered out. Clear the filter to see everything again.`;
+      foot.textContent = `${hiddenCount} org${hiddenCount === 1 ? ' is' : 's are'} hidden by the filter. Clear the filter to see everything again.`;
       foot.hidden = false;
     } else {
       foot.hidden = true;
@@ -217,6 +220,33 @@ function render(root) {
 
   // Sync URL (shallow — replaceState, don't push)
   syncUrl();
+}
+
+/**
+ * Puts ghost cards (data-hidden of them at most) only where the last
+ * row of real cards leaves gaps, so the grid ends square: none in a
+ * one-column phone layout, never a row of ghosts. Done again when the
+ * grid's width (its number of columns) changes.
+ */
+function fillLastRow(grid) {
+  grid.querySelectorAll('.card--ghost').forEach(g => g.remove());
+  const hidden = Number(grid.dataset.hidden) || 0;
+  if (hidden) {
+    const tracks = getComputedStyle(grid).gridTemplateColumns;
+    const cols = tracks && tracks !== 'none' ? tracks.split(' ').filter(Boolean).length : 1;
+    const real = grid.querySelectorAll('.card').length;
+    const gaps = (cols - (real % cols)) % cols;
+    grid.insertAdjacentHTML('beforeend', Array.from({ length: Math.min(hidden, gaps) }, ghostCardHtml).join(''));
+  }
+  if (!grid.__ghostFit) {
+    let width = grid.clientWidth;
+    grid.__ghostFit = new ResizeObserver(() => {
+      if (grid.clientWidth === width) return;
+      width = grid.clientWidth;
+      fillLastRow(grid);
+    });
+    grid.__ghostFit.observe(grid);
+  }
 }
 
 function openBooth(id) {

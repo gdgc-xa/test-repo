@@ -3,7 +3,7 @@
    how the site looks, in one place:
 
      data-theme   light | dark          (the original toggle)
-     data-skin    txc | worldcup | sands (which design is painted)
+     data-skin    txc | sands         (which design is painted)
      data-motion  full | reduced        (ambient animation)
 
    All three are written onto <html> as attributes, saved to
@@ -25,7 +25,7 @@ const KEY = {
 };
 
 const THEMES  = ['light', 'dark'];
-const SKINS   = ['txc', 'worldcup', 'sands'];
+const SKINS   = ['txc', 'sands'];   // a saved 'worldcup' (retired) falls back to the default
 const MOTIONS = ['full', 'reduced'];
 
 /* localStorage throws in some privacy modes — never let that
@@ -119,9 +119,20 @@ export function applySeasonWords(skin = getAppliedSkin()) {
   });
 }
 
+/* ---------- Browser bar ----------
+   <meta name="theme-color"> tints the phone's address bar. It takes
+   the page ground of whichever theme and design are showing, so the
+   bar is cream by day and navy at night instead of one fixed colour. */
+function paintBrowserBar() {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const ground = getComputedStyle(root()).getPropertyValue('--ground').trim();
+  if (meta && ground) meta.setAttribute('content', ground);
+}
+
 /* ---------- Change events ---------- */
 
 function emit() {
+  paintBrowserBar();
   document.dispatchEvent(new CustomEvent('appearance:change', {
     detail: {
       theme: getAppliedTheme(),
@@ -188,7 +199,10 @@ export function initAppearance() {
   // The inline script in <head> has usually applied these already;
   // re-applying is cheap and covers the case where it did not run.
   setTheme(getTheme(), { persist: false });
-  setSkin(getSkin(), { persist: false });
+  // A locked design also replaces a saved choice of another one, so
+  // the inline script in <head> stops painting that design for a frame
+  // before this runs (Sands of Time while it is switched off).
+  setSkin(getSkin(), { persist: !SITE.skin.allowToggle });
   setMotion(getMotion(), { persist: false });
 
   document.querySelectorAll('[data-theme-toggle]').forEach(btn => {

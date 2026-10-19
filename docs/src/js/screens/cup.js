@@ -37,7 +37,7 @@
   ============================================================ */
 
 import {
-  CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, CUP_PHOTOS, GAMES, VENUE_BY_ID,
+  CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, CUP_PHOTOS, CUP_LIVE, GAMES, VENUE_BY_ID,
   allSports, findSport, cupNow, isPreviewClock,
 } from '../data/xavier-cup.js';
 import { TEAM_BY_ID, teamFor } from '../data/teams.js';
@@ -47,6 +47,8 @@ import { resolveGame } from '../components/game-card.js';
 import { matchCardHtml } from '../components/match-card.js';
 import { gameDetailHtml } from '../components/game-detail.js';
 import { mountCupMap, cupLegendHtml, venueStats, venueIcons } from '../components/cup-map.js';
+import { offCampusHtml } from '../components/cup-off-campus.js';
+import { isOffCampus, venueLocationHtml } from '../lib/cup-map-locations.js';
 import { statusPillHtml, GAME_STATUS_LABEL } from '../components/status.js';
 import { mountTeamStrip } from '../components/team-strip.js';
 import { dayKey, gameDays, initialDay, gamesOn, pickFeatured, keyToDate } from '../components/featured-match.js';
@@ -54,7 +56,7 @@ import { calendarHtml, gameMonths } from '../components/cup-calendar.js';
 import { openDetail, closeDetail } from '../components/detail-modal.js';
 import { sportsIndexHtml, sportPageHtml } from '../components/sports.js';
 import { myTeams, toggleMyTeam, onMyTeamChange } from '../lib/my-team.js';
-import { divisionOf, divisionsFor, standings, knockouts, winnerOf } from '../lib/standings.js';
+import { categoryIn, categoriesFor, categoryFromLink, sameCategory, groupTables, bracketFor, groupsFor, inGroups, knockouts, winnerOf } from '../lib/standings.js';
 import { watchReveals } from '../reveal-observer.js';
 import { currentQuery } from '../router.js';
 import { escapeHtml, escapeAttr, safeUrl } from '../lib/html.js';
@@ -121,6 +123,7 @@ const state = {
 let rootEl = null;
 let tick = null;
 let mapView = null;   // the mounted campus map (components/cup-map.js)
+let mapListExpanded = null; // presentation only; survives timer renders
 
 /* ---------- Boot ---------- */
 
@@ -185,15 +188,20 @@ export function initCup(root) {
       root.querySelectorAll('[data-cup-teams]').forEach(el => mountTeamStrip(el));
     }
     onMyTeamChange(() => {
-      if (currentQuery().screen === 'cup') render();
+      if (currentQuery().screen === 'cup') render({ instant: true });
     });
 
     mountHeroPhotos(root);
     wireTabs(root);
+    const mapSpace = new ResizeObserver(() => {
+      root.style.setProperty('--cup-map-top', `${stuckHeight()}px`);
+    });
+    [document.querySelector('.site-nav'), root.querySelector('[data-cup-tabs]')]
+      .filter(Boolean).forEach(el => mapSpace.observe(el));
     mountFilters(root);
 
     // Crossing the phone or swipe width changes how much each view shows.
-    const rerender = () => { if (currentQuery().screen === 'cup') render(); };
+    const rerender = () => { if (currentQuery().screen === 'cup') render({ instant: true }); };
     PHONE.addEventListener('change', rerender);
     SWIPE.addEventListener('change', rerender);
 
@@ -202,9 +210,11 @@ export function initCup(root) {
     // ?game= link, which could not be found before the data arrived.
     let dataSeen = false;
     window.addEventListener('cup:data', () => {
+      liveArrived = true;
       const q = currentQuery();
       if (q.screen === 'cup') {
-        render();
+        // The first data fades in like a first load; refreshes don't blink.
+        render({ instant: dataSeen });
         if (!dataSeen && q.game) renderGameDetail(q.game);
       }
       dataSeen = true;
@@ -226,6 +236,12 @@ export function initCup(root) {
     // these are the venue list and the sport chips in the panel, and
     // everything on Matches.
     root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-cup-map-list-toggle]')) {
+        mapListExpanded = !mapListExpanded;
+        render();
+        requestAnimationFrame(() => mapView?.refocus());
+        return;
+      }
       // A match card's venue: the Map with that venue picked. A
       // new-tab click is left to the browser.
       const venueLink = e.target.closest('[data-match-venue]');
@@ -264,6 +280,13 @@ export function initCup(root) {
         state.sportsAll = !state.sportsAll;
         render();
         root.querySelector('[data-sports-more]')?.focus({ preventScroll: true });
+        return;
+      }
+
+      // A round's chip on the phone bracket: slide to that round.
+      const slideRound = e.target.closest('[data-kslide-round]');
+      if (slideRound) {
+        setSlide(slideRound.closest('[data-kslide]'), Number(slideRound.dataset.kslideRound), true);
         return;
       }
 
@@ -375,8 +398,12 @@ function mountHeroPhotos(root) {
   const slide = (s, i) => {
     const src = safeImage(s.src);
     const label = `${i + 1} of ${n}${s.caption ? `: ${s.caption}` : ''}`;
+    const lazy = i ? ' loading="lazy"' : '';
+    // A blurred copy behind the photo, shown only around a tall one on a
+    // wide banner (.is-tall below; cup.css).
     const media = src
-      ? `<img class="cup-photo__img" src="${escapeAttr(src)}" alt="${escapeAttr(s.alt || '')}" decoding="async"${i ? ' loading="lazy"' : ''}>`
+      ? `<img class="cup-photo__fill" src="${escapeAttr(src)}" alt="" aria-hidden="true" decoding="async"${lazy}>
+         <img class="cup-photo__img" src="${escapeAttr(src)}" alt="${escapeAttr(s.alt || '')}" decoding="async"${lazy}>`
       : `<span class="cup-photo__img news-ph news-ph--${i % 4} news-ph--hero" role="img"
                aria-label="${escapeAttr(`Photo coming soon${s.alt ? `: ${s.alt}` : ''}`)}">
            <span class="news-ph__mark" aria-hidden="true">${camera}<span>TXC photo</span></span>
@@ -399,6 +426,14 @@ function mountHeroPhotos(root) {
             <span class="news-hero__fill"></span>
           </button>`).join('')}
       </div>` : ''}`;
+
+  // A photo taller than it is wide (the 4:5 posters) is marked once it
+  // loads, so a wide banner shows it whole instead of cropping it.
+  wrap.querySelectorAll('img.cup-photo__img').forEach(img => {
+    const mark = () => img.closest('.cup-photo').classList.toggle('is-tall', img.naturalHeight > img.naturalWidth * 1.05);
+    if (img.complete && img.naturalWidth) mark();
+    else img.addEventListener('load', mark, { once: true });
+  });
 
   // The whole tile pauses on hover and focus, the title included.
   wireHero(tile, { ms: Math.max(3, Number(CUP_PHOTOS.secondsPerSlide) || 6) * 1000 });
@@ -447,6 +482,7 @@ function showTab(id, { scroll = true } = {}) {
   const tabs = enabledTabs();
   state.tab = tabs.includes(id) ? id : (tabs[0] || 'matches');
 
+  root.classList.toggle('is-map-view', state.tab === 'map');
   root.querySelectorAll('[data-cup-view]').forEach(view => {
     view.hidden = view.dataset.cupView !== state.tab;
   });
@@ -458,7 +494,9 @@ function showTab(id, { scroll = true } = {}) {
   movePill();
 
   const view = root.querySelector(`[data-cup-view="${state.tab}"]`);
-  if (scroll) scrollToView();
+  root.style.setProperty('--cup-map-top', `${stuckHeight()}px`);
+  if (state.tab === 'map') window.scrollTo({ top: 0, behavior: 'auto' });
+  else if (scroll) scrollToView();
 
   // Revealed content in a view that was hidden needs watching again.
   if (view) watchReveals(view);
@@ -508,7 +546,7 @@ function startClock() {
   tick = setInterval(() => {
     const screen = currentQuery().screen;
     if (screen !== 'cup') return;          // idle on other tabs
-    render();
+    render({ instant: true });
   }, 60000);
 }
 
@@ -531,7 +569,14 @@ export function findGame(id) {
 
 /* ---------- Render ---------- */
 
-function render() {
+/**
+ * render({ instant }) — draw the tab from the current state.
+ * `instant` is for a refresh of the same view (a team picked, live
+ * data, the minute tick, a resize): the cards come back already shown
+ * instead of fading in again, so nothing blinks. Moving to another
+ * view (a tab, a sport, a filter) keeps the fade-in.
+ */
+function render({ instant = false } = {}) {
   const root = rootEl;
   if (!root) return;
 
@@ -543,6 +588,9 @@ function render() {
   renderMatches(root, games, mine);
   renderSports(root, games, mine);
   renderMap(root, games);
+
+  // Before the next paint, so the redrawn cards never show hidden.
+  if (instant) root.querySelectorAll('.reveal:not(.revealed)').forEach(el => el.classList.add('revealed'));
 
   syncUrl();
 }
@@ -569,6 +617,9 @@ function renderTeamNote(root, mine) {
 /* --- Sports: the grid, a sport's page, or a team inside it --- */
 
 let newsPosts = [];   // every post, once the news feed has loaded (renderNews)
+// True once the live data (lib/live-data.js) has landed. Until then a
+// sport only the tracker lists (Banner Raising) is not known yet.
+let liveArrived = false;
 
 /** Is a post about this sport? Its own `sport`, or a hashtag in its text. */
 function isAbout(p, sport) {
@@ -576,6 +627,9 @@ function isAbout(p, sport) {
   const tag = `#${sport.name.replace(/\s+/g, '')}`.toLowerCase();
   return `${p.title} ${p.body}`.toLowerCase().split(/[^#\w]+/).includes(tag);
 }
+
+/** A category as it goes in a link: "100m · Men" → "100m-men". */
+const catSlug = (c) => String(c || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
 function renderSports(root, games, mine) {
   const wrap = root.querySelector('[data-cup-sports]');
@@ -585,26 +639,39 @@ function renderSports(root, games, mine) {
   const index = sports.findIndex(s => s.id === state.sportsSport);
   const sport = sports[index];
   if (!sport) {
-    state.sportsSport = '';
-    state.sportsTeam = '';
-    wrap.innerHTML = sportsIndexHtml({ sports, games, divisionsOf: divisionsFor });
+    // A link to a sport only the tracker lists keeps its sport (and
+    // team) while the live data loads, so its page opens when it lands.
+    if (liveArrived || !CUP_LIVE.enabled) {
+      state.sportsSport = '';
+      state.sportsTeam = '';
+    }
+    wrap.innerHTML = sportsIndexHtml({ sports, games, categoriesOf: categoriesFor });
     watchReveals(wrap);
+    sportsBack?.disconnect();
     return;
   }
 
-  // The division asked for, if the sport has it; else its first.
+  // The category asked for (by its link form, "100m-men"; an older link
+  // to one now folded into a listed category finds that), if the sport
+  // has it; else its first.
   const sportGames = games.filter(g => g.sport === sport.name);
-  const divisions = divisionsFor(sportGames);
-  const div = divisions.find(d => d.toLowerCase() === state.sportsDiv.toLowerCase()) || divisions[0] || 'Open';
-  // With no games yet (live data still loading), keep the division the
+  const divisions = categoriesFor(sport, sportGames);
+  const div = categoryFromLink(divisions, catSlug(state.sportsDiv)) || divisions[0] || 'Open';
+  // With no games yet (live data still loading), keep the category the
   // link asked for so it still applies when the games arrive.
-  if (divisions.length) state.sportsDiv = div;
-  const divGames = sportGames.filter(g => divisionOf(g) === div);
+  if (sportGames.length) state.sportsDiv = div;
+  // Each game under the listed category it means (categoryIn), so the
+  // tracker's own wording never makes a second chip for the same thing.
+  // Its group games in their group: the tracker has no group column, so
+  // the group comes from the schedule's draw (SPORTS[].groups).
+  const divGames = inGroups(sportGames.filter(g => sameCategory(categoryIn(sport, g), div)), groupsFor(sport, div));
+  // How this category's schedule runs (groups, crossovers, placings).
+  const format = bracketFor(sport, div);
 
   wrap.innerHTML = sportPageHtml({
-    sport, index, sportGames, divisions, div, divGames,
-    table: standings(divGames),
-    ko: knockouts(divGames),
+    sport, index, sportGames, divisions, div, divGames, format,
+    tables: groupTables(divGames),
+    ko: knockouts(divGames, format),
     news: newsPosts.filter(p => isAbout(p, sport)).slice(0, isPhone() ? 2 : 3),
     team: TEAM_BY_ID[state.sportsTeam] || null,
     mine,
@@ -612,9 +679,174 @@ function renderSports(root, games, mine) {
     // (all of them in a swipe row).
     matchesShown: (state.sportsAll || isSwipe()) ? Infinity : 6,
     collapsible: !isSwipe(),
+    // A to Z, so "Next" carries on through the grid's order.
+    next: sports[(index + 1) % sports.length],
   });
   watchReveals(wrap);
+  watchSportsBack(wrap);
+
+  // A long row of categories starts back at its first chip once
+  // redrawn; bring the chosen one to the middle of the row instead.
+  const cats = wrap.querySelector('.sport-cats');
+  const on = cats?.querySelector('[aria-pressed="true"]');
+  if (on) {
+    const left = on.getBoundingClientRect().left - cats.getBoundingClientRect().left;
+    cats.scrollLeft = left - (cats.clientWidth - on.offsetWidth) / 2;
+  }
+
+  // The bracket you slide through, round by round.
+  slideFit.disconnect();
+  wrap.querySelectorAll('[data-kslide]').forEach(slide => {
+    const frame = slide.querySelector('.kslide__frame');
+    let settle = null;
+    frame.addEventListener('scroll', () => {
+      clearTimeout(settle);
+      settle = setTimeout(() => {
+        const i = Math.round(frame.scrollLeft / slideStep(slide));
+        if (String(i) !== slide.dataset.active) layoutSlide(slide, i);
+      }, 90);
+    }, { passive: true });
+    slideFit.observe(frame);
+  });
 }
+
+/* The floating way back on a sport's page (components/sports.js →
+   backFloatHtml): shown once the breadcrumb has gone up under the
+   sticky bars, put away while the end of the page (its own way back)
+   is on screen, and never above the sport's page (the banner). */
+let sportsBack = null;
+
+function watchSportsBack(wrap) {
+  sportsBack?.disconnect();
+  const crumbs = wrap.querySelector('.sports-crumbs');
+  const float = wrap.querySelector('[data-sports-float]');
+  const end = wrap.querySelector('[data-sports-endnav]');
+  if (!crumbs || !float) return;
+  const top = stuckHeight();
+  const crumbsAbove = (r) => r.bottom <= top;
+  const endInView = (r) => r.top < innerHeight && r.bottom > top;
+  let above = crumbsAbove(crumbs.getBoundingClientRect());
+  let atEnd = end ? endInView(end.getBoundingClientRect()) : false;
+  // Set at once from where the page is, so a redraw (the clock, live
+  // data) never blinks it.
+  const update = () => float.classList.toggle('is-shown', above && !atEnd);
+  update();
+  sportsBack = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.target === crumbs) above = !e.isIntersecting && crumbsAbove(e.boundingClientRect);
+      else atEnd = e.isIntersecting;
+    }
+    update();
+  }, { rootMargin: `-${top}px 0px 0px 0px` });
+  sportsBack.observe(crumbs);
+  if (end) sportsBack.observe(end);
+}
+
+/* The bracket (components/sports.js → slideHtml): one column per round,
+   like the World Cup's; two in view on a phone, all of them where they
+   fit (then there is nothing to slide and no chips). The round at the left is
+   stacked close; every later match sits halfway between the matches
+   that feed it, joined to them by a line. A swipe snaps to a round;
+   so does tapping its chip. Laid out again for each round it shows. */
+const SLIDE_GAP = 14;   // between two matches in a column, px
+
+/** From one column to the next, px. */
+function slideStep(slide) {
+  const cols = slide.querySelectorAll('.kslide__col');
+  return cols[1] ? cols[1].offsetLeft - cols[0].offsetLeft : (cols[0]?.offsetWidth || 1);
+}
+
+function layoutSlide(slide, active) {
+  const frame = slide.querySelector('.kslide__frame');
+  const cols = [...slide.querySelectorAll('.kslide__col')];
+  if (!frame.clientWidth || !cols.length) return;   // not on screen
+  const step = slideStep(slide);
+  const gapX = step - cols[0].offsetWidth;
+  // How many rounds are in view at once; when that is all of them,
+  // there is nothing to slide.
+  const visible = Math.max(1, Math.min(cols.length, Math.floor((frame.clientWidth + gapX) / step + 0.01)));
+  const all = visible >= cols.length;
+  slide.classList.toggle('kslide--all', all);
+  if (all) active = 0;
+  slide.dataset.active = String(active);
+
+  const centres = [];   // each column's match centres, px from its top
+  cols.forEach((col, i) => {
+    const prev = centres[i - 1] || [];
+    const matches = [...col.children];
+    const h = matches[0]?.offsetHeight || 0;
+    const teams = matches[0]?.querySelector('.kmatch__teams');
+    const mid = teams ? teams.offsetTop + teams.offsetHeight / 2 : h / 2;   // where the lines meet it
+    let last = -Infinity;
+    centres[i] = matches.map((m, k) => {
+      const near = (m.dataset.from || '').split(',').filter(Boolean).map(Number).filter(j => prev[j] !== undefined);
+      // A winner from further back (double elimination's upper final),
+      // while its round is in view; slid past, it is left out.
+      const far = (m.dataset.far || '').split(',').filter(Boolean).map(s => s.split(':').map(Number))
+        .filter(([r, j]) => r >= active && centres[r]?.[j] !== undefined);
+      const fed = [...near.map(j => prev[j]), ...far.map(([r, j]) => centres[r][j])];
+      // The round in view (and those before it) stack close; later ones line up with their feeders.
+      let top = i > active && fed.length
+        ? fed.reduce((sum, y) => sum + y, 0) / fed.length - mid
+        : k * (h + SLIDE_GAP);
+      top = Math.max(top, last + h + SLIDE_GAP);
+      last = top;
+      m.style.top = `${top}px`;
+
+      // The line from the feeders: a bracket on the right of the round
+      // before, then across to this match. None for the third-place game.
+      const link = m.querySelector('.kmatch__link');
+      if (i > 0 && fed.length && !('losers' in m.dataset)) {
+        const ys = fed.map(y => y - top);
+        const y1 = Math.min(...ys);
+        const y2 = Math.max(...ys);
+        // The far feeder's line runs on across the round between (--krun).
+        const run = far.length ? (i - 1 - far[0][0]) * step : 0;
+        const runY = far.length ? centres[far[0][0]][far[0][1]] - top : 0;
+        link.style.cssText = `display: block; left: ${-gapX}px; width: ${gapX / 2}px; top: ${y1}px;`
+          + ` height: ${y2 - y1}px; --kmid: ${mid - y1}px;`
+          + (run ? ` --krun: ${run}px; --krun-y: ${runY === y1 ? 0 : y2 - y1 - 2}px;` : '')
+          // One feeder (a bye on the other side): a plain line across.
+          + (fed.length === 1 ? ' border-right: 0; border-bottom: 0; border-radius: 0;' : '');
+      } else {
+        link.style.cssText = 'display: none;';
+      }
+      return top + mid;
+    });
+    col.style.height = `${last + h}px`;
+  });
+  // Only as tall as the rounds in view, not the longest round (and a
+  // couple of pixels more, so the lowest bubble keeps its bottom edge).
+  frame.style.height = `${Math.ceil(Math.max(...cols.slice(active, active + visible).map(c => parseFloat(c.style.height) || 0))) + 2}px`;
+
+  // The chips follow the round in view.
+  slide.querySelectorAll('[data-kslide-round]').forEach(chip => {
+    const on = Number(chip.dataset.kslideRound) === active;
+    chip.setAttribute('aria-pressed', String(on));
+    if (on) {
+      const row = chip.parentElement;
+      row.scrollLeft = chip.offsetLeft - (row.clientWidth - chip.offsetWidth) / 2;
+    }
+  });
+}
+
+/** Shows round i at the left (null: the round it is on, or opens on). */
+function setSlide(slide, i, smooth = false) {
+  const frame = slide?.querySelector('.kslide__frame');
+  if (!frame?.clientWidth) return;
+  const active = i ?? Number(slide.dataset.active ?? slide.dataset.start ?? 0);
+  layoutSlide(slide, active);
+  frame.scrollTo({ left: active * slideStep(slide), behavior: smooth && !reducedMotion() ? 'smooth' : 'instant' });
+}
+// Laid out again when its width changes (first shown, phone turned);
+// not on height, which the layout itself changes mid-slide.
+const slideFit = new ResizeObserver(entries => entries.forEach(e => {
+  const slide = e.target.closest('[data-kslide]');
+  const width = String(Math.round(e.contentRect.width));
+  if (!slide || slide.dataset.width === width) return;
+  slide.dataset.width = width;
+  setSlide(slide);
+}));
 
 /* --- The campus map + its venue panel --- */
 function renderMap(root, games) {
@@ -623,6 +855,32 @@ function renderMap(root, games) {
   const mapWrap = root.querySelector('[data-cup-map]');
   const panel = root.querySelector('[data-cup-venue-panel]');
   const stats = venueStats(games);
+  const grid = root.querySelector('.cup-map-grid');
+  grid?.classList.toggle('has-selection', Boolean(state.venue));
+  mapListExpanded ??= Boolean(state.venue) || matchMedia('(min-width: 1001px)').matches;
+  grid?.classList.toggle('is-list-expanded', mapListExpanded);
+  const list = root.querySelector('[data-cup-map-list]');
+  if (list) {
+    list.dataset.expanded = String(mapListExpanded);
+    const button = list.querySelector('[data-cup-map-list-toggle]');
+    button.setAttribute('aria-expanded', String(mapListExpanded));
+    button.setAttribute('aria-label', `${mapListExpanded ? 'Collapse' : 'Expand'} games panel`);
+    list.querySelector('.cup-map-list__content').hidden = !mapListExpanded;
+    list.querySelector('[data-cup-map-list-title]').textContent = VENUE_BY_ID[state.venue]?.short || 'Venues & games';
+    const live = games.filter(g => g.status === 'ongoing' && (!state.venue || g.venueId === state.venue)).length;
+    list.querySelector('[data-cup-map-list-note]').textContent = state.venue
+      ? `${live ? `${live} ongoing · ` : ''}Tap to ${mapListExpanded ? 'hide' : 'show'} games`
+      : `${CUP_MAP.venues.length} venues${live ? ` · ${live} ongoing` : ''}`;
+  }
+  const outside = root.querySelector('[data-cup-off-campus]');
+  if (outside) {
+    outside.hidden = !CUP_MAP.showOffCampus;
+    if (CUP_MAP.showOffCampus) {
+      const old = outside.querySelector('details');
+      const expanded = old ? old.open : matchMedia('(min-width: 1001px)').matches;
+      outside.innerHTML = offCampusHtml(games, { now: cupNow(), selected: state.venue, expanded });
+    }
+  }
 
   // A sport picked on the map only stands while its venue still has it.
   if (state.mapSport && !stats[state.venue]?.sports?.[state.mapSport]) state.mapSport = null;
@@ -702,12 +960,13 @@ function renderMap(root, games) {
 
   panel.innerHTML = `
     <div class="venue-panel__head">
-      <p class="panel__kicker">Venue</p>
+      <p class="panel__kicker">${isOffCampus(venue) ? 'Outside campus' : 'Campus venue'}</p>
       <h3 class="venue-panel__title">${escapeHtml(venue.name)}</h3>
       ${venue.note ? `<p class="venue-panel__hint">${escapeHtml(venue.note)}</p>` : ''}
+      ${venueLocationHtml(venue)}
       ${sportChips}
       <button class="btn btn--ghost btn--sm venue-panel__clear" type="button" data-cup-clear-venue>
-        ← All venues
+        ← Close venue
       </button>
     </div>
     ${here.length ? `
@@ -839,7 +1098,7 @@ function renderWins(root, games) {
         <ol class="cup-wins__list">
           ${top.map(x => `
             <li class="cup-wins__team" title="${escapeAttr(x.team.name)}">
-              <img src="${escapeAttr(x.team.logo)}" alt="" loading="lazy" decoding="async">
+              <img src="${escapeAttr(x.team.logo)}" alt="">
               <span>${escapeHtml(x.team.short)}</span>
               <b aria-label="${escapeAttr(`${x.n} win${x.n === 1 ? '' : 's'}`)}">${x.n}</b>
             </li>`).join('')}
@@ -1137,7 +1396,7 @@ async function renderNews(root) {
   const all = await loadPosts();
   // Each sport's page shows its own posts from the same feed.
   newsPosts = all;
-  if (state.sportsSport) render();
+  if (state.sportsSport) render({ instant: true });
   const posts = all.slice(0, CUP_NEWS.maxPosts || (HERO_COUNT + MORE_MAX));
   const heroPosts = posts.slice(0, HERO_COUNT);
    const rest = posts.slice(HERO_COUNT, HERO_COUNT + MORE_MAX);
@@ -1392,7 +1651,8 @@ function wireHero(el, { ms = HERO_MS } = {}) {
  * its team's crest on navy instead.
  */
 function eventsHtml() {
-  const items = CUP_EVENTS?.enabled ? (CUP_EVENTS.items || []) : [];
+  // Off with CUP_CONFIG.showEvents (or CUP_EVENTS.enabled).
+  const items = (CUP_CONFIG.showEvents !== false && CUP_EVENTS?.enabled) ? (CUP_EVENTS.items || []) : [];
   if (!items.length) return '';
 
   const card = (ev) => {
@@ -1435,6 +1695,7 @@ function selectVenue(id, { toggle: toggleSame = false } = {}) {
   const next = (toggleSame && state.venue === id && !state.mapSport) ? null : (id || null);
   state.venue = (next && VENUE_BY_ID[next]) ? next : null;
   state.mapSport = null;
+  mapListExpanded = Boolean(state.venue) || matchMedia('(min-width: 1001px)').matches;
   render();
   revealPanel();
 }
@@ -1445,25 +1706,21 @@ function selectSport(id, sport) {
   const same = state.venue === id && state.mapSport === sport;
   state.venue = VENUE_BY_ID[id] ? id : null;
   state.mapSport = (state.venue && !same) ? sport : null;
+  mapListExpanded = true;
   render();
   revealPanel();
 }
 
-/* Keep the panel in view after a tap on a phone, where it sits
-   below the fold under the map. */
+/* The map and its sheet share one viewport under the existing navigation. */
 function revealPanel() {
-  if (state.venue && window.matchMedia('(max-width: 1000px)').matches) {
-    rootEl?.querySelector('[data-cup-venue-panel]')
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  if (state.tab === 'map') window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
 /** Exported so a match's detail view can jump to its venue. */
 export function showVenue(id) {
   showTab('map', { scroll: false });
   selectVenue(id);
-  rootEl?.querySelector('[data-cup-map-section]')
-    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
 function openGame(id) {
@@ -1479,7 +1736,11 @@ function openGame(id) {
 /** The Sports view's place from a link: ?sport=<id>&div=<division>&team=<id>. */
 function readSports(q, tab = state.tab) {
   const on = tab === 'sports';
-  state.sportsSport = on ? (findSport(q.sport)?.id || '') : state.sportsSport;
+  // Before the live data lands, a sport not known yet (one only the
+  // tracker lists) keeps the link's id; renderSports drops it after.
+  const waiting = CUP_LIVE.enabled && !liveArrived;
+  const linked = findSport(q.sport)?.id || (waiting ? String(q.sport || '').toLowerCase().replace(/[^a-z0-9-]/g, '') : '');
+  state.sportsSport = on ? linked : state.sportsSport;
   state.sportsDiv = on ? String(q.div || '') : state.sportsDiv;
   state.sportsTeam = (on && state.sportsSport && TEAM_BY_ID[q.team]) ? q.team : (on ? '' : state.sportsTeam);
 }
@@ -1517,7 +1778,7 @@ function urlFor() {
   }
   if (state.tab === 'sports' && state.sportsSport) {
     q.set('sport', state.sportsSport);
-    if (state.sportsDiv) q.set('div', state.sportsDiv.toLowerCase());
+    if (state.sportsDiv) q.set('div', catSlug(state.sportsDiv));
     if (state.sportsTeam) q.set('team', state.sportsTeam);
   }
   if (state.tab === 'map') {

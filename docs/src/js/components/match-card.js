@@ -26,6 +26,7 @@
 import { CUP_CONFIG } from '../data/xavier-cup.js';
 import { sportGlyph } from './game-card.js';
 import { sportIcon } from './cup-map.js';
+import { sportPictogram } from './sport-pictograms.js';
 import { escapeHtml, escapeAttr } from '../lib/html.js';
 
 const BAR_LABEL = { upcoming: 'Upcoming', ongoing: 'Live', finished: 'Final' };
@@ -35,8 +36,11 @@ function hasScore(g) {
     && g.score.home !== undefined && g.score.away !== undefined;
 }
 
-/** The sport's picture from CUP_MAP.sportIcons, else its line glyph. */
+/** The sport's pictogram (sport-pictograms.js), else its configured or
+    shared WebP picture (SPORTS / sport-icons.js), else its line glyph. */
 function sportIconHtml(sport) {
+  const picto = sportPictogram(sport, { cls: 'match__icon' });
+  if (picto) return picto;
   const src = sportIcon(sport);
   if (src) return `<img class="match__icon" src="${escapeAttr(src)}" alt="" loading="lazy" decoding="async">`;
   return sportGlyph(sport) || '';
@@ -45,7 +49,7 @@ function sportIconHtml(sport) {
 function sideHtml(team, { winner = false, loser = false, align = 'home' } = {}) {
   if (!team) return '<span class="match__side" aria-hidden="true"></span>';
   const crest = team.logo
-    ? `<img src="${escapeAttr(team.logo)}" alt="" loading="lazy" decoding="async">`
+    ? `<img src="${escapeAttr(team.logo)}" alt="">`
     : `<span class="match__initials">${escapeHtml(String(team.short || team.name).slice(0, 3))}</span>`;
   return `
     <span class="match__side match__side--${align}${winner ? ' is-winner' : ''}${loser ? ' is-loser' : ''}">
@@ -58,7 +62,9 @@ function sideHtml(team, { winner = false, loser = false, align = 'home' } = {}) 
 /**
  * matchCardHtml(g, { i, myTeams, featured })
  *   i         position in its list, for the reveal stagger
- *   myTeams   the followed team ids; their games get a lime ring
+ *   myTeams   the picked team ids; their games get a lime ring and a
+ *             "Selected team" tag with the picked team's logo (both
+ *             logos when both teams in the game are picked)
  *   featured  the larger version, first card of the chosen day
  */
 export function matchCardHtml(g, { i = 0, myTeams = [], featured = false } = {}) {
@@ -66,7 +72,9 @@ export function matchCardHtml(g, { i = 0, myTeams = [], featured = false } = {})
   const home = Number(g.score?.home);
   const away = Number(g.score?.away);
   const decided = scored && g.status === 'finished' && home !== away;
-  const mine = Boolean(g.teamIds?.some(id => myTeams.includes(id)));
+  // The picked teams playing in this game, in card order.
+  const picked = (g.sides || []).filter(t => t?.id && myTeams.includes(t.id));
+  const mine = picked.length > 0;
   const solo = (g.sides?.length || 0) < 2;
 
   const box = scored
@@ -119,7 +127,7 @@ export function matchCardHtml(g, { i = 0, myTeams = [], featured = false } = {})
   const label = [
     g.title, scoreLabel, g.meta,
     [g.dayLabel, g.venueName].filter(Boolean).join(', '),
-    mine ? 'Your team' : '',
+    mine ? `${pickedWord(picked)}: ${picked.map(t => t.name).join(' and ')}` : '',
   ].filter(Boolean).join('. ');
 
   return `
@@ -138,6 +146,19 @@ export function matchCardHtml(g, { i = 0, myTeams = [], featured = false } = {})
         ${venue}
         <span class="match__day" aria-hidden="true">${escapeHtml(g.dayLabel)}${scored && g.timeLabel ? ` · ${escapeHtml(g.timeLabel)}` : ''}</span>
       </span>
-      ${mine ? '<span class="match__mine" aria-hidden="true">Your team</span>' : ''}
+      ${mine ? selectedTagHtml(picked) : ''}
     </article>`;
+}
+
+const pickedWord = (picked) => (picked.length > 1 ? 'Selected teams' : 'Selected team');
+
+/** The tag on a picked team's game: its logo (both, when both teams are picked) and the words. */
+function selectedTagHtml(picked) {
+  const crests = picked.map(t => (t.logo
+    ? `<img class="match__mine-crest" src="${escapeAttr(t.logo)}" alt="">`
+    : `<span class="match__mine-crest match__mine-crest--initials">${escapeHtml(String(t.short || t.name).slice(0, 3))}</span>`)).join('');
+  return `
+      <span class="match__mine" aria-hidden="true">
+        <span class="match__mine-crests">${crests}</span>${pickedWord(picked)}
+      </span>`;
 }

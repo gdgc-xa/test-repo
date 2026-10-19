@@ -5,8 +5,8 @@
 > Created by **GDG on Campus – Xavier Ateneo**.
 >
 > The site ships in the **Xavier Cup 2026** design: navy, lime and cream tiles, merged in
-> from the TXC proposal. The **World Cup** pitch and the original **Sands of Time** beach
-> are still here in full and can be switched to from the gear icon in the nav.
+> from the TXC proposal. The original **Sands of Time** beach is still here in full and
+> can be switched to from the gear icon in the nav.
 
 Static HTML / CSS / vanilla JS. No frameworks, no build step, no npm dependencies.
 
@@ -68,7 +68,7 @@ campus-compass/
 │   │   ├── layout.css               # page-level layout: max-widths, section grid, responsive breakpoints
 │   │   ├── animations.css           # every @keyframes block (drift, wave, sand, reveal, modal…)
 │   │   │
-│   │   ├── skins.css                # Xavier Cup 2026 ⇄ World Cup ⇄ Sands of Time: which scene is painted
+│   │   ├── skins.css                # Xavier Cup 2026 ⇄ Sands of Time: which scene is painted
 │   │   │
 │   │   ├── components/              # one file, one component. Never reach into a sibling.
 │   │   │   ├── nav.css              # top navigation bar
@@ -143,6 +143,7 @@ campus-compass/
 │   │   │   ├── cup-map.js           # the consolidated venue map + pins
 │   │   │   ├── match-card.js        # one match as a match card
 │   │   │   ├── sports.js            # the Sports view: sport grid, sport page, team page
+│   │   │   ├── sport-pictograms.js  # a pictogram per sport (CC0 SVGs from svgrepo.com)
 │   │   │   ├── team-strip.js        # team picker
 │   │   │   ├── featured-match.js    # which game to feature on a day
 │   │   │   ├── cup-calendar.js      # the season as a month
@@ -160,10 +161,11 @@ campus-compass/
 │   └── html/                        # (unused — screens are hydrated by JS, no partials)
 │
 └── assets/
+    ├── brand/
+    │   └── gdg-xavier-logo.webp     # official GDG on Campus Xavier logo (About + footer)
     ├── illustrations/               # redrawn cleaner than the mockups (per project decision)
     │   ├── compass-rose.svg
     │   ├── sea-scene.svg            # (also inlined in index.html so CSS binds to layers)
-    │   ├── gdg-credit.svg           # sun mark
     │   └── primitives/
     │       ├── puzzle-red.svg
     │       ├── puzzle-blue.svg
@@ -240,8 +242,6 @@ Two axes, both saved per device and both switchable from the **gear icon** in th
   Figtree for reading, both from Google Fonts. Palette and contrast rules are at the
   bottom of `tokens.css`; the structural rules are at the bottom of `skins.css`; the tiles
   are `components/bento-hero.css` + `.js`.
-- `worldcup` — Floodlit stadium hero, pitch stripes, trophy in the
-  lockup, bunting in the corners, green-and-gold palette.
 - `sands` — the original **Sands of Time** beach, untouched: sea, surf, hourglass,
   palms, the closing tide scene.
 
@@ -254,8 +254,7 @@ The season wording (brand subtitle, hero tagline, footer line) comes from
 `data/site.js → season`, one set per design, stamped onto any `[data-season]` element.
 
 **Theme (`data-theme`)**
-- Light and dark, for either design. Dark is *night at the beach* under Sands of Time
-  and *a floodlit night match* under World Cup.
+- Light and dark, for either design. Dark is *night at the beach* under Sands of Time.
 
 **Motion (`data-motion`)** — a third row in Settings, so someone whose OS says one
 thing can still ask this site for the other. `prefers-reduced-motion` is still honoured
@@ -346,7 +345,7 @@ Every reusable illustration group in the mockup SVGs is exported to `assets/illu
 |---|---|
 | `#Compass-Icon` | `compass-rose.svg` (inlined in nav for `currentColor`) |
 | `#Sea-Scene` | `sea-scene.svg` (also inlined in `index.html` so CSS animation classes bind to internal `<g>` groups) |
-| `#GDG-Credit` (sun mark) | `gdg-credit.svg` |
+| `#GDG-Credit` | replaced by the official logo, `assets/brand/gdg-xavier-logo.webp` |
 | 4 puzzle pieces + starfish | `primitives/*.svg` |
 
 Small mockup-only decorations that were not extracted separately (they exist inside `sea-scene.svg` as internal groups instead): the two sailboats, the three horizon birds, the sparkles, and the wave motion lines. If you need to swap them individually, edit `sea-scene.svg` and the inline copy in `index.html`.
@@ -357,3 +356,68 @@ Small mockup-only decorations that were not extracted separately (they exist ins
 
 Designed and built by **Google Developer Group on Campus – Xavier Ateneo**, for the
 **Sands of Time** organizational trip and **The Xavier Cup** season.
+
+## Campus map integration
+
+The Map tab is 2D only. Its camera starts close enough to read on phones and
+supports drag, pinch, wheel, double tap, keyboard arrows, +/−, and recenter (Home).
+The camera survives match refreshes and tab changes. A selected venue opens an
+translucent floating panel on desktop and a collapsible sheet at widths up to 1000px.
+The Map tab fills the screen below the existing navigation/tabs; its hero banner
+is hidden only while Map is active. Other tabs keep their existing header.
+Use the panel header to collapse/expand the game list; selecting a venue opens it.
+The camera keeps selected markers clear of the panel. Background blur preserves
+legibility without reducing text opacity. Outside games remain inside this panel.
+
+### Outside locations
+
+Keep one canonical venue record in `src/js/data/xavier-cup.js` → `CUP_MAP.venues`.
+For an outside location, set `venueType: 'off-campus'`. Give it a permanent `id`
+and a confirmed `name`; optional `address`, `note`, and `gps: [longitude, latitude]`.
+It needs no campus `label`, `footprint`, or `icons` positions. Point `GAMES[].venue`
+at that ID. Do not add a copy in a second venue list or use sport names as locations.
+No confirmed outside locations were available at integration, so none are invented.
+
+`CUP_MAP.showOffCampus` controls the Outside campus panel. It lists ongoing games
+(regardless of their scheduled day) and upcoming games today using the same
+resolved matches and `cupNow()` as the rest of Campus Compass. Select a venue to
+see all its existing matches and results; select a game to open its detail view.
+Results retain the site's existing behaviour. For outside venues, valid coordinates enable an external
+Google Maps link, with coordinate order converted to latitude,longitude. Missing
+coordinates never prevent venue information from appearing. No navigation, GPS
+tracking, or internal routing is implemented.
+
+### Clock and tracker boundary
+
+The existing one-minute refresh, `CUP_CONFIG.previewNow`, `resolveGame()` and
+`computeStatus()` are retained. Explicit upcoming/ongoing/finished statuses beat
+the clock; auto status uses start/end and the existing duration fallback.
+**This repository still uses its local GAMES data. It does not yet fetch the new
+tracker.** A later tracker adapter must read Master + Events, preserve IDs and
+reported statuses, and resolve controlled venue selections into the registry.
+The preview clock is still enabled in the existing configuration; set it to null
+when the team is ready to use real time.
+
+### Sport assets and Sports tab
+
+The 23 transparent WebP sport assets are connected through
+`src/js/data/sport-icons.js`. `sportIconFor(name)` matches case, spaces, hyphens,
+and known aliases, including Basketball3x3, ESports Dota and ESports MLBB.
+Map markers, match cards, outside games, and automatic Sports entries use this
+lookup; explicit icons in SPORTS keep priority. The mini map can show the image
+for a scheduled sport even without a custom sport position at its venue.
+
+The Sports tab is restored to its original five entries: Basketball, Volleyball,
+Soccer, Frisbee, and Softball. The additional tiles were removed at the user's
+request while the final Sports implementation is undecided. All 23 WebP assets
+and the shared icon lookup remain available for map markers and outside games.
+No assets, games, venue assignments, or map layout were removed by this revert.
+Verify the final sport catalogue and tracker mappings separately.
+
+Run the focused map tests from the repository root:
+
+```sh
+node --test tests/*.test.mjs
+```
+
+The source TXC worktree stays read-only. No framework or dependency was added.

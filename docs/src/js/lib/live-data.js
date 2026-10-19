@@ -116,7 +116,7 @@ function apply(data, kind) {
 
   // The sheet's sport list, so every sport has a tile before its first game.
   const sports = (Array.isArray(data.sports) ? data.sports : []).map(s => sportName(s?.name)).filter(Boolean);
-  TRACKER_SPORTS.splice(0, TRACKER_SPORTS.length, ...sports);
+  TRACKER_SPORTS.splice(0, TRACKER_SPORTS.length, ...new Set(sports));
 
   live.loaded = true;
   live.source = kind;
@@ -141,9 +141,12 @@ const VENUE_ID = new Map(Object.entries(CUP_LIVE.venues || {})
   .flatMap(([id, names]) => names.map(n => [key(n), id])));
 const TEAM_ID = new Map(Object.entries(CUP_LIVE.colleges || {}).map(([code, id]) => [key(code), id]));
 const SPORT_NAME = new Map(SPORTS.map(s => [key(s.name), s.name]));
+const SPORT_AS = new Map(Object.entries(CUP_LIVE.sports || {}).map(([name, to]) => [key(name), to]));
 
 const teamId = (code) => TEAM_ID.get(key(code)) || text(code) || 'TBD';
-const sportName = (name) => SPORT_NAME.get(key(name)) || text(name);
+const sportName = (name) => SPORT_AS.get(key(name))?.sport || SPORT_NAME.get(key(name)) || text(name);
+// The event a sheet sport is on the site ("Basketball 3x3" → '3x3').
+const sportEvent = (name) => SPORT_AS.get(key(name))?.event || undefined;
 const venueId = (name) => VENUE_ID.get(key(name)) || null;
 
 // "Men's" → "Men", the division names the Sports pages already use.
@@ -178,6 +181,7 @@ function fromMatch(m) {
   return {
     id: text(m.match_id),
     sport: sportName(m.sport) || 'Match',
+    event: sportEvent(m.sport),
     division: division(m.category),
     round: text(m.round) || undefined,
     teams: [teamId(m.team_a), teamId(m.team_b)],

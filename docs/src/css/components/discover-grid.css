@@ -47,7 +47,15 @@ a.dtile:focus-visible { outline: 3px solid var(--tx-accent); outline-offset: 3px
 .dtile--map { grid-area: map; min-height: 360px; background: var(--surface); border: 1px solid var(--border); }
 .dtile--map .dtile__title { font-size: clamp(30px, 4vw, 48px); }
 .dtile--map .dtile__eyebrow { color: var(--tx-primary); }
-.dtile__mapart { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; z-index: 0;
+/* The real campus (discover-map.js draws it): the venues lit and named,
+   the heading read over a fade of the ground at the top. */
+.dtile__mapart { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; z-index: 0; background: var(--campus-ground); }
+.dtile__mapart .campus { position: absolute; inset: 0; width: 100%; height: 100%; }
+.dtile__mapart .campus__fp.is-venue { stroke: var(--campus-select); stroke-width: 1.6; }
+.dtile__mapart::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, var(--campus-ground) 0%, color-mix(in srgb, var(--campus-ground) 70%, transparent) 20%, transparent 34%); }
+/* Until it is drawn: a grid with three pins. */
+.dtile__mapart:empty {
   background:
     radial-gradient(circle at 70% 28%, var(--tx-accent) 0 7px, transparent 8px),
     radial-gradient(circle at 32% 62%, var(--tx-primary) 0 7px, transparent 8px),

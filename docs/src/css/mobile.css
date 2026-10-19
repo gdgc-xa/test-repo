@@ -319,3 +319,102 @@
   .screen--cup .cup-matches__head { margin-bottom: 12px; }
   .cup-matches__head .cup-section__hint { margin-top: 2px; font-size: 14px; }
 }
+
+/* ============================================================
+   PHONE FIT — written from MOBILE-OPTIMIZATION-PROMPT.md.
+   Phones are most of the traffic, so: content decides height (never
+   the screen), detail views are sheets, posters get their own space,
+   and nothing is wider than the card it sits in.
+   ============================================================ */
+@keyframes sheetIn { from { transform: translateY(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+@media (max-width: 720px) {
+
+  /* 1. The Discover search bar. A grid column of 1fr cannot shrink below
+        the input's own width, so the bar was a fixed ~364px wide and its
+        Search button was clipped. minmax(0, 1fr) lets it fit the card. */
+  .dhero--full .dhero__panel { grid-template-columns: minmax(0, 1fr); }
+  .dhero--full .dhero__copy,
+  .dhero .dhero__search { min-width: 0; }
+
+  /* 2. Inputs at 16px or more, or iPhones zoom the page on focus.
+        Chips and close buttons are real touch targets. */
+  .search-shell__input,
+  .dhero .dhero__search .search-shell__input,
+  input[type="search"], input[type="text"], input:not([type]) { font-size: 16px; }
+  .chip { min-height: 44px; }
+
+  /* 3. The Xavier Cup banner no longer fills a whole tall screen. */
+  :root[data-skin] .cup-hero.has-photos .cup-hero__tile {
+    min-height: min(calc(100vh - var(--nav-h-mob)), 620px);
+    min-height: min(calc(100svh - var(--nav-h-mob)), 620px);
+  }
+
+  /* 4. Popups are bottom sheets: capped height, rounded top, a strip of
+        the page left above so it reads as dismissable. Leaving is the
+        X, a tap outside, or Esc, so the breadcrumb and the second
+        "Back" button inside a popup are hidden. */
+  .modal { place-items: end center; padding: 0; }
+  .modal__panel {
+    max-width: 100%;
+    max-height: min(88vh, 760px);
+    max-height: min(88dvh, 760px);
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    border-radius: 22px 22px 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    animation: sheetIn 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .modal__panel::before {
+    content: "";
+    display: block;
+    width: 40px; height: 4px;
+    margin: 8px auto 0;
+    border-radius: 2px;
+    background: var(--border);
+  }
+  .modal .booth__crumb,
+  .modal .btn--back { display: none; }
+  .modal .booth { padding-top: var(--space-3); }
+  .modal .booth-hero__title { font-size: clamp(24px, 7vw, 30px); }
+
+  /* 5. Latest updates (the Discover tile and the Cup's News tab).
+        Pubmats already carry their own text, so the picture goes first at
+        a capped 4:5 and the story sits on its own panel underneath. Our
+        words never land on top of theirs. */
+  .news-hero__slide,
+  .dtile--updates .news-hero__slide { min-height: 0; grid-template-rows: auto auto; }
+  .news-hero__media,
+  .dtile--updates .news-hero__media {
+    grid-area: 1 / 1;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    max-height: min(62vh, 460px);
+    max-height: min(62svh, 460px);
+  }
+  .news-hero__panel,
+  .dtile--updates .news-hero__panel {
+    grid-area: 2 / 1;
+    align-self: stretch;
+    max-width: none;
+    gap: 8px;
+    padding: 18px 20px 56px;
+    background: color-mix(in srgb, #fff 8%, var(--tx-navy-deep, #092040));
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+  }
+  .dtile--updates .news-hero__panel { padding-bottom: 104px; }   /* room for the bars and arrows */
+  .news-hero__slide::after,
+  .dtile--updates .news-hero__slide::after { display: none; }
+  .news-hero__title { font-size: clamp(20px, 5.6vw, 26px); line-height: 1.15; }
+  .news-hero__body { -webkit-line-clamp: 2; }
+  .news-hero__cta { min-height: 44px; padding: 0 22px; font-size: 14px; }
+  .news-hero__bars { left: 20px; right: 20px; bottom: 18px; }
+  .dtile--updates .news-hero__bars { bottom: 54px; }
+  /* The eyebrow and "View more" were laid over the poster (and over its
+     title). They become a header row above it. */
+  .dtile--updates .du-top {
+    position: static;
+    padding: 14px 20px;
+    background: color-mix(in srgb, #fff 8%, var(--tx-navy-deep, #092040));
+  }
+}
