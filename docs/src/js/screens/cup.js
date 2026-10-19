@@ -40,7 +40,7 @@ import {
   CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, CUP_PHOTOS, CUP_LIVE, GAMES, VENUE_BY_ID,
   allSports, findSport, cupNow, isPreviewClock,
 } from '../data/xavier-cup.js';
-import { TEAM_BY_ID, teamFor } from '../data/teams.js';
+import { TEAMS, TEAM_BY_ID, teamFor } from '../data/teams.js';
 import { SITE } from '../data/site.js';
 import { byWhen, parseDate, formatDay, formatTime, formatRange } from '../lib/dates.js';
 import { resolveGame } from '../components/game-card.js';
@@ -1084,11 +1084,11 @@ function renderWins(root, games) {
     const id = winnerOf(g);
     if (id) wins.set(id, (wins.get(id) || 0) + 1);
   }
-  const top = [...wins]
-    .map(([id, n]) => ({ team: TEAM_BY_ID[id], n }))
-    .filter(x => x.team)
-    .sort((a, b) => (b.n - a.n) || a.team.name.localeCompare(b.team.name))
-    .slice(0, 4);
+  // Every team, most wins first (one still without a win shows 0);
+  // the name breaks a tie. Nothing to rank until the first result.
+  const top = wins.size ? TEAMS
+    .map(team => ({ team, n: wins.get(team.id) || 0 }))
+    .sort((a, b) => (b.n - a.n) || a.team.name.localeCompare(b.team.name)) : [];
 
   box.innerHTML = `
     <span class="cup-wins__icon" aria-hidden="true">

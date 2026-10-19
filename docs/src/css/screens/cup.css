@@ -217,25 +217,26 @@
   text-transform: uppercase;
   color: var(--muted);
 }
+/* Every team, in wins order: one row where they fit, else the next. */
 .cup-wins__list {
   display: flex;
-  gap: var(--space-4);
+  flex-wrap: wrap;
+  gap: 8px var(--space-4);
   margin: 6px 0 0;
   padding: 0;
   list-style: none;
-  overflow-x: auto;
-  scrollbar-width: none;
 }
-.cup-wins__list::-webkit-scrollbar { display: none; }
 .cup-wins__team {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
   font-size: 13px;
   font-weight: 700;
   color: var(--ink-2);
 }
+.cup-wins__team span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cup-wins__team img { width: 26px; height: 26px; object-fit: contain; }
 .cup-wins__team b {
   font-family: var(--font-serif);
@@ -1454,8 +1455,9 @@
   .cup-wins { gap: var(--space-3); padding: 10px 14px; border-radius: 18px; }
   .cup-wins__icon { width: 44px; height: 44px; }
   .cup-wins__icon img { width: 28px; height: 28px; }
-  .cup-wins__list { gap: var(--space-3); }
-  .cup-wins__team:nth-child(n + 4) { display: none; }   /* the top three fit a phone */
+  /* All eight on a phone: two columns of four, wins on the right. */
+  .cup-wins__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px var(--space-4); }
+  .cup-wins__team span { flex: 1 1 auto; }
   .cup-rail { padding: var(--space-3); border-radius: 20px; }
   .cup-rail__title { font-size: 17px; }
   .cup-rail__arrow { width: 34px; height: 34px; }
