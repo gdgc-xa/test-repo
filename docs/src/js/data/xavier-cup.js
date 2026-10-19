@@ -126,9 +126,11 @@ export const CUP_MAP = {
                   at   [x, y] on the drawing
                   gps  optional [longitude, latitude];
                        without it the icon uses the venue's gps
-                A sport only shows here once GAMES has a fixture
-                for it at this venue. One with no spot listed is
-                placed automatically above the name tag.
+                  always  true: shown before the sport's first
+                       fixture here too (where it is known to be played)
+                Otherwise a sport only shows here once GAMES has a
+                fixture for it at this venue. One with no spot listed
+                is placed automatically above the name tag.
      ------------------------------------------------------------ */
   venues: [
     {
@@ -167,6 +169,19 @@ export const CUP_MAP = {
       note: 'Beside the SPED Lab and the Agriculture Building, on the Corrales Avenue side.',
       icons: {
         Basketball: { at: [481, 324] },
+      },
+    },
+    {
+      id: 'main-library',
+      footprint: 'xu-new-library',
+      name: 'XU Main Library',
+      short: 'Main Library',
+      label: [409, 238],
+      indoor: true,
+      note: 'Between the University Church and the Library Annex, across from the Science Center.',
+      icons: {
+        // Chess is played here: its icon shows before the first game is set.
+        Chess: { at: [409, 210], always: true },
       },
     },
   ],
@@ -209,6 +224,7 @@ export const CUP_LIVE = {
     'soccer-field':  ['Soccer Field', 'XU Soccer Field', 'Field (Pitch 1)', 'Field (Pitch 2)', 'Softball Field'],
     'covered-court': ['Covered Court', 'XU Covered Court'],
     'xu-gym':        ['University Gym', 'Xavier University Gym', 'Gym'],
+    'main-library':  ['Main Library', 'XU Main Library', 'Library'],
   },
 
   /* College codes in the sheet → team ids in data/teams.js.

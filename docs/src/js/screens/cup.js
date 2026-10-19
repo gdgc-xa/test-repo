@@ -944,10 +944,10 @@ function renderMap(root, games) {
   const sportChips = sports.length > 1 ? `
     <div class="venue-panel__sports" role="group" aria-label="Sports at ${escapeAttr(venue.name)}">
       <button class="chip chip--plain" type="button" data-venue-sport="all"
-              aria-pressed="${!state.mapSport}">All sports <span class="chip__count">${vstat.total}</span></button>
+              aria-pressed="${!state.mapSport}">All sports <span class="chip__count">${vstat?.total ?? 0}</span></button>
       ${sports.map(s => `
         <button class="chip chip--plain" type="button" data-venue-sport="${escapeAttr(s)}"
-                aria-pressed="${state.mapSport === s}">${escapeHtml(s)} <span class="chip__count">${vstat.sports[s].total}</span></button>`).join('')}
+                aria-pressed="${state.mapSport === s}">${escapeHtml(s)} <span class="chip__count">${vstat?.sports?.[s]?.total ?? 0}</span></button>`).join('')}
     </div>` : '';
 
   const section = (status, label) => {

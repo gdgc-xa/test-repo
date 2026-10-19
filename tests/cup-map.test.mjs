@@ -56,7 +56,7 @@ test('outside panel uses existing statuses, shows ongoing and today upcoming, an
   } finally { CUP_MAP.venues.pop(); delete VENUE_BY_ID[venue.id]; }
 });
 test('existing campus interactions and explicit status precedence remain', () => {
-  assert.equal(CUP_MAP.venues.length,3);
+  assert.equal(CUP_MAP.venues.length,4);   // the Soccer Field, Covered Court, Gym and Main Library
   assert.ok(CUP_MAP.venues.every(hasCampusPoint));
   const g=resolveGame({id:'campus',venue:'soccer-field',sport:'Soccer',teams:['ccs','eng'],
     start:'2026-10-10T09:00',end:'2026-10-10T10:00',status:'ongoing'},cupNow());

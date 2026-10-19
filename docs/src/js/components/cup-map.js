@@ -77,11 +77,13 @@ export function venueStats(games) {
 export function venueIcons(venue, stat) {
   const booked = Object.keys(stat?.sports || {});
   const listed = Object.keys(venue.icons || {});
+  // A spot marked `always` shows before its sport's first game here too.
+  const shown = (s) => booked.includes(s) || venue.icons?.[s]?.always;
   const sports = [
-    ...listed.filter(s => booked.includes(s)),
+    ...listed.filter(shown),
     ...booked.filter(s => !listed.includes(s)),
   ];
-  if (!hasCampusPoint(venue)) return sports.map(sport => ({ sport, stat: stat.sports[sport] }));
+  if (!hasCampusPoint(venue)) return sports.map(sport => ({ sport, stat: stat?.sports?.[sport] }));
   const unplaced = sports.filter(s => !venue.icons?.[s]);
   // Reserve configured spots even without a current game, keeping automatic
   // icons away from them and consistent between the main map and mini map.
@@ -97,7 +99,7 @@ export function venueIcons(venue, stat) {
       const i = unplaced.indexOf(sport);
       at = [venue.label[0] + (i - (unplaced.length - 1) / 2) * 24, rowY];
     }
-    return { sport, at, gps: spot?.gps || venue.gps, stat: stat.sports[sport] };
+    return { sport, at, gps: spot?.gps || venue.gps, stat: stat?.sports?.[sport] };
   });
 }
 
