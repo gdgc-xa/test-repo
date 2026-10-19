@@ -377,44 +377,4 @@
   .modal .btn--back { display: none; }
   .modal .booth { padding-top: var(--space-3); }
   .modal .booth-hero__title { font-size: clamp(24px, 7vw, 30px); }
-
-  /* 5. Latest updates (the Discover tile and the Cup's News tab).
-        Pubmats already carry their own text, so the picture goes first at
-        a capped 4:5 and the story sits on its own panel underneath. Our
-        words never land on top of theirs. */
-  .news-hero__slide,
-  .dtile--updates .news-hero__slide { min-height: 0; grid-template-rows: auto auto; }
-  .news-hero__media,
-  .dtile--updates .news-hero__media {
-    grid-area: 1 / 1;
-    width: 100%;
-    aspect-ratio: 4 / 5;
-    max-height: min(62vh, 460px);
-    max-height: min(62svh, 460px);
-  }
-  .news-hero__panel,
-  .dtile--updates .news-hero__panel {
-    grid-area: 2 / 1;
-    align-self: stretch;
-    max-width: none;
-    gap: 8px;
-    padding: 18px 20px 56px;
-    background: color-mix(in srgb, #fff 8%, var(--tx-navy-deep, #092040));
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-  }
-  .dtile--updates .news-hero__panel { padding-bottom: 104px; }   /* room for the bars and arrows */
-  .news-hero__slide::after,
-  .dtile--updates .news-hero__slide::after { display: none; }
-  .news-hero__title { font-size: clamp(20px, 5.6vw, 26px); line-height: 1.15; }
-  .news-hero__body { -webkit-line-clamp: 2; }
-  .news-hero__cta { min-height: 44px; padding: 0 22px; font-size: 14px; }
-  .news-hero__bars { left: 20px; right: 20px; bottom: 18px; }
-  .dtile--updates .news-hero__bars { bottom: 54px; }
-  /* The eyebrow and "View more" were laid over the poster (and over its
-     title). They become a header row above it. */
-  .dtile--updates .du-top {
-    position: static;
-    padding: 14px 20px;
-    background: color-mix(in srgb, #fff 8%, var(--tx-navy-deep, #092040));
-  }
 }

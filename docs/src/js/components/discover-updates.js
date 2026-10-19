@@ -10,6 +10,7 @@
 import { CUP_NEWS } from '../data/xavier-cup.js';
 import { parseDate, formatRange } from '../lib/dates.js';
 import { escapeHtml, escapeAttr } from '../lib/html.js';
+import { displayablePosts } from '../lib/post-filter.js';
 
 const COUNT = 4;       // slides shown
 const MS = 7000;       // time per slide
@@ -56,7 +57,7 @@ function slide(p, n, total) {
       </p>
       <h2 class="news-hero__title">${escapeHtml(p.title)}</h2>
       ${p.body ? `<p class="news-hero__body">${escapeHtml(p.body)}</p>` : ''}
-      ${link ? `<a class="news-hero__cta" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer"${n ? ' tabindex="-1"' : ''}>Read more</a>` : ''}
+      ${link ? `<a class="news-hero__cta" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer"${n ? ' tabindex="-1"' : ''}>${p.isReel ? 'Watch reel' : 'Read more'}</a>` : ''}
     </div>
   </article>`;
 }
@@ -120,7 +121,7 @@ async function init() {
   const el = document.querySelector('[data-discover-updates]');
   if (!el || el.__wired || !CUP_NEWS.enabled) return;
   el.__wired = true;
-  const posts = (await loadPosts()).slice(0, COUNT);
+  const posts = (await displayablePosts(await loadPosts())).slice(0, COUNT);
   if (!posts.length) return;                      // keep the static slide
   const total = posts.length;
   el.querySelector('[data-du-viewport]').innerHTML = posts.map((p, n) => slide(p, n, total)).join('');

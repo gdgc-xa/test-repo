@@ -20,6 +20,7 @@ import './components/discover-flow.js';
 import './components/discover-teams.js';
 import './components/discover-hero.js';
 import './lib/adaptive-tone.js';
+import './components/discover-cup-button.js';
 
 function boot() {
   // Read before the router tidies the address (see the layout tool below).

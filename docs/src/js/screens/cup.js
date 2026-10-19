@@ -50,6 +50,7 @@ import { mountCupMap, cupLegendHtml, venueStats, venueIcons } from '../component
 import { offCampusHtml } from '../components/cup-off-campus.js';
 import { isOffCampus, venueLocationHtml } from '../lib/cup-map-locations.js';
 import { statusPillHtml, GAME_STATUS_LABEL } from '../components/status.js';
+import { displayablePosts } from '../lib/post-filter.js';
 import { mountTeamStrip } from '../components/team-strip.js';
 import { dayKey, gameDays, initialDay, gamesOn, pickFeatured, keyToDate } from '../components/featured-match.js';
 import { calendarHtml, gameMonths } from '../components/cup-calendar.js';
@@ -69,7 +70,8 @@ const STATUS_FILTERS = [
   { id: 'ongoing',  label: 'Live',     color: 'red'    },
   { id: 'upcoming', label: 'Upcoming', color: 'green'  },
   { id: 'finished', label: 'Results',  color: 'yellow' },
-];
+].filter(f => (f.id !== 'ongoing'  || CUP_CONFIG.showLiveNow  !== false)
+           && (f.id !== 'upcoming' || CUP_CONFIG.showComingUp !== false));
 // Friendlier spellings a link may use for ?status=
 const STATUS_ALIAS = { live: 'ongoing', results: 'finished' };
 
@@ -1194,12 +1196,12 @@ function renderRails(root, list, mine) {
       games: mineFirst(of('ongoing').sort(byStart)),
       empty: 'Nothing live right now.',
       // A day that is not today has nothing live to show.
-      shown: !state.day || state.day === today },
+      shown: CUP_CONFIG.showLiveNow !== false && (!state.day || state.day === today) },
     { id: 'upcoming', status: 'upcoming',
       title: !state.day ? 'Coming up' : (dayName ? `Upcoming · ${dayName}` : 'Upcoming today'),
       games: mineFirst(of('upcoming').sort(byStart)),
       empty: dayName ? `Nothing still to come on ${dayName}.` : 'Nothing still to come.',
-      shown: true },
+      shown: CUP_CONFIG.showComingUp !== false },
     { id: 'finished', status: 'finished',
       title: !state.day ? 'Finished recently' : (dayName ? `Results · ${dayName}` : 'Finished today'),
       games: mineFirst(of('finished').sort((a, b) => byStart(b, a))),
@@ -1393,7 +1395,7 @@ async function renderNews(root) {
   if (!wrap || !CUP_CONFIG.showNews || !CUP_NEWS.enabled) return;
 
   const page = safeUrl(CUP_NEWS.pageUrl);
-  const all = await loadPosts();
+  const all = await displayablePosts(await loadPosts());
   // Each sport's page shows its own posts from the same feed.
   newsPosts = all;
   if (state.sportsSport) render({ instant: true });
@@ -1429,7 +1431,7 @@ async function renderNews(root) {
           </p>
           <h3 class="news-hero__title">${escapeHtml(p.title)}</h3>
           ${p.body ? `<p class="news-hero__body">${escapeHtml(p.body)}</p>` : ''}
-          ${link ? `<a class="news-hero__cta" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer"${i ? ' tabindex="-1"' : ''}>Read more</a>` : ''}
+          ${link ? `<a class="news-hero__cta" href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer"${i ? ' tabindex="-1"' : ''}>${p.isReel ? 'Watch reel' : 'Read more'}</a>` : ''}
         </div>
       </article>`;
   };

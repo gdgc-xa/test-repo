@@ -58,15 +58,22 @@ export const CUP_CONFIG = {
   showFeatured: true,      // the featured match, first card of the chosen day
   showSchedule: true,      // Matches: the list, grouped by day
   showCalendar: true,      // Matches: the List / Calendar switch (off = list only)
-  showSports: true,        // the Sports view: one page per sport (SPORTS)
+  showSports: false,       // the Sports view: one page per sport (SPORTS). OFF for now: true brings the tab back
   showBracket: false,      // Sports: each sport's knockout bracket (off: its standings show the groups instead)
   showMap: true,           // the Map view
   showNews: true,          // News & Updates from the Facebook page
-  showEvents: true,        // News & Updates: the Upcoming Events cards under the news (CUP_EVENTS)
+  showEvents: false,       // News & Updates: the Upcoming Events cards under the news (CUP_EVENTS). OFF; set true to bring them back
   showLegend: true,        // the colour key under the map
 
   /* --- Filters on Matches (sports have their own pages on Sports) --- */
   showStatusFilter: true,  // All / Live / Upcoming / Results, on one line
+  showLiveNow: false,      // Matches: the "Live now" row (and the Live filter chip). OFF for now
+  showComingUp: false,     // Matches: the "Coming up" row (and the Upcoming filter chip). OFF for now
+
+  /* --- Discover --- */
+  showDiscoverButton: true,                    // the Xavier Cup button at the very top of Discover
+  discoverButtonLabel: 'The Xavier Cup',
+  discoverButtonNote: 'Matches, map & news',
 
   /** How long a match with no `end` is assumed to run, in minutes. */
   defaultDurationMins: 90,
@@ -429,6 +436,12 @@ export const GAMES = [
    ============================================================ */
 export const CUP_NEWS = {
   enabled: true,
+
+  /** Facebook reels. A reel is only shown if the feed gives us a
+      picture for it (it then gets a "Watch reel" button). */
+  hideReelsWithoutPhoto: true,   // leave out a reel with no picture, or one that will not load
+  hideAllReels: false,           // true = leave out every reel, picture or not
+  requirePhoto: false,           // true = leave out every post without a picture
   title: 'News & Updates',
   kicker: 'From the TXC Compass page',
   pageName: 'TXC Compass',
