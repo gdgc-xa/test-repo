@@ -9,18 +9,8 @@
    A rule names the element's own class, so it changes every copy of
    it (every sport page's "Next"), on the screens its @media says.
    ============================================================ */
-/* ============================================================
-   tweaks.css — hand adjustments, loaded last so they win.
-
-   Written by the layout tool (src/js/tweak.js): add ?tweak to the
-   site's address while it runs on your computer, pick a word or a
-   box, change it and press Save. Every Save is also listed in
-   tweaks-history.json, and the tool can go back to any of them.
-
-   A rule names the element's own class, so it changes every copy of
-   it (every sport page's "Next"), on the screens its @media says.
-   ============================================================ */
 
 .sports-endnav__kicker { translate: 0px 1px !important; font-size: 11px !important; }
 .card__cta { font-size: 12px !important; }
 .card__meta { font-size: 6px !important; }
+.cup-sport { translate: -11px -14px !important; }
