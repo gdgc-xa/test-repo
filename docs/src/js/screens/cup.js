@@ -113,6 +113,7 @@ const state = {
   filtersOpen: false, // the Filter panel is open
   view: 'list',       // 'list' | 'calendar'
   calMonth: null,
+  railsOpen: {},      // rows opened with "See all" (a row's id → true): every game, as a list
   // Sports
   sportsSport: '',    // a SPORTS id; '' = the grid of sports
   sportsDiv: '',      // 'Men' | 'Women' | …; '' = the sport's first
@@ -333,6 +334,22 @@ export function initCup(root) {
       // An arrow on a row of matches: one card along.
       const railStep = e.target.closest('[data-rail-step]');
       if (railStep) { stepRail(railStep); return; }
+
+      // "See all" / "Show less" on a row. The row's heading stays where
+      // it was on the screen, so a long list closing never loses it.
+      const railAll = e.target.closest('[data-rail-all]');
+      if (railAll) {
+        const id = railAll.dataset.railAll;
+        const before = railAll.getBoundingClientRect().top;
+        state.railsOpen[id] = !state.railsOpen[id];
+        render({ instant: true });
+        const again = root.querySelector(`[data-rail-all="${CSS.escape(id)}"]`);
+        if (again) {
+          window.scrollBy(0, again.getBoundingClientRect().top - before);
+          again.focus({ preventScroll: true });
+        }
+        return;
+      }
 
       // "Try the map" and other links to another view of the tab.
       const goto = e.target.closest('[data-cup-goto]');
@@ -1177,7 +1194,9 @@ function renderFilters(root, days) {
 }
 
 /* --- Three rows you swipe: Live now · Upcoming · Finished recently.
-       Followed teams' games go first in each. --- */
+       Followed teams' games go first in each. A row of four games or
+       more has "See all", which shows them all as a list of small
+       cards (state.railsOpen) until "Show less". --- */
 const RAIL_ARROW = (dir) => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="${dir < 0 ? '10,3 5,8 10,13' : '6,3 11,8 6,13'}"/></svg>`;
 
 function renderRails(root, list, mine) {
@@ -1212,16 +1231,29 @@ function renderRails(root, list, mine) {
       shown: true },
   ].filter(r => r.shown && (state.status === 'all' || state.status === r.status));
 
-  wrap.innerHTML = rails.map(r => `
-    <section class="cup-rail cup-rail--${r.id}" data-rail="${r.id}" aria-labelledby="cup-rail-${r.id}">
+  // From four games a row has "See all": every game at once, as a list
+  // of small cards; "Show less" puts the row back.
+  const SEE_ALL_AT = 4;
+  wrap.innerHTML = rails.map(r => {
+    const canOpen = r.games.length >= SEE_ALL_AT;
+    const open = canOpen && Boolean(state.railsOpen[r.id]);
+    return `
+    <section class="cup-rail cup-rail--${r.id}${open ? ' is-open' : ''}" data-rail="${r.id}" aria-labelledby="cup-rail-${r.id}">
       <div class="cup-rail__head">
         <h3 class="cup-rail__title" id="cup-rail-${r.id}">
           ${r.id === 'live' && r.games.length ? '<i class="cup-rail__live" aria-hidden="true"></i>' : ''}${escapeHtml(r.title)}
         </h3>
         ${r.games.length ? `<span class="cup-rail__count">${r.games.length}</span>` : ''}
+        ${canOpen ? `
+          <button class="cup-rail__all" type="button" data-rail-all="${r.id}"
+                  aria-expanded="${open}" aria-controls="cup-rail-games-${r.id}">${open ? 'Show less' : 'See all'}</button>` : ''}
       </div>
-      ${r.games.length ? `
-        <div class="cup-rail__body">
+      ${open ? `
+        <div class="cup-rail__list" id="cup-rail-games-${r.id}">
+          ${r.games.map((g, i) => matchCardHtml(g, { i, myTeams: mine })).join('')}
+        </div>`
+      : r.games.length ? `
+        <div class="cup-rail__body" id="cup-rail-games-${r.id}">
           <button class="cup-rail__arrow cup-rail__arrow--prev" type="button" data-rail-step="-1"
                   aria-label="${escapeAttr(`${r.title}: back`)}">${RAIL_ARROW(-1)}</button>
           <div class="cup-rail__track" data-rail-track>
@@ -1231,7 +1263,8 @@ function renderRails(root, list, mine) {
                   aria-label="${escapeAttr(`${r.title}: more`)}">${RAIL_ARROW(1)}</button>
         </div>`
         : `<p class="cup-rail__empty">${escapeHtml(r.empty)}</p>`}
-    </section>`).join('');
+    </section>`;
+  }).join('');
 
   wrap.querySelectorAll('[data-rail]').forEach(rail => {
     const track = rail.querySelector('[data-rail-track]');
