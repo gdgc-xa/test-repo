@@ -155,7 +155,7 @@ export const ORGS = [
     pending: true,
   },
 
-  // ---------- Media and Arts (14) ----------
+  // ---------- Media and Arts (15) ----------
   {
     id: 'devcomsoc',
     name: 'Development Communication Society',
@@ -338,8 +338,21 @@ export const ORGS = [
     logo: 'assets/orgs/xavier-ateneo-film-society.webp',
     pending: true,
   },
+  {
+    id: 'gems',
+    name: 'Xavier University - Guild of Entertainment and Multimedia Students',
+    short: 'GEMS',
+    tags: ['media-arts'],
+    keywords: ['entertainment', 'multimedia', 'media', 'gaming', 'games', 'animation', 'video', 'digital arts', 'design', 'streaming', 'content creation'],
+    description: 'The student organization for Entertainment and Multimedia Computing majors, spanning game development, animation, digital design, and multimedia production.',
+    emails: [],
+    fbUrl: 'https://www.facebook.com/profile.php?id=61592739895098',
+    fbHandle: null,
+    logo: 'assets/orgs/gems.webp',
+    pending: true,
+  },
 
-  // ---------- Natural Sciences, Engineering and Technology (15) ----------
+  // ---------- Natural Sciences, Engineering and Technology (13) ----------
   {
     id: 'biophilic',
     name: 'BIOPHILIC Society',
@@ -497,19 +510,6 @@ export const ORGS = [
     pending: true,
   },
   {
-    id: 'xu-xceed',
-    name: 'Xavier Campus Esports and Entertainment Development',
-    short: 'XU-XCEED',
-    tags: ['sci-eng-tech'],
-    keywords: ['esports', 'gaming', 'games', 'competitive gaming', 'tournaments', 'entertainment'],
-    description: 'The campus esports and entertainment organization, growing Xavier Ateneo\'s competitive gaming community through tournaments, game nights, and player development.',
-    emails: ['xuxceed@gmail.com'],
-    fbUrl: 'https://www.facebook.com/xuxceed',
-    fbHandle: 'xuxceed',
-    logo: 'assets/orgs/xu-xceed.webp',
-    pending: true,
-  },
-  {
     id: 'xu-xcites',
     name: 'Xavier Circle of Information Technology Students',
     short: 'XU-XCITES',
@@ -520,19 +520,6 @@ export const ORGS = [
     fbUrl: 'https://www.facebook.com/XU.XCITES',
     fbHandle: 'XU.XCITES',
     logo: 'assets/orgs/xu-xcites.webp',
-    pending: true,
-  },
-  {
-    id: 'gems',
-    name: 'Xavier University - Guild of Entertainment and Multimedia Students',
-    short: 'GEMS',
-    tags: ['sci-eng-tech'],
-    keywords: ['entertainment', 'multimedia', 'media', 'gaming', 'games', 'animation', 'video', 'digital arts', 'design', 'streaming', 'content creation'],
-    description: 'The student organization for Entertainment and Multimedia Computing majors, spanning game development, animation, digital design, and multimedia production.',
-    emails: [],
-    fbUrl: 'https://www.facebook.com/profile.php?id=61592739895098',
-    fbHandle: null,
-    logo: 'assets/orgs/gems.webp',
     pending: true,
   },
 
@@ -590,7 +577,7 @@ export const ORGS = [
     pending: true,
   },
 
-  // ---------- Sports and Recreation (5) ----------
+  // ---------- Sports and Recreation (6) ----------
   {
     id: 'rodeo',
     name: 'Xavier University Rodeo Enthusiasts',
@@ -658,6 +645,19 @@ export const ORGS = [
     fbUrl: 'https://www.facebook.com/profile.php?id=61565463236791',
     fbHandle: null,
     logo: 'assets/orgs/cmma.webp',
+    pending: true,
+  },
+  {
+    id: 'xu-xceed',
+    name: 'Xavier Campus Esports and Entertainment Development',
+    short: 'XU-XCEED',
+    tags: ['sports'],
+    keywords: ['esports', 'gaming', 'games', 'competitive gaming', 'tournaments', 'entertainment'],
+    description: 'The campus esports and entertainment organization, growing Xavier Ateneo\'s competitive gaming community through tournaments, game nights, and player development.',
+    emails: ['xuxceed@gmail.com'],
+    fbUrl: 'https://www.facebook.com/xuxceed',
+    fbHandle: 'xuxceed',
+    logo: 'assets/orgs/xu-xceed.webp',
     pending: true,
   },
 
