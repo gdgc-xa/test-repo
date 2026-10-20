@@ -99,6 +99,20 @@
 .campus__fp--church { fill: var(--campus-church); }
 
 .campus__roof { pointer-events: none; }
+
+/* 3D view: raised buildings get walls and a soft shadow. */
+.campus__shadow { fill: var(--campus-shadow); pointer-events: none; }
+.campus__wall {
+  fill: color-mix(in srgb, var(--ink) 26%, var(--wall-base, var(--campus-building)));
+  stroke: var(--campus-building-edge);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+}
+.campus__wall--side { fill: color-mix(in srgb, var(--ink) 36%, var(--wall-base, var(--campus-building))); }
+.campus__walls--gym    { --wall-base: var(--campus-gym); }
+.campus__walls--court  { --wall-base: var(--campus-court); }
+.campus__walls--church { --wall-base: var(--campus-church); }
+.campus__walls[data-map-venue] { cursor: pointer; }
 .campus__roof-line { stroke: var(--campus-roof); stroke-width: 0.3; }
 
 .campus__fp-label {
@@ -352,6 +366,9 @@
 .cup-map__btn svg { width: 18px; height: 18px; }
 .cup-map__btn:hover:not(:disabled) { background: var(--surface-2); }
 .cup-map__btn:disabled { color: var(--border-strong); cursor: default; }
+/* The Flat / 3D switch: a word, not an icon, lit while 3D is on. */
+.cup-map__dock .cup-map__btn--view { font-size: 13px; font-weight: 800; letter-spacing: 0.02em; }
+.cup-map__btn--view[aria-pressed="true"] { background: var(--campus-select); color: var(--campus-on-select); }
 .cup-map__btn:focus-visible { outline: 2px solid var(--campus-select); outline-offset: -2px; }
 /* ============================================================
    MINI MAP — one venue lit, in a match's detail view

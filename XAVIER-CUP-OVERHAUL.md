@@ -225,3 +225,6 @@ map positions, or GPS coordinates.
 Confirm these assignments before updating the tracker-to-map mapping or publishing
 fixtures. Swimming should use the outside-campus panel once its venue and matches
 are established; its Google Maps button requires confirmed valid coordinates.
+
+- [Map, done] **Flat / 3D map.** The campus and every pin are stored once, flat, and drawn by `lib/campus-view.js`: Flat by default, **3D** (tilted, buildings raised by `h`) from a button on the Map tab, remembered per visitor. `CAMPUS_VIEW` in `data/campus-map.js` has `default`, `toggle` and a code-only `slant` for a tilted Flat view. Pins follow whichever view is on.
+- [Map + tracker, done] **Venue plan** (`CUP_VENUE_PLAN`, `data/xavier-cup.js`): the sports office's sport → venue list. `version: 'new'` shows it (default); `'old'`, or `?venues=old`, restores the three-venue map where an icon shows only with a fixture. New: the Library Annex (campus) and outside venues XU Uptown Sports Centre, Homecourt and Virtual Grounds; every planned sport's icon on its venue; tracker aliases for the sheet's spellings; a row with no venue filed under its sport's venue. **Mega Crew is overridden** to the Gym, Saturday, in the tracker (`overrides`). Lawn Tennis and Debate have no venue yet. Taekwondo's Gym is marked to be confirmed. Outside venues need their address and coordinates.

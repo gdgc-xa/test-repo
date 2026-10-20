@@ -2,11 +2,20 @@
    data/campus-map.js — the Xavier University main campus, drawn.
    Pure data. No DOM.
 
-   Ported from the TXC campus map (txc-map, data/campus-layout.ts
-   and components/map/SchematicCampusMap.tsx). The drawing follows
-   the university's 11282023.Web.Campus_Map.jpg: field on the left,
-   covered court below it, gym lower right. Shapes are illustrative,
-   not surveyed — positions are in the drawing's own units, not GPS.
+   Redrawn FLAT: every building is a straight, true-to-scale
+   footprint taken from the university's flat campus plan (the
+   "Cautious Return on Campus" layout), not the old tilted
+   perspective sketch. The plan is shown turned half a circle from
+   that sheet so the map keeps the app's orientation: the soccer
+   field on the left, the covered court below it, the gym lower
+   right, Corrales Avenue down the right-hand edge. Shapes are
+   illustrative, not surveyed — positions are in the drawing's own
+   units (one plan pixel = 0.93 units), not GPS.
+
+   Everything here is in FLAT drawing units. lib/campus-view.js turns
+   it into the view on screen (flat, or tilted and raised in 3D), and
+   the pins in CUP_MAP follow the same way — so a building or pin is
+   only ever placed once, here, flat.
 
    Which buildings are Xavier Cup venues, what is played where and
    the icon spots are NOT in here: they live with the fixtures in
@@ -15,93 +24,112 @@
 
    ============================================================ */
 
+/* How the map may be shown (see lib/campus-view.js).
+   default  'flat' or '3d': what a first-time visitor sees
+   toggle   true shows the Flat / 3D button on the Map tab; false
+            hides it and everyone gets `default`
+   slant    CODE ONLY, no button. true tilts the Flat view a little
+            (3D is always tilted). Pins follow either way. */
+export const CAMPUS_VIEW = { default: 'flat', toggle: true, slant: false };
+
 /* The drawing's viewBox is `0 ${top} ${width} ${height}`. */
 export const CAMPUS_DRAWING = { width: 560, height: 310, top: 110 };
 
 /* The campus boundary. */
 export const CAMPUS_OUTLINE =
-  '16,198 150,173 285,151 359,142 476,143 542,398 450,376 430,354 319,302 258,365 214,346 154,287 137,250 73,295 25,244';
+  '506,415 383,413 301,349 258,404 155,323 120,317 39,267 12,233 12,219 16,218 346,118 506,118';
 
-/* Corrales Avenue, down the east side. */
+/* Corrales Avenue, straight down the east side (a line, flat). */
 export const CAMPUS_ROAD = {
-  d: 'M 492 160 L 551 390',
-  label: { text: 'CORRALES AVENUE', x: 532, y: 245, rotate: 75 },
+  pts: '518,112 518,420',
+  label: { text: 'CORRALES AVENUE', x: 522, y: 236 },
 };
 
-/* Pedestrian corridors, following the gaps between buildings. */
+/* Roads and pedestrian corridors: the loop road round the field and
+   the court, the road in from the Main Gate, the Sec Gate courtyard.
+   pts = the line's corners. */
 export const CAMPUS_WALKWAYS = [
-  { d: 'M 490 231 H 382 L 380 247 H 296 L 291 184', width: 9 },
-  { d: 'M 293 248 L 153 252 L 145 202 M 151 251 L 202 296', width: 6 },
-  { d: 'M 322 249 V 288 L 397 316 L 431 359', width: 7 },
-  { d: 'M 387 239 L 389 278 L 500 278 M 77 289 L 145 249', width: 6 },
-  { d: 'M 160 283 L 257 283 L 262 295', width: 5 },
+  { pts: '379.35,181.24 379.35,268.66 366.33,281.68 165.45,281.68 152.43,268.66 152.43,181.24', width: 6 },
+  { pts: '370.98,263.08 362.61,272.38 320.76,272.38 312.39,263.08 312.39,221.23 320.76,211.93 362.61,211.93 370.98,221.23 370.98,263.08', width: 5 },
+  { pts: '505.83,238.9 379.35,238.9', width: 9 },
+  { pts: '466.77,303.07 391.44,303.07', width: 6 },
 ];
 
 /* ------------------------------------------------------------
    Buildings.
    id      stable — CUP_MAP venues point at these
    lines   the label, one string per line ([] = no label)
-   points  the footprint polygon
-   center  where the label sits
+   points  the footprint polygon, on the ground
+   center  where the label sits, on the ground
+   h       how tall the building stands in the 3D view (drawing
+           units). 0 = flat. Pins on the building ride up with it
    kind    field | court | gym | church — coloured, not roofed
    small   true → a smaller label, for the tight footprints
    ------------------------------------------------------------ */
 export const CAMPUS_FOOTPRINTS = [
-  { id: 'xu-old-library', name: 'Library Annex', lines: ['LIBRARY', 'ANNEX'], points: '447,183 492,183 496,211 447,211', center: [471, 197] },
-  { id: 'xu-new-library', name: 'Main Library', lines: ['MAIN LIBRARY'], points: '380,202 438,202 438,224 380,224', center: [409, 213] },
-  { id: 'museo-de-oro', name: 'Museo de Oro', lines: ['MUSEO', 'DE ORO'], points: '430,148 461,148 466,175 430,175', center: [447, 162] },
-  { id: 'xavier-hall', name: 'Xavier Hall', lines: ['XAVIER', 'HALL'], points: '388,161 424,161 429,195 388,195', center: [407, 179] },
-  { id: 'lucas-hall', name: 'Lucas Hall', lines: ['LUCAS HALL'], points: '345,146 386,146 386,161 345,161', center: [365, 154] },
-  { id: 'campion-hall', name: 'Campion Hall', lines: ['CAMPION', 'HALL'], points: '313,166 375,166 375,195 313,195', center: [344, 181] },
-  { id: 'university-church', name: 'University Church', lines: ['UNIVERSITY CHURCH'], points: '304,220 363,220 371,227 371,244 304,244', center: [336, 232], kind: 'church' },
-  { id: 'loyola-house', name: 'Loyola House', lines: ['LOYOLA HOUSE'], points: '245,160 312,160 312,176 245,176', center: [279, 168] },
-  { id: 'haggerty-house', name: 'Haggerty House', lines: ['HAGGERTY'], points: '206,165 237,165 237,178 206,178', center: [222, 172] },
-  { id: 'soccer-field', name: 'Soccer Field', lines: [], points: '174,186 282,183 282,252 160,252', center: [224, 218], kind: 'field' },
-  { id: 'amphitheater', name: 'Amphitheater', lines: ['AMPHI-', 'THEATER'], points: '129,174 151,174 151,198 129,198', center: [140, 187] },
-  { id: 'faber-hall', name: 'Faber Hall', lines: ['FABER'], points: '93,181 127,181 127,199 93,199', center: [110, 190] },
-  { id: 'medicine-building', name: 'Medicine Building', lines: ['MEDICINE'], points: '23,199 58,199 58,234 23,234', center: [41, 216] },
-  { id: 'engineering-building', name: 'Engineering Building', lines: ['ENGINEERING'], points: '62,219 142,219 142,244 62,244', center: [102, 232] },
-  { id: 'religious-of-the-assumption', name: 'Religious of the Assumption', lines: ['R. OF THE', 'ASSUMPTION'], points: '47,249 64,244 73,262 55,272', center: [60, 257], small: true },
-  { id: 'engineering-annex', name: 'Engineering Annex', lines: ['ENG. ANNEX'], points: '78,248 106,250 93,279 71,276', center: [87, 264] },
-  { id: 'physical-plant-workshop', name: 'Physical Plant Workshop', lines: ['WORKSHOP'], points: '146,282 157,279 175,302 165,311', center: [160, 295], small: true },
-  { id: 'physical-plant-offices', name: 'Physical Plant Office', lines: ['PLANT', 'OFFICE'], points: '169,310 178,305 194,325 185,334', center: [180, 320], small: true },
-  { id: 'sbm-building', name: 'SBM Building', lines: ['SBM BUILDING'], points: '164,258 251,258 251,277 158,277', center: [207, 268] },
-  { id: 'covered-court', name: 'Covered Court', lines: [], points: '207,314 235,286 278,320 248,353', center: [241, 319], kind: 'court' },
-  { id: 'social-science-building', name: 'Social Science Building', lines: ['SOCIAL', 'SCIENCE'], points: '263,257 292,257 292,286 263,286', center: [278, 272] },
-  { id: 'little-theater', name: 'Little Theater', lines: ['LITTLE', 'THEATER'], points: '296,256 324,256 324,285 296,285', center: [310, 271] },
-  { id: 'student-center', name: 'STC Building', lines: ['STC BUILDING'], points: '335,286 389,286 395,311 335,311', center: [363, 299] },
-  { id: 'magis-building', name: 'Magis Building (Canteen)', lines: ['MAGIS'], points: '354,264 382,264 384,281 354,281', center: [369, 273] },
-  { id: 'sped-lab', name: 'SPED Lab', lines: ['SPED'], points: '414,336 435,336 438,352 416,352', center: [426, 344] },
-  { id: 'xu-gym', name: 'University Gym', lines: [], points: '441,311 510,311 529,369 446,369 432,354', center: [481, 342], kind: 'gym' },
-  { id: 'agriculture-building', name: 'Agriculture Building', lines: ['AGRICULTURE'], points: '413,282 497,282 502,304 413,304', center: [457, 293] },
-  { id: 'science-center', name: 'Science Center Building', lines: ['SCIENCE CENTER'], points: '398,250 478,250 482,271 398,271', center: [440, 261] },
-  { id: 'sec-mall', name: 'SEP Mall', lines: ['SEP'], points: '483,251 497,251 502,273 483,273', center: [491, 263] },
+  { id: 'xu-gym', name: 'University Gym', lines: [], points: '484,404 441,404 429,392 429,361 441,349 484,349 497,361 497,392', center: [463, 377], h: 8, kind: 'gym' },
+  { id: 'sped-lab', name: 'SPED Lab', lines: ['SPED'], points: '417,397 393,397 393,377 417,377', center: [405, 387], h: 5 },
+  { id: 'little-theater', name: 'Little Theater', lines: ['LITTLE', 'THEATER'], points: '417,371 390,371 390,347 417,347', center: [404, 359], h: 6 },
+  { id: 'agriculture-building', name: 'Agriculture Building', lines: ['AGRICULTURE'], points: '497,332 393,332 393,313 497,313', center: [445, 323], h: 8 },
+  { id: 'sec-mall', name: 'SEP Mall', lines: ['SEP'], points: '497,313 467,313 467,293 497,293', center: [482, 303], h: 8 },
+  { id: 'science-center', name: 'Science Center Building', lines: ['SCIENCE CENTER'], points: '497,293 393,293 393,274 497,274', center: [445, 284], h: 8 },
+  { id: 'university-church', name: 'University Church', lines: ['UNIVERSITY', 'CHURCH'], points: '388,339 329,339 329,300 338,290 379,290 388,298', center: [358, 315], h: 9, kind: 'church' },
+  { id: 'social-science-building', name: 'Social Science Building', lines: ['SOCIAL', 'SCIENCE'], points: '326,324 276,324 276,297 326,297', center: [301, 310], h: 8 },
+  { id: 'sbm-building', name: 'SBM Building', lines: ['SBM BUILDING'], points: '271,305 167,305 167,287 271,287', center: [219, 296], h: 8 },
+  { id: 'covered-court', name: 'Covered Court', lines: [], points: '294,342 261,384 224,356 255,312', center: [259, 348], h: 5, kind: 'court' },
+  { id: 'physical-plant-workshop', name: 'Physical Plant Workshop', lines: ['WORKSHOP'], points: '220,363 216,366 192,349 197,345', center: [206, 356], h: 4, small: true },
+  { id: 'physical-plant-offices', name: 'Physical Plant Office', lines: ['PLANT', 'OFFICE'], points: '188,344 183,348 161,328 165,315', center: [174, 331], h: 4, small: true },
+  { id: 'religious-of-the-assumption', name: 'Religious of the Assumption', lines: ['R. OF THE', 'ASSUMPTION'], points: '121,307 105,318 81,297 98,277', center: [101, 297], h: 6, small: true },
+  { id: 'medicine-building', name: 'Medicine Building', lines: ['MEDICINE'], points: '64,266 41,266 41,239 16,239 16,218 64,218', center: [40, 229], h: 10 },
+  { id: 'engineering-building', name: 'Engineering Building', lines: ['ENGINEERING'], points: '134,261 68,261 68,250 134,250', center: [101, 256], h: 7 },
+  { id: 'engineering-annex', name: 'Engineering Annex', lines: ['ENG. ANNEX'], points: '131,244 77,244 77,231 131,231', center: [104, 237], h: 5 },
+  { id: 'amphitheater', name: 'Amphitheater', lines: ['AMPHI-', 'THEATER'], points: '148,225 125,225 125,194 148,194', center: [136, 210], h: 4, small: true },
+  { id: 'faber-hall', name: 'Faber Hall', lines: ['FABER'], points: '125,221 68,221 68,202 125,202', center: [96, 211], h: 8 },
+  { id: 'soccer-field', name: 'Soccer Field', lines: [], points: '300,270 165,270 165,177 300,177', center: [232, 223], h: 0, kind: 'field' },
+  { id: 'student-center', name: 'STC Building', lines: ['STC'], points: '365,259 318,259 318,225 365,225', center: [342, 242], h: 6 },
+  { id: 'loyola-house', name: 'Loyola House', lines: ['LOYOLA HOUSE'], points: '313,164 247,164 247,153 313,153', center: [280, 159], h: 7 },
+  { id: 'haggerty-house', name: 'Haggerty House', lines: ['HAGGERTY'], points: '315,151 289,151 289,140 315,140', center: [302, 145], h: 5, small: true },
+  { id: 'xu-old-library', name: 'Library Annex', lines: ['LIBRARY', 'ANNEX'], points: '497,218 459,218 459,190 497,190', center: [478, 204], h: 8 },
+  { id: 'xu-new-library', name: 'Main Library', lines: ['MAIN LIBRARY'], points: '442,219 385,219 385,201 442,201', center: [413, 210], h: 8 },
+  { id: 'xavier-hall', name: 'Xavier Hall', lines: ['XAVIER', 'HALL'], points: '442,196 396,196 396,140 442,140', center: [419, 168], h: 10 },
+  { id: 'campion-hall', name: 'Campion Hall', lines: ['CAMPION', 'HALL'], points: '370,196 324,196 324,140 370,140', center: [347, 168], h: 10 },
+  { id: 'lucas-hall', name: 'Lucas Hall', lines: ['LUCAS', 'HALL'], points: '410,140 355,140 355,121 410,121', center: [383, 131], h: 10 },
+  { id: 'museo-de-oro', name: 'Museo de Oro', lines: ['MUSEO', 'DE ORO'], points: '486,136 450,136 450,122 486,122', center: [468, 129], h: 6 },
+  { id: 'magis-building', name: 'Magis Building (Canteen)', lines: ['MAGIS'], points: '497,181 459,181 459,145 497,145', center: [478, 163], h: 6 },
 ];
 
-/* Court and pitch markings, drawn over the three sports footprints.
-   `stripes` marks the polygon that gets the mown-grass pattern. */
+/* Court and pitch markings, flat. `on` is the footprint they sit on,
+   so they ride up with its roof in 3D. A line is a list of corners;
+   a circle is [centre x, centre y, radius]. `stripes` is the polygon
+   that gets the mown-grass pattern. */
 export const CAMPUS_MARKINGS = {
-  stripes: '174,186 282,183 282,252 160,252',
+  stripes: { on: 'soccer-field', pts: '300,270 165,270 165,177 300,177' },
   lines: [
-    // Soccer Field: touchlines, halfway line, centre circle, boxes
-    { d: 'M 179 191 L 276 189 L 276 246 L 168 246 Z M 222 190 V 246' },
-    { d: 'M 211 218 a 11 11 0 1 0 22 0 a 11 11 0 1 0 -22 0' },
-    { d: 'M 174 207 H 190 V 232 H 171 M 276 205 H 258 V 232 H 276' },
-    { d: 'M 177 212 H 183 V 226 H 174 M 276 211 H 267 V 226 H 276' },
-    // Covered Court: a volleyball court turned with the building
-    { d: 'M -23 -18 H 23 V 18 H -23 Z M 0 -18 V 18 M -8 -18 V 18 M 8 -18 V 18', transform: 'translate(241 319) rotate(39)' },
-    // University Gym: a basketball court
-    { d: 'M 449 317 H 504 L 518 362 H 449 Z M 480 317 V 362' },
-    { d: 'M 474 340 a 8 9 0 1 0 16 0 a 8 9 0 1 0 -16 0' },
-    { d: 'M 449 329 H 460 V 350 H 449 M 507 329 H 496 V 350 H 514' },
+    { on: 'soccer-field', pts: '171,183 294,183 294,264 171,264 171,183' },
+    { on: 'soccer-field', pts: '232.5,183 232.5,264' },
+    { on: 'soccer-field', circle: [232.5, 223.5, 10] },
+    { on: 'soccer-field', pts: '171,203 190,203 190,244 171,244' },
+    { on: 'soccer-field', pts: '294,203 275,203 275,244 294,244' },
+    { on: 'soccer-field', pts: '171,214 179,214 179,233 171,233' },
+    { on: 'soccer-field', pts: '294,214 286,214 286,233 294,233' },
+    { on: 'covered-court', pts: '286.1,342.5 260.3,375.6 231.9,353.5 257.7,320.4 286.1,342.5' },
+    { on: 'covered-court', pts: '273.2,359.1 244.8,336.9' },
+    { on: 'covered-court', pts: '277.5,353.6 249.1,331.4' },
+    { on: 'covered-court', pts: '268.9,364.6 240.5,342.4' },
+    { on: 'xu-gym', pts: '437,358 489,358 489,396 437,396 437,358' },
+    { on: 'xu-gym', pts: '463,358 463,396' },
+    { on: 'xu-gym', circle: [463, 377, 7] },
+    { on: 'xu-gym', pts: '437,367 447,367 447,387 437,387' },
+    { on: 'xu-gym', pts: '489,367 479,367 479,387 489,387' },
   ],
 };
 
 /* Gates and other things you navigate by that are not buildings.
-   `tick` is the short bar drawn at the gate itself. */
+   ticks   the short bars drawn at the gate: [x1, y1, x2, y2]
+   along   true → the label runs along Corrales Avenue */
 export const CAMPUS_LANDMARKS = [
-  { text: 'MAIN GATE', x: 493, y: 244, size: 4, tick: 'M 481 227 L 493 227 M 481 235 L 495 235' },
-  { text: 'COVERED WALK', x: 464, y: 231, size: 3 },
-  { text: 'MORTOLA GATE 2', x: 35, y: 190, size: 3.5, tick: 'M 20 227 L 24 236' },
-  { text: 'MORTOLA GATE 1', x: 73, y: 302, size: 3.5, tick: 'M 66 286 L 72 293' },
+  { text: 'MAIN GATE', x: 501, y: 239, size: 3.6, along: true, ticks: [[505, 225, 517, 225], [505, 253, 517, 253]] },
+  { text: 'SEC GATE', x: 501, y: 303, size: 3.6, along: true, ticks: [[505, 295, 517, 295], [505, 311, 517, 311]] },
+  { text: 'MORTOLA GATE 1', x: 96, y: 326, size: 3.5, ticks: [[112, 314, 120, 304]] },
+  { text: 'MORTOLA GATE 2', x: 56, y: 288, size: 3.5, ticks: [[45, 268, 53, 258]] },
 ];

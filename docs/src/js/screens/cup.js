@@ -37,12 +37,13 @@
   ============================================================ */
 
 import {
-  CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, CUP_PHOTOS, CUP_LIVE, GAMES, VENUE_BY_ID,
+  CUP_CONFIG, CUP_MAP, CUP_NEWS, CUP_EVENTS, CUP_PHOTOS, CUP_LIVE, GAMES, VENUE_BY_ID, UNPLACED_SPORTS,
   allSports, findSport, cupNow, isPreviewClock,
 } from '../data/xavier-cup.js';
 import { TEAMS, TEAM_BY_ID, teamFor } from '../data/teams.js';
 import { SITE } from '../data/site.js';
 import { byWhen, parseDate, formatDay, formatTime, formatRange } from '../lib/dates.js';
+import { planAt, planText } from '../lib/venue-plan.js';
 import { resolveGame } from '../components/game-card.js';
 import { matchCardHtml } from '../components/match-card.js';
 import { gameDetailHtml } from '../components/game-detail.js';
@@ -928,6 +929,7 @@ function renderMap(root, games) {
         <p class="panel__kicker">All venues</p>
         <h3 class="venue-panel__title">${CUP_MAP.venues.length} venues · ${games.length} matches</h3>
         <p class="venue-panel__hint">Tap a venue or a sport on the map, or pick a venue below, to see what is on there.</p>
+        ${UNPLACED_SPORTS.length ? `<p class="venue-panel__hint">Venue still to be announced: ${escapeHtml(UNPLACED_SPORTS.join(' · '))}.</p>` : ''}
       </div>
       <div class="venue-rows">${rows}</div>`;
     return;
@@ -965,6 +967,7 @@ function renderMap(root, games) {
       <p class="panel__kicker">${isOffCampus(venue) ? 'Outside campus' : 'Campus venue'}</p>
       <h3 class="venue-panel__title">${escapeHtml(venue.name)}</h3>
       ${venue.note ? `<p class="venue-panel__hint">${escapeHtml(venue.note)}</p>` : ''}
+      ${planAt(venue).length ? `<p class="venue-panel__hint"><strong>Planned here:</strong> ${planAt(venue).map(p => escapeHtml(planText(p))).join(' · ')}</p>` : ''}
       ${venueLocationHtml(venue)}
       ${sportChips}
       <button class="btn btn--ghost btn--sm venue-panel__clear" type="button" data-cup-clear-venue>

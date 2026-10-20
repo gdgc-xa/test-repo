@@ -30,6 +30,9 @@ import {
   CAMPUS_DRAWING, CAMPUS_OUTLINE, CAMPUS_ROAD, CAMPUS_WALKWAYS,
   CAMPUS_FOOTPRINTS, CAMPUS_MARKINGS, CAMPUS_LANDMARKS,
 } from '../data/campus-map.js';
+import { CAMPUS_VIEW } from '../data/campus-map.js';
+import { project, getCampusView, setCampusView, isRaised, roadAngle, previewView } from '../lib/campus-view.js';
+import { planAt } from '../lib/venue-plan.js';
 import { escapeHtml, escapeAttr } from '../lib/html.js';
 
 const { width: W, height: H, top: TOP } = CAMPUS_DRAWING;
@@ -39,6 +42,20 @@ import { constrainCamera, initialCamera, zoomAt, panBy, pinchCamera, minScale, M
 
 const footprintOf = (venue) => venue.footprint || venue.id;
 const VENUE_BY_FOOTPRINT = Object.fromEntries(CUP_MAP.venues.filter(hasCampusPoint).map(v => [footprintOf(v), v]));
+
+/* The drawing and the pins are stored flat; lib/campus-view.js turns a
+   flat point into the one on screen for the view in use. A pin on a
+   building rides up with that building's roof in 3D. */
+const FOOTPRINT_H = Object.fromEntries(CAMPUS_FOOTPRINTS.map(f => [f.id, f.h || 0]));
+const heightOf = id => FOOTPRINT_H[id] || 0;
+const venueHeight = venue => heightOf(footprintOf(venue));
+const at2 = (venue, [x, y]) => project(x, y, venueHeight(venue));   // a pin's place on screen
+const parsePts = pts => pts.split(' ').map(p => p.split(',').map(Number));
+const projectPts = (pts, h = 0) => parsePts(pts).map(([x, y]) => project(x, y, h).map(n => +n.toFixed(1)));
+const polyPts = list => list.map(p => p.join(',')).join(' ');
+const linePath = list => 'M ' + list.map(p => p.join(' ')).join(' L ');
+const ringPts = (cx, cy, r, h, n = 32) => Array.from({ length: n + 1 }, (_, i) =>
+  project(cx + r * Math.cos(2 * Math.PI * i / n), cy + r * Math.sin(2 * Math.PI * i / n), h).map(v => +v.toFixed(1)));
 
 // Pattern ids must be unique per drawing: the tab's map and a detail
 // view's mini map can both be in the page, and a pattern referenced
@@ -71,35 +88,43 @@ export function venueStats(games) {
 
 /**
  * venueIcons(venue, stat) — the sport icons to draw at a venue: one
- * per sport that has a fixture there, at its spot from CUP_MAP. A
- * sport with no spot listed is set in a row above the name tag.
+ * per sport that has a fixture there OR is planned there (the venue
+ * plan, data/xavier-cup.js → CUP_VENUE_PLAN), at its spot from
+ * CUP_MAP. A sport with no spot listed is set in rows above the name
+ * tag, three to a row, so a venue with many sports stays on its
+ * building.
  */
 export function venueIcons(venue, stat) {
+  const sportStat = sport => stat?.sports?.[sport];
   const booked = Object.keys(stat?.sports || {});
+  const planned = planAt(venue).map(p => p.sport);
   const listed = Object.keys(venue.icons || {});
-  // A spot marked `always` shows before its sport's first game here too.
-  const shown = (s) => booked.includes(s) || venue.icons?.[s]?.always;
   const sports = [
-    ...listed.filter(shown),
+    ...listed.filter(s => booked.includes(s) || planned.includes(s)),
     ...booked.filter(s => !listed.includes(s)),
+    ...planned.filter(s => !listed.includes(s) && !booked.includes(s)),
   ];
-  if (!hasCampusPoint(venue)) return sports.map(sport => ({ sport, stat: stat?.sports?.[sport] }));
+  if (!hasCampusPoint(venue)) return sports.map(sport => ({ sport, stat: sportStat(sport) }));
   const unplaced = sports.filter(s => !venue.icons?.[s]);
   // Reserve configured spots even without a current game, keeping automatic
   // icons away from them and consistent between the main map and mini map.
   const reserved = Object.values(venue.icons || {}).map(spot => spot.at).filter(Boolean);
-  const halfRow = (unplaced.length - 1) * 12;
+  const PER_ROW = 3, STEP = 24;
+  const rows = Math.ceil(unplaced.length / PER_ROW);
+  const rowWidth = Math.min(unplaced.length, PER_ROW);
+  const halfRow = (rowWidth - 1) * 12;
   let rowY = venue.label[1] - 26;
   while (unplaced.length && reserved.some(([x, y]) =>
-    Math.abs(y - rowY) < 24 && Math.abs(x - venue.label[0]) < halfRow + 24)) rowY -= 24;
+    Math.abs(y - rowY) < STEP && Math.abs(x - venue.label[0]) < halfRow + STEP)) rowY -= STEP;
   return sports.map(sport => {
     const spot = venue.icons?.[sport];
     let at = spot?.at;
     if (!at) {
       const i = unplaced.indexOf(sport);
-      at = [venue.label[0] + (i - (unplaced.length - 1) / 2) * 24, rowY];
+      const row = Math.floor(i / PER_ROW), inRow = Math.min(PER_ROW, unplaced.length - row * PER_ROW);
+      at = [venue.label[0] + ((i % PER_ROW) - (inRow - 1) / 2) * STEP, rowY - row * STEP];
     }
-    return { sport, at, gps: spot?.gps || venue.gps, stat: stat?.sports?.[sport] };
+    return { sport, at, gps: spot?.gps || venue.gps, stat: sportStat(sport) };
   });
 }
 
@@ -119,12 +144,32 @@ export function sportIcon(sport) {
  */
 function drawingSvg({ stats = {}, selected = null, interactive = false, extra = '', view = null } = {}) {
   const uid = `campus-${++drawingCount}`;
+  const mode = getCampusView();
+  const raised = isRaised(mode);
 
   const walkways = CAMPUS_WALKWAYS.map(w =>
-    `<path class="campus__walk" d="${escapeAttr(w.d)}" stroke-width="${w.width}"/>`).join('');
+    `<path class="campus__walk" d="${linePath(projectPts(w.pts))}" stroke-width="${w.width}"/>`).join('');
 
-  const footprints = CAMPUS_FOOTPRINTS.map(fp => {
+  /* Buildings are drawn back to front. In 3D a building is its ground
+     footprint, walls up to `h`, and a roof (with its label) lifted by
+     `h`; flat, it is just the footprint. */
+  const baseY = fp => Math.max(...projectPts(fp.points).map(p => p[1]));
+  const wallsOf = (fp, ground) => {
+    const area = ground.reduce((a, [x, y], i) => { const [x2, y2] = ground[(i + 1) % ground.length]; return a + (x * y2 - x2 * y); }, 0);
+    const sign = area > 0 ? 1 : -1;
+    return ground.map(([x, y], i) => {
+      const [x2, y2] = ground[(i + 1) % ground.length];
+      const ny = -(x2 - x) * sign, nx = (y2 - y) * sign;          // outward normal
+      if (ny <= 0) return '';                                      // faces away from the viewer
+      const side = Math.abs(nx) > Math.abs(ny) * 0.6 ? ' campus__wall--side' : '';
+      return `<polygon class="campus__wall${side}" points="${x},${y} ${x2},${y2} ${x2},${y2 - fp.h} ${x},${y - fp.h}"/>`;
+    }).join('');
+  };
+  const footprints = [...CAMPUS_FOOTPRINTS].sort((a, b) => baseY(a) - baseY(b)).map(fp => {
     const venue = VENUE_BY_FOOTPRINT[fp.id];
+    const h = raised ? (fp.h || 0) : 0;
+    const ground = projectPts(fp.points);
+    const points = polyPts(ground);
     const classes = ['campus__fp', fp.kind ? `campus__fp--${fp.kind}` : ''];
     let attrs = '';
     if (venue) {
@@ -134,32 +179,53 @@ function drawingSvg({ stats = {}, selected = null, interactive = false, extra = 
       if (interactive) attrs = ` data-map-venue="${escapeAttr(venue.id)}"`;
       if (!total && interactive) classes.push('is-empty');
     }
+    const [cx, cy] = project(fp.center[0], fp.center[1], h);
     const label = fp.lines.length ? `
       <text class="campus__fp-label${fp.small ? ' campus__fp-label--small' : ''}"
-            x="${fp.center[0]}" y="${fp.center[1] - (fp.lines.length - 1) * 3.2 + 1.8}">
+            x="${cx.toFixed(1)}" y="${(cy - (fp.lines.length - 1) * 3.2 + 1.8).toFixed(1)}">
         ${fp.lines.map((line, i) =>
-          `<tspan x="${fp.center[0]}" dy="${i === 0 ? 0 : 6.4}">${escapeHtml(line)}</tspan>`).join('')}
+          `<tspan x="${cx.toFixed(1)}" dy="${i === 0 ? 0 : 6.4}">${escapeHtml(line)}</tspan>`).join('')}
       </text>` : '';
     return `
       <g>
         <title>${escapeHtml(venue?.name || fp.name)}</title>
-        <polygon class="${classes.filter(Boolean).join(' ')}" points="${fp.points}"${attrs}/>
-        ${fp.kind ? '' : `<polygon class="campus__roof" points="${fp.points}" fill="url(#${uid}-roof)"/>`}
+        ${h ? `<polygon class="campus__shadow" points="${points}" transform="translate(${(h * 0.7).toFixed(1)} ${(h * 0.35).toFixed(1)})"/>` : ''}
+        ${h ? `<g class="campus__walls campus__walls--${fp.kind || 'plain'}"${attrs}>${wallsOf({ h }, ground)}</g>` : ''}
+        <g${h ? ` transform="translate(0 ${-h})"` : ''}>
+          <polygon class="${classes.filter(Boolean).join(' ')}" points="${points}"${attrs}/>
+          ${fp.kind ? '' : `<polygon class="campus__roof" points="${points}" fill="url(#${uid}-roof)"/>`}
+        </g>
         ${label}
       </g>`;
   }).join('');
 
-  const markings = CAMPUS_MARKINGS.lines.map(m =>
-    `<path d="${escapeAttr(m.d)}"${m.transform ? ` transform="${escapeAttr(m.transform)}"` : ''}/>`).join('');
-
-  const landmarks = CAMPUS_LANDMARKS.map(l => `
-    ${l.tick ? `<path class="campus__gate" d="${escapeAttr(l.tick)}"/>` : ''}
-    <text class="campus__landmark" x="${l.x}" y="${l.y}" font-size="${l.size}">${escapeHtml(l.text)}</text>`).join('');
+  const markings = CAMPUS_MARKINGS.lines.map(m => {
+    const h = heightOf(m.on);
+    const list = m.circle ? ringPts(m.circle[0], m.circle[1], m.circle[2], h) : projectPts(m.pts, h);
+    return `<path d="${linePath(list)}"/>`;
+  }).join('');
+  const stripes = polyPts(projectPts(CAMPUS_MARKINGS.stripes.pts, heightOf(CAMPUS_MARKINGS.stripes.on)));
 
   const road = CAMPUS_ROAD;
+  const roadPts = projectPts(road.pts);
+  const roadD = linePath(roadPts);
+  const angle = roadAngle(parsePts(road.pts), mode);
+  const [rlx, rly] = project(road.label.x, road.label.y);
+
+  const landmarks = CAMPUS_LANDMARKS.map(l => {
+    const [lx, ly] = project(l.x, l.y);
+    const ticks = (l.ticks || []).map(([x1, y1, x2, y2]) => {
+      const [a, b] = project(x1, y1), [c, d] = project(x2, y2);
+      return `M ${a.toFixed(1)} ${b.toFixed(1)} L ${c.toFixed(1)} ${d.toFixed(1)}`;
+    }).join(' ');
+    return `
+    ${ticks ? `<path class="campus__gate" d="${ticks}"/>` : ''}
+    <text class="campus__landmark" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" font-size="${l.size}"${l.along ? ` transform="rotate(${angle.toFixed(1)} ${lx.toFixed(1)} ${ly.toFixed(1)})"` : ''}>${escapeHtml(l.text)}</text>`;
+  }).join('');
+
   return `
     <svg class="campus" viewBox="${view ? view.join(' ') : `0 ${TOP} ${W} ${H}`}"${view ? ' preserveAspectRatio="xMidYMid slice"' : ''}
-         aria-hidden="true" focusable="false">
+         aria-hidden="true" focusable="false" data-campus-view="${mode}">
       <defs>
         <pattern id="${uid}-stripes" width="24" height="80" patternUnits="userSpaceOnUse">
           <rect class="campus__stripe" width="12" height="80"/>
@@ -168,15 +234,15 @@ function drawingSvg({ stats = {}, selected = null, interactive = false, extra = 
           <path class="campus__roof-line" d="M 0 0 V 5"/>
         </pattern>
       </defs>
-      <path class="campus__road" d="${road.d}"/>
-      <path class="campus__road-line" d="${road.d}"/>
-      <text class="campus__road-label" x="${road.label.x}" y="${road.label.y}"
-            transform="rotate(${road.label.rotate} ${road.label.x} ${road.label.y})">${escapeHtml(road.label.text)}</text>
-      <polygon class="campus__land" points="${CAMPUS_OUTLINE}"/>
+      <path class="campus__road" d="${roadD}"/>
+      <path class="campus__road-line" d="${roadD}"/>
+      <text class="campus__road-label" x="${rlx.toFixed(1)}" y="${rly.toFixed(1)}"
+            transform="rotate(${angle.toFixed(1)} ${rlx.toFixed(1)} ${rly.toFixed(1)})">${escapeHtml(road.label.text)}</text>
+      <polygon class="campus__land" points="${polyPts(projectPts(CAMPUS_OUTLINE))}"/>
       <g class="campus__walks">${walkways}</g>
       ${footprints}
       <g class="campus__markings">
-        <polygon points="${CAMPUS_MARKINGS.stripes}" fill="url(#${uid}-stripes)"/>
+        <polygon points="${stripes}" fill="url(#${uid}-stripes)"/>
         <g class="campus__lines">${markings}</g>
       </g>
       <g class="campus__landmarks">${landmarks}</g>
@@ -188,11 +254,14 @@ function drawingSvg({ stats = {}, selected = null, interactive = false, extra = 
    Markers (HTML over the drawing, so they stay a readable size)
    ============================================================ */
 
-const pct = ([x, y]) => `--x: ${(x / W * 100).toFixed(3)}%; --y: ${((y - TOP) / H * 100).toFixed(3)}%;`;
+const pct = (venue, spot) => {
+  const [x, y] = at2(venue, spot);
+  return `--x: ${(x / W * 100).toFixed(3)}%; --y: ${((y - TOP) / H * 100).toFixed(3)}%;`;
+};
 
 /* How far a name tag leans away from the nearer edge on a small map,
-   so the gym's tag, on the right-hand edge, is not cut off. */
-const lean = ([x]) => `--lean: ${(-50 - (x / W - 0.5) * 60).toFixed(1)}%;`;
+   so a tag on the right-hand edge is not cut off. */
+const lean = (venue, spot) => `--lean: ${(-50 - (at2(venue, spot)[0] / W - 0.5) * 60).toFixed(1)}%;`;
 
 /** How a venue's or sport's tally reads to a screen reader. */
 function tallyLabel(s) {
@@ -245,12 +314,12 @@ function markersHtml(stats, selectedVenue, selectedSport) {
     const stat = stats[venue.id];
     tags.push(venueTagHtml(venue, stat, {
       selected: selectedVenue === venue.id && !selectedSport,
-      style: pct(venue.label) + lean(venue.label),
+      style: pct(venue, venue.label) + lean(venue, venue.label),
     }));
     for (const icon of venueIcons(venue, stat)) {
       sports.push(sportMarkerHtml(venue, icon, {
         selected: selectedVenue === venue.id && selectedSport === icon.sport,
-        style: pct(icon.at),
+        style: pct(venue, icon.at),
       }));
     }
   }
@@ -274,7 +343,7 @@ export function cupMapHtml(stats = {}, { selected = null, sport = null } = {}) {
   if (hasCampusPoint(venue)) {
     const icon = sport ? venueIcons(venue, { sports: { [sport]: { total: 1 } } })[0] : null;
     const src = sportIcon(sport);
-    const [lx, ly] = venue.label;
+    const [lx, ly] = at2(venue, venue.label);
     const name = venue.short || venue.name;
     const w = Math.max(40, name.length * 5.4 + 14);
     extra = `
@@ -282,7 +351,7 @@ export function cupMapHtml(stats = {}, { selected = null, sport = null } = {}) {
         <rect x="${lx - w / 2}" y="${ly - 7}" width="${w}" height="14" rx="7"/>
         <text x="${lx}" y="${ly + 0.4}">${escapeHtml(name)}</text>
       </g>
-      ${icon && src ? `<image href="${escapeAttr(src)}" x="${icon.at[0] - 21}" y="${icon.at[1] - 21}" width="42" height="42"/>` : ''}`;
+      ${icon && src ? (([ix, iy]) => `<image href="${escapeAttr(src)}" x="${ix - 21}" y="${iy - 21}" width="42" height="42"/>`)(at2(venue, icon.at)) : ''}`;
   }
   const label = venue ? `Campus map showing ${venue.name}` : 'Campus map';
   return `
@@ -299,7 +368,6 @@ export function cupMapHtml(stats = {}, { selected = null, sport = null } = {}) {
    drawing units): the three venues in the middle band, room above for
    the tile's heading and below for its button. It fills the tile and
    crops at the edges, never at a venue. */
-const PREVIEW_VIEW = [102, 88, 506, 344];
 
 /**
  * cupMapPreviewHtml(stats) — a still of the campus around the Cup's
@@ -309,12 +377,14 @@ const PREVIEW_VIEW = [102, 88, 506, 344];
  */
 export function cupMapPreviewHtml(stats = {}) {
   const venues = CUP_MAP.venues.filter(hasCampusPoint);
-  const icons = venues.flatMap(v => Object.entries(v.icons || {}))
+  const icons = venues.flatMap(v => Object.entries(v.icons || {})
     .filter(([sport, spot]) => spot.at && sportIcon(sport))
-    .map(([sport, { at: [x, y] }]) =>
-      `<image href="${escapeAttr(sportIcon(sport))}" x="${x - 12}" y="${y - 12}" width="24" height="24"/>`).join('');
+    .map(([sport, spot]) => {
+      const [x, y] = at2(v, spot.at);
+      return `<image href="${escapeAttr(sportIcon(sport))}" x="${x - 12}" y="${y - 12}" width="24" height="24"/>`;
+    })).join('');
   const tags = venues.map(v => {
-    const [lx, ly] = v.label;
+    const [lx, ly] = at2(v, v.label);
     const name = v.short || v.name;
     const w = name.length * 6.4 + 18;
     const live = (stats[v.id]?.ongoing ?? 0) > 0;
@@ -325,7 +395,7 @@ export function cupMapPreviewHtml(stats = {}) {
         ${live ? `<circle class="campus__pulse" cx="${lx - w / 2 + 3}" cy="${ly - 6}" r="4"/>` : ''}
       </g>`;
   }).join('');
-  return drawingSvg({ stats, view: PREVIEW_VIEW, extra: icons + tags });
+  return drawingSvg({ stats, view: previewView(), extra: icons + tags });
 }
 
 /** The key under the big map. */
@@ -358,7 +428,9 @@ export function mountCupMap(el, handlers) {
       <button class="cup-map__btn" type="button" data-map-zoom="1" aria-label="Zoom in">+</button>
       <button class="cup-map__btn" type="button" data-map-zoom="-1" aria-label="Zoom out">−</button>
       <button class="cup-map__btn" type="button" data-map-home aria-label="Recenter campus map" title="Recenter">⌖</button>
-    </div></div>
+    </div>${CAMPUS_VIEW.toggle ? `
+    <div class="cup-map__zoom"><button class="cup-map__btn cup-map__btn--view" type="button" data-map-view
+      aria-pressed="false" aria-label="3D view" title="Switch between the flat map and 3D">3D</button></div>` : ''}</div>
   </div>`;
   const root = el.querySelector('.cup-map');
   const viewport = root.querySelector('.cup-map__viewport');
@@ -393,7 +465,7 @@ export function mountCupMap(el, handlers) {
     lastFocus = key;
     const venue = VENUE_BY_ID[model.venue];
     if (!hasCampusPoint(venue)) return;
-    const at = venueIcons(venue, model.stats[venue.id]).find(icon => icon.sport === model.sport)?.at || venue.label;
+    const at = at2(venue, venueIcons(venue, model.stats[venue.id]).find(icon => icon.sport === model.sport)?.at || venue.label);
     const scale = Math.max(camera.scale, 2.4);
     const list = el.closest('.cup-map-grid')?.querySelector('[data-cup-map-list]');
     const mobile = matchMedia('(max-width: 1000px)').matches;
@@ -406,7 +478,7 @@ export function mountCupMap(el, handlers) {
       y: at[1] - TOP - (targetY - size.height / 2) / scale }, size));
   }
   function paint() {
-    const signature = JSON.stringify(model);
+    const signature = JSON.stringify(model) + getCampusView();
     if (signature === painted) return;
     painted = signature;
     const focused = canvas.contains(document.activeElement) ? document.activeElement : null;
@@ -416,11 +488,17 @@ export function mountCupMap(el, handlers) {
     if (focusedVenue) [...canvas.querySelectorAll('button[data-map-venue]')]
       .find(b => b.dataset.mapVenue === focusedVenue && b.dataset.mapSport === focusedSport)?.focus({ preventScroll: true });
   }
+  const viewBtn = root.querySelector('[data-map-view]');
+  const syncViewBtn = () => viewBtn?.setAttribute('aria-pressed', String(getCampusView() === '3d'));
+  syncViewBtn();
+  // The pins are re-placed with the drawing, so they stay on their buildings.
+  listen(window, 'campus:view', () => { syncViewBtn(); paint(); if (model.venue) focusSelection(true); });
   listen(root, 'click', e => {
     if (suppressClick && viewport.contains(e.target) && e.detail !== 0) { e.preventDefault(); e.stopPropagation(); return; }
     const zoomBtn = e.target.closest('[data-map-zoom]');
     if (zoomBtn) { zoom(Number(zoomBtn.dataset.mapZoom) > 0 ? 1.3 : 1 / 1.3); return; }
     if (e.target.closest('[data-map-home]')) { recenter(); return; }
+    if (e.target.closest('[data-map-view]')) { setCampusView(getCampusView() === '3d' ? 'flat' : '3d'); return; }
     const venue = e.target.closest('[data-map-venue]');
     if (venue) {
       e.stopPropagation();

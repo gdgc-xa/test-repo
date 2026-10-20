@@ -68,7 +68,7 @@ export const CUP_CONFIG = {
   /* --- Filters on Matches (sports have their own pages on Sports) --- */
   showStatusFilter: true,  // All / Live / Upcoming / Results, on one line
   showLiveNow: false,      // Matches: the "Live now" row (and the Live filter chip). OFF for now
-  showComingUp: false,     // Matches: the "Coming up" row (and the Upcoming filter chip). OFF for now
+  showComingUp: true,     // Matches: the "Coming up" row (and the Upcoming filter chip). OFF for now
 
   /* --- Discover --- */
   showDiscoverButton: true,                    // the Xavier Cup button at the very top of Discover
@@ -90,6 +90,100 @@ export const CUP_CONFIG = {
 };
 
 /* ============================================================
+   2a. THE VENUE PLAN — which sport is played where
+   ------------------------------------------------------------
+   The planned home of every sport, from the sports office's list.
+   It drives three things on its own, with no games needed:
+     · the MAP shows each planned sport's icon at its venue,
+     · the TRACKER (lib/live-data.js) files a match under its sport's
+       venue when the sheet's venue name is not one it knows, and
+       applies the `overrides` below,
+     · the venue panel and the Outside-campus list say what is planned.
+
+   version  'new'  this plan (shown by default)
+            'old'  how the map worked before it: three campus venues,
+                   an icon only where a fixture exists, no overrides
+            One word to switch. For a quick look without editing,
+            add ?venues=old (or ?venues=new) to the page address.
+
+   sports   { sport, venue }  `sport` is the name in SPORTS below;
+            `venue` an id from the venue lists in section 2 (null: no
+            venue yet). Optional: `note` (shown beside the sport) and
+            `tentative: true` (the list has a "?" — shown as "to be
+            confirmed").
+   overrides  sports whose tracker rows are forced to a venue, whatever
+            the sheet says. `venue` is the id, `place` the name shown,
+            `note` the short badge on the match card.
+   sheetNames  extra spellings the tracker's sheet uses for a venue →
+            merged into CUP_LIVE.venues (section 3).
+   ============================================================ */
+export const CUP_VENUE_PLAN = {
+  version: 'new',
+
+  sports: [
+    { sport: 'Athletics',        venue: 'xu-uptown-sports-centre' },
+    { sport: 'Badminton',        venue: 'covered-court' },
+    { sport: 'Basketball',       venue: 'xu-gym' },
+    { sport: 'Chess',            venue: 'library-annex' },
+    { sport: 'Football',         venue: 'soccer-field' },
+    { sport: 'Karatedo',         venue: 'xu-gym' },
+    { sport: 'Lawn Tennis',      venue: null },                    // no venue given yet
+    { sport: 'Sepak Takraw',     venue: 'covered-court' },
+    { sport: 'Softball',         venue: 'soccer-field' },
+    { sport: 'Swimming',         venue: 'xu-uptown-sports-centre' },
+    { sport: 'Table Tennis',     venue: 'covered-court' },
+    { sport: 'Taekwondo',        venue: 'xu-gym', tentative: true },
+    { sport: 'Darts',            venue: 'xu-gym' },
+    { sport: 'Volleyball',       venue: 'covered-court' },
+    { sport: 'Pickleball',       venue: 'homecourt' },
+    { sport: 'Cheerdance',       venue: 'xu-gym' },
+    { sport: 'Esports',          venue: 'virtual-grounds', note: 'Valorant · ML and CODM finals' },
+    { sport: 'Ultimate Frisbee', venue: 'soccer-field' },
+    { sport: 'Megacrew',         venue: 'xu-gym', note: 'Saturday, inside the Gym' },
+    { sport: 'Debate',           venue: null },                    // no venue given yet
+  ],
+
+  /* Mega Crew is placed by the sports office, not the tracker: its
+     rows are always filed under the Gym, whatever the sheet's venue
+     column says. */
+  overrides: {
+    Megacrew: { venue: 'xu-gym', place: 'Gym', note: 'Sat · Gym' },
+  },
+
+  /* Where the planned sports' icons sit, for the venues that have
+     several. Applied on top of the venue's own `label` / `icons`, so
+     the old version keeps its original spots. [x, y] on the drawing. */
+  placement: {
+    'covered-court': {
+      label: [259, 380],
+      icons: { Volleyball: [246, 330], Badminton: [272, 330], 'Sepak Takraw': [246, 356], 'Table Tennis': [272, 356] },
+    },
+    'xu-gym': {
+      label: [463, 409],
+      icons: { Basketball: [439, 366], Karatedo: [463, 366], Taekwondo: [487, 366],
+               Darts: [439, 391], Cheerdance: [463, 391], Megacrew: [487, 391] },
+    },
+  },
+
+  sheetNames: {
+    'soccer-field':  ['XU Field', 'Field'],
+    'covered-court': ['Covered Courts', 'Coverd Courts', 'Covered Court'],
+    'xu-gym':        ['XU Gym', 'Gym'],
+    'library-annex': ['Library Annex', 'XU Library Annex'],
+    'xu-uptown-sports-centre': ['XU Uptown Sports Centre', 'Uptown Sports Centre', 'XU Uptown'],
+    'homecourt':     ['Homecourt', 'Home Court'],
+    'virtual-grounds': ['Virtual Grounds', 'Virtual'],
+  },
+};
+
+/** Which version is showing: the address's ?venues=old|new, else the setting above. */
+const askedVersion = (() => {
+  try { return new URLSearchParams(globalThis.location?.search || '').get('venues'); } catch { return null; }
+})();
+export const PLAN_VERSION = askedVersion === 'old' || askedVersion === 'new' ? askedVersion : CUP_VENUE_PLAN.version;
+export const planActive = PLAN_VERSION === 'new';
+
+/* ============================================================
    2. THE MAP
    ------------------------------------------------------------
    The campus itself (every building, path and gate) is drawn in
@@ -105,15 +199,13 @@ export const CUP_CONFIG = {
    same numbers as data/campus-map.js, not pixels — so they never
    change when the map is resized or zoomed.
    ============================================================ */
-export const CUP_MAP = {
-  showOffCampus: true,
   // Outside venues belong in this SAME venues array. Example shape (not a real venue):
   // { id: 'confirmed-venue-id', name: 'Confirmed venue name', venueType: 'off-campus',
   //   address: 'Confirmed address', gps: [longitude, latitude], note: 'Access details' }
   // gps/address are optional; outside venues never need campus label/footprint/icons.
   // Games reference the stable id through GAMES[].venue. Do not infer venues from sports.
 
-  /* --- VENUES --------------------------------------------------
+  /* --- VENUES (the three on campus; section 2b adds the rest) ---
      id         referenced by each game's `venue`
      footprint  the building in data/campus-map.js (defaults to id)
      name       full name, shown in the panel and the detail view
@@ -126,71 +218,108 @@ export const CUP_MAP = {
                   at   [x, y] on the drawing
                   gps  optional [longitude, latitude];
                        without it the icon uses the venue's gps
-                  always  true: shown before the sport's first
-                       fixture here too (where it is known to be played)
-                Otherwise a sport only shows here once GAMES has a
-                fixture for it at this venue. One with no spot listed
-                is placed automatically above the name tag.
+                A sport only shows here once GAMES has a fixture
+                for it at this venue. One with no spot listed is
+                placed automatically above the name tag.
      ------------------------------------------------------------ */
-  venues: [
+
+const BASE_VENUES = [
     {
       id: 'soccer-field',
       name: 'XU Soccer Field',
       short: 'Soccer Field',
-      label: [224, 240],
+      label: [232, 252],
       gps: [124.6478329, 8.4761031],
       indoor: false,
       note: 'Behind Loyola House and Haggerty, across the walkway from the SBM Building.',
       icons: {
-        Football: { at: [203, 202] },
-        'Ultimate Frisbee': { at: [225, 218], gps: [124.64828633923103, 8.476343007092051] },
-        Softball: { at: [260, 202], gps: [124.64746719564286, 8.475821935655013] },
+        Football: { at: [203, 205] },
+        'Ultimate Frisbee': { at: [232, 224], gps: [124.64828633923103, 8.476343007092051] },
+        Softball: { at: [262, 205], gps: [124.64746719564286, 8.475821935655013] },
       },
     },
     {
       id: 'covered-court',
       name: 'XU Covered Court',
       short: 'Covered Court',
-      label: [241, 337],
+      label: [259, 368],
       gps: [124.6478784, 8.4769404],
       indoor: true,
       note: 'Past the SBM Building, between the Physical Plant Office and Social Science.',
       icons: {
-        Volleyball: { at: [241, 301] },
+        Volleyball: { at: [259, 334] },
       },
     },
     {
       id: 'xu-gym',
       name: 'Xavier University Gym',
       short: 'University Gym',
-      label: [481, 352],
+      label: [463, 391],
       gps: [124.6465004, 8.4775435],
       indoor: true,
       note: 'Beside the SPED Lab and the Agriculture Building, on the Corrales Avenue side.',
       icons: {
-        Basketball: { at: [481, 324] },
+        Basketball: { at: [463, 366] },
       },
     },
-    {
-      id: 'main-library',
-      footprint: 'xu-new-library',
-      name: 'XU Main Library',
-      short: 'Main Library',
-      label: [409, 238],
-      indoor: true,
-      note: 'Between the University Church and the Library Annex, across from the Science Center.',
-      icons: {
-        // Chess is played here: its icon shows before the first game is set.
-        Chess: { at: [409, 210], always: true },
-      },
-    },
-  ],
+];
+
+/* ------------------------------------------------------------
+   2b. The venues the plan adds (only while the plan is 'new').
+   Outside venues carry no map spot — they sit in the "Outside
+   campus" list. Add `address` and `gps: [longitude, latitude]` to
+   one once confirmed and it gets an Open in Google Maps button.
+   ------------------------------------------------------------ */
+const PLAN_VENUES = [
+  {
+    id: 'library-annex',
+    footprint: 'xu-old-library',
+    name: 'Library Annex',
+    short: 'Library Annex',
+    label: [452, 230],
+    indoor: true,
+    note: 'The Library Annex, beside the Main Library near the Main Gate.',
+    icons: { Chess: { at: [478, 191] } },
+  },
+  { id: 'xu-uptown-sports-centre', name: 'XU Uptown Sports Centre', short: 'Uptown Sports Centre', venueType: 'off-campus',
+    note: 'Off campus, at the XU Uptown Sports Centre.' },
+  { id: 'homecourt', name: 'Homecourt', short: 'Homecourt', venueType: 'off-campus',
+    note: 'Off campus, at Homecourt.' },
+  { id: 'virtual-grounds', name: 'Virtual Grounds', short: 'Virtual Grounds', venueType: 'off-campus',
+    note: 'Played online. No physical venue.' },
+];
+
+/** The sports the plan puts at a venue: [{ sport, note?, tentative? }]. */
+const plannedAt = id => CUP_VENUE_PLAN.sports.filter(p => p.venue === id)
+  .map(({ sport, note, tentative }) => ({ sport, ...(note ? { note } : {}), ...(tentative ? { tentative } : {}) }));
+
+/** A venue with the plan's name-tag and icon spots laid over its own. */
+function withPlacement(v) {
+  const p = CUP_VENUE_PLAN.placement?.[v.id];
+  if (!p) return v;
+  const icons = { ...(v.icons || {}) };
+  for (const [sport, at] of Object.entries(p.icons || {})) icons[sport] = { ...(icons[sport] || {}), at };
+  return { ...v, label: p.label || v.label, icons };
+}
+
+export const CUP_MAP = {
+  showOffCampus: true,
+
+  /* The venues in use. With the plan on ('new') that is every venue
+     above, each carrying its planned sports as `plan`; with it off
+     ('old') just the three campus venues, as before. */
+  venues: planActive
+    ? [...BASE_VENUES, ...PLAN_VENUES].map(v => withPlacement({ ...v, plan: plannedAt(v.id) }))
+    : BASE_VENUES,
 
   /* Each sport's picture is its `icon` in SPORTS (section 7). A
      sport with no picture still shows — as a plain badge with its
      first letter. */
 
 };
+
+/** Sports the plan has not given a venue yet (Lawn Tennis, Debate). */
+export const UNPLACED_SPORTS = planActive ? CUP_VENUE_PLAN.sports.filter(p => !p.venue).map(p => p.sport) : [];
 
 /* ============================================================
    3. LIVE DATA — the Intramurals Tracker
@@ -205,6 +334,13 @@ export const CUP_MAP = {
    While enabled, GAMES below is ignored and "Updated X min ago"
    shows in the banner. Set enabled: false to go back to GAMES.
    ============================================================ */
+/** Two venue → sheet-name tables, joined. */
+function mergeAliases(base, extra) {
+  const out = Object.fromEntries(Object.entries(base).map(([id, names]) => [id, [...names]]));
+  for (const [id, names] of Object.entries(extra)) out[id] = [...new Set([...(out[id] || []), ...names])];
+  return out;
+}
+
 export const CUP_LIVE = {
   enabled: true,
   api: 'https://campus-api.srv1804367.hstgr.cloud/v1/snapshot',
@@ -220,12 +356,11 @@ export const CUP_LIVE = {
      spaces. A venue not listed here still shows on its matches, just
      not on the map. The sheet's names are still samples: confirm
      these with the database lead. */
-  venues: {
+  venues: mergeAliases({
     'soccer-field':  ['Soccer Field', 'XU Soccer Field', 'Field (Pitch 1)', 'Field (Pitch 2)', 'Softball Field'],
     'covered-court': ['Covered Court', 'XU Covered Court'],
     'xu-gym':        ['University Gym', 'Xavier University Gym', 'Gym'],
-    'main-library':  ['Main Library', 'XU Main Library', 'Library'],
-  },
+  }, planActive ? CUP_VENUE_PLAN.sheetNames : {}),   // the plan's extra spellings and venues, while it is on
 
   /* College codes in the sheet → team ids in data/teams.js.
      PRIMUS was COLOSSUS until Oct 15; both point to the same team.
@@ -253,6 +388,7 @@ export const CUP_LIVE = {
   sports: {
     'Soccer':           { sport: 'Football' },
     'Frisbee':          { sport: 'Ultimate Frisbee' },
+    'Mega Crew':        { sport: 'Megacrew' },
     'Basketball 3x3':   { sport: 'Basketball', event: '3x3' },
     'ESports MLBB':     { sport: 'Esports', event: 'ML' },
     'ESports COD':      { sport: 'Esports', event: 'CODM' },

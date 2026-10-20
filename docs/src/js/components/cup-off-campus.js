@@ -1,6 +1,7 @@
 // Reuses resolved games and Campus Compass's clock; no second timer or schedule.
 import { CUP_MAP } from '../data/xavier-cup.js';
 import { isOffCampus, venueLocationHtml } from '../lib/cup-map-locations.js';
+import { planAt, planText } from '../lib/venue-plan.js';
 import { sameDay, formatTime } from '../lib/dates.js';
 import { escapeHtml, escapeAttr } from '../lib/html.js';
 import { sportIcon } from './cup-map.js';
@@ -32,7 +33,7 @@ export function offCampusHtml(games, { now, selected = null, expanded = false } 
         : '<p class="venue-panel__hint">No ongoing games or upcoming games today at outside venues.</p>'}
       ${venues.length ? `<div class="outside-venues__locations">${venues.map(v => `<article>
         <button class="btn btn--ghost btn--sm" type="button" data-venue-id="${escapeAttr(v.id)}" aria-pressed="${selected === v.id}">${escapeHtml(v.name)} →</button>
-        ${v.note ? `<p class="venue-panel__hint">${escapeHtml(v.note)}</p>` : ''}${venueLocationHtml(v)}</article>`).join('')}</div>`
+        ${v.note ? `<p class="venue-panel__hint">${escapeHtml(v.note)}</p>` : ''}${planAt(v).length ? `<p class="venue-panel__hint"><strong>Planned:</strong> ${planAt(v).map(p => escapeHtml(planText(p))).join(' · ')}</p>` : ''}${venueLocationHtml(v)}</article>`).join('')}</div>`
         : '<p class="venue-panel__hint">Outside venue details will appear once locations are confirmed.</p>'}
     </div></details>`;
 }

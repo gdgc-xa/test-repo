@@ -19,6 +19,7 @@
 
 import { CUP_LIVE, GAMES, SPORTS, TRACKER_SPORTS } from '../data/xavier-cup.js';
 import { teamFor } from '../data/teams.js';
+import { applyVenuePlan } from './venue-plan.js';
 
 const live = {
   loaded: false,      // a snapshot has been applied at least once
@@ -178,7 +179,7 @@ function fromMatch(m) {
   const a = score(m.team_a_score);
   const b = score(m.team_b_score);
   const winner = text(m.winner);
-  return {
+  return applyVenuePlan({
     id: text(m.match_id),
     sport: sportName(m.sport) || 'Match',
     event: sportEvent(m.sport),
@@ -195,14 +196,14 @@ function fromMatch(m) {
           : winner && winner === text(m.team_b) ? 'away' : undefined,
     // Filled as soon as either college reports; "?" for the side still to.
     score: a === null && b === null ? undefined : { home: a ?? '?', away: b ?? '?' },
-  };
+  });
 }
 
 function fromEvent(e) {
   const podium = [['1st', e.first], ['2nd', e.second], ['3rd', e.third]]
     .filter(([, code]) => text(code))
     .map(([place, code]) => `${place} ${teamFor(teamId(code)).short}`);
-  return {
+  return applyVenuePlan({
     id: text(e.event_id),
     sport: sportName(e.sport) || 'Event',
     // A placement event has no two sides: its name is the title, and its
@@ -219,7 +220,7 @@ function fromEvent(e) {
     // detail view and the other cards.
     podium: podium.join(' · ') || undefined,
     description: podium.join(' · ') || undefined,
-  };
+  });
 }
 
 /** "2026-10-12 08:00:00" in Manila → a Date, wherever the visitor is. */

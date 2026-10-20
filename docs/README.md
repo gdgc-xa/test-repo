@@ -414,6 +414,53 @@ and the shared icon lookup remain available for map markers and outside games.
 No assets, games, venue assignments, or map layout were removed by this revert.
 Verify the final sport catalogue and tracker mappings separately.
 
+### Map views: flat and 3D
+
+The campus is stored once, flat, in `src/js/data/campus-map.js`, and every pin in
+`CUP_MAP` is stored once, flat. `src/js/lib/campus-view.js` draws it two ways, and the
+pins follow the drawing in both:
+
+- **Flat** (default): the plain plan.
+- **3D**: tilted, with each building raised by its `h`. The Map tab has a **3D** button
+  for it; a visitor's choice is remembered.
+
+`CAMPUS_VIEW` in `campus-map.js` sets `default` (`'flat'` or `'3d'`), `toggle` (`false`
+hides the button) and `slant` (code only, no button: tilts the Flat view a little).
+A pin on a raised building rides up with its roof; the building's `h` is read from its
+footprint.
+
+### Venue plan: which sport is played where
+
+`CUP_VENUE_PLAN` in `src/js/data/xavier-cup.js` holds the sports office's list of where
+each sport is played. It switches between two versions:
+
+| | `version: 'new'` (shown) | `version: 'old'` |
+|---|---|---|
+| Venues | Soccer Field, Covered Court, Gym, **Library Annex**, and the outside venues **XU Uptown Sports Centre**, **Homecourt**, **Virtual Grounds** | the first three only |
+| Map icons | every planned sport's icon is on its venue, with or without games | an icon only where a fixture exists |
+| Tracker | spellings of the new venues are matched; a row with no venue goes to its sport's planned venue; overrides apply | as before |
+| Panels | "Planned here" lines, and the sports with no venue yet | none |
+
+Add `?venues=old` (or `?venues=new`) to the page address to compare the two without
+editing anything. `tests/venue-plan-old.test.mjs` keeps the old version working.
+
+The list: Athletics and Swimming at the XU Uptown Sports Centre; Badminton, Sepak
+Takraw, Table Tennis and Volleyball at the Covered Court; Basketball, Karatedo,
+Taekwondo (to be confirmed), Darts and Cheerdance at the Gym; Chess at the Library
+Annex; Football, Softball and Ultimate Frisbee at the Soccer Field (XU Field);
+Pickleball at Homecourt; Esports at Virtual Grounds (Valorant, with ML and CODM
+finals); Mega Crew on Saturday inside the Gym. **Lawn Tennis and Debate have no venue
+yet**; set their `venue` in the plan when one is confirmed.
+
+**Mega Crew is overridden in the tracker.** `CUP_VENUE_PLAN.overrides` forces every
+Mega Crew row (the sheet's "Mega Crew" or "Megacrew") to the Gym, whatever its venue
+column says, and gives it the card badge "Sat · Gym". Its date and time still come from
+the tracker. Remove the entry to hand the venue back to the sheet.
+
+The outside venues have no confirmed address or coordinates, so none are invented: add
+`address` and `gps: [longitude, latitude]` to their records (`PLAN_VENUES`) to get an
+Open in Google Maps button. Where each venue's icons sit is `CUP_VENUE_PLAN.placement`.
+
 Run the focused map tests from the repository root:
 
 ```sh

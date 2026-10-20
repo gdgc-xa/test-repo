@@ -29,6 +29,8 @@ function init() {
 
   paint();
   setInterval(paint, 60000);
+  window.addEventListener('cup:data', paint);
   window.addEventListener('cup:data', paint);   // live data arrived or refreshed
+  window.addEventListener('campus:view', () => { shown = null; paint(); });   // the Map tab's Flat / 3D switch   // the Map tab's Flat / 3D switch   // live data arrived or refreshed
 }
 init();
