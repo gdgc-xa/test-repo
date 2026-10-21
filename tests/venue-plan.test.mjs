@@ -18,7 +18,7 @@ test('every sport on the list sits at its venue on the map with no games booked'
     'covered-court': ['Badminton', 'Sepak Takraw', 'Table Tennis', 'Volleyball'],
     'xu-gym': ['Basketball', 'Karatedo', 'Taekwondo', 'Darts', 'Cheerdance', 'Megacrew'],
     'soccer-field': ['Football', 'Softball', 'Ultimate Frisbee'],
-    'library-annex': ['Chess'],
+    'main-library': ['Chess'],
     'xu-uptown-sports-centre': ['Athletics', 'Swimming'],
     homecourt: ['Pickleball'],
     'virtual-grounds': ['Esports'],
@@ -34,11 +34,11 @@ test('outside and online venues carry no map spot, campus ones do', () => {
   for (const id of ['xu-uptown-sports-centre', 'homecourt', 'virtual-grounds']) {
     assert.ok(isOffCampus(venue(id)) && !hasCampusPoint(venue(id)), id);
   }
-  for (const id of ['soccer-field', 'covered-court', 'xu-gym', 'library-annex']) assert.ok(hasCampusPoint(venue(id)), id);
+  for (const id of ['soccer-field', 'covered-court', 'xu-gym', 'main-library']) assert.ok(hasCampusPoint(venue(id)), id);
 });
 
 test('automatic icons stay apart, inside the drawing, in the flat and 3D views', () => {
-  for (const id of ['covered-court', 'xu-gym', 'soccer-field', 'library-annex']) {
+  for (const id of ['covered-court', 'xu-gym', 'soccer-field', 'main-library']) {
     const icons = venueIcons(venue(id), undefined);
     for (const view of ['flat', '3d']) {
       const pts = icons.map(i => project(i.at[0], i.at[1], 0, view));

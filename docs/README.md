@@ -436,7 +436,7 @@ each sport is played. It switches between two versions:
 
 | | `version: 'new'` (shown) | `version: 'old'` |
 |---|---|---|
-| Venues | Soccer Field, Covered Court, Gym, **Library Annex**, and the outside venues **XU Uptown Sports Centre**, **Homecourt**, **Virtual Grounds** | the first three only |
+| Venues | Soccer Field, Covered Court, Gym, **Main Library** (Chess), and the outside venues **XU Uptown Sports Centre**, **Homecourt**, **Virtual Grounds** | the first three only |
 | Map icons | every planned sport's icon is on its venue, with or without games | an icon only where a fixture exists |
 | Tracker | spellings of the new venues are matched; a row with no venue goes to its sport's planned venue; overrides apply | as before |
 | Panels | "Planned here" lines, and the sports with no venue yet | none |
