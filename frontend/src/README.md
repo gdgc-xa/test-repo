@@ -1,6 +1,6 @@
 # How the code works
 
-The site's code: plain HTML, CSS and vanilla JavaScript modules. There's no framework and no build step. The **content** (orgs, games, settings) lives in [`../database/`](../database/README.md), and nothing in `js/screens/` or `js/components/` holds content. If you find yourself editing a template to change a word, the word belongs in a database file.
+The site's code: plain HTML, CSS and vanilla JavaScript modules. There's no framework and no build step. The **content** (orgs, games, settings) lives in the top-level [`database/`](../../database/README.md) folder, and nothing in `js/screens/` or `js/components/` holds content. If you find yourself editing a template to change a word, the word belongs in a database file.
 
 ## Files
 
@@ -26,7 +26,7 @@ js/
   compass-orientation.js  the nav compass points at the current screen
   reveal-observer.js      one shared IntersectionObserver + watchReveals()
   tweak.js          the layout tool (?tweak): move words and boxes by hand
-  data/             thin loaders: read ../../database/*.json, add lookups and logic
+  data/             thin loaders: read database/*.json, add lookups and logic
   lib/              helpers with no markup (dates, live data, standings, map maths)
   components/       functions that return HTML for one piece of UI
   screens/          one file per screen: state, events, rendering

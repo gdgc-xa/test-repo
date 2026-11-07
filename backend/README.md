@@ -111,13 +111,13 @@ Rules that apply to every endpoint:
 
 ### How the site uses it
 
-`docs/src/js/lib/live-data.js` loads `/v1/snapshot` every 45 seconds while
+`frontend/src/js/lib/live-data.js` loads `/v1/snapshot` every 45 seconds while
 the page is open. It falls back to the api.gs link if the API fails, takes
 over 5 seconds, or returns something that isn't JSON. It converts each match
 and event into the site's game format.
 
-The settings live in `docs/database/xavier-cup.json` → `live` (exported as
-`CUP_LIVE` by `docs/src/js/data/xavier-cup.js`): addresses, refresh rate, and
+The settings live in `database/xavier-cup.json` → `live` (exported as
+`CUP_LIVE` by `frontend/src/js/data/xavier-cup.js`): addresses, refresh rate, and
 the **venue** and **college** mapping tables.
 
 ---
@@ -159,7 +159,7 @@ public. The root `.gitignore` already excludes it.
 
 ### Add an allowed origin (e.g. a move to Cloudflare Pages)
 
-On the server, in `/opt/campus-api/api`:
+On the server, in `/opt/campus-api/backend`:
 
 ```bash
 nano .env
@@ -182,7 +182,7 @@ You need Node 24 and Docker Desktop. Production MySQL can't be reached from
 outside the server, and it shouldn't be, so tests use a throwaway copy.
 
 ```bash
-cd api
+cd backend
 npm install
 npm test
 ```
@@ -211,7 +211,7 @@ To run the site against a local API, start the API with the test database:
 DB_HOST=127.0.0.1 DB_PORT=3307 DB_NAME=campus_compass DB_USER=campus_api DB_PASSWORD=test-api-only ALLOWED_ORIGINS='http://localhost:*' PORT=3000 node src/server.js
 ```
 
-Then serve `docs/` on any localhost port. On localhost the site tries
+Then run the site (`cd frontend && npm run dev`). On localhost the site tries
 `http://localhost:3000` first (`CUP_LIVE.devApi`).
 
 ---
@@ -226,11 +226,11 @@ time and compare with the expected result before going on.
 - If a pasted command shows up starting with `^[[200~`, type this once by
   hand, then paste again: `bind 'set enable-bracketed-paste off'`
 - `docker compose` only works inside the stack's folder
-  (`/opt/campus-api/api`).
+  (`/opt/campus-api/backend`).
 - `docker compose logs -f` keeps running until you press **Ctrl+C**.
 - If a command says *permission denied*, put `sudo ` in front of it.
 
-**Before you start:** the `api/` folder must already be pushed to GitHub,
+**Before you start:** the `backend/` folder must already be pushed to GitHub,
 because step 1 downloads it from there.
 
 ### 1. Get the code
@@ -243,7 +243,7 @@ Expect `Cloning into '/opt/campus-api'...`. This downloads the repository
 without the website's files.
 
 ```bash
-cd /opt/campus-api && git sparse-checkout set api && cd api && ls
+cd /opt/campus-api && git sparse-checkout set backend && cd backend && ls
 ```
 
 Expect a list that includes `Dockerfile  docker-compose.yml  package.json  src`.
@@ -352,25 +352,45 @@ In the `available` column, expect more than about **1 GB** (1.0Gi).
 
 ### 9. Only now, switch the website
 
-Push the site change (`docs/`) to GitHub. GitHub Pages takes 1–2 minutes to
-update.
+Push the site change (`database/xavier-cup.json` → `live`) to GitHub. The
+Pages workflow takes 1–2 minutes to update.
 
 ### Roll back
 
 ```bash
-cd /opt/campus-api/api && docker compose down
+cd /opt/campus-api/backend && docker compose down
 ```
 
 Expect `Container campus-api Removed`. The site then uses the api.gs
 fallback, but **only if** `CUP_LIVE.fallback` is set in
-`docs/src/js/data/xavier-cup.js`. Without it, the site shows "Live results
+`database/xavier-cup.json` → `live`. Without it, the site shows "Live results
 are unavailable".
 
 ### Update after a code change
 
 ```bash
-cd /opt/campus-api && git pull && cd api && docker compose up -d --build
+cd /opt/campus-api && git pull && cd backend && docker compose up -d --build
 ```
+
+### One time: the move from `api/` to `backend/`
+
+This folder used to be called `api/`. A server set up before the move still
+runs from `/opt/campus-api/api`, and a plain `git pull` there would empty
+it. Do this once, after the move is on `main`. The API keeps running until
+the last command replaces it.
+
+```bash
+cd /opt/campus-api && git pull && git sparse-checkout set backend
+```
+
+Expect `backend/` to appear next to an `api/` that only holds `.env`.
+
+```bash
+mv api/.env backend/.env && rmdir api && cd backend && docker compose up -d --build
+```
+
+Expect `Container campus-api Started`, then run checks 6 and 7 above. The
+container keeps its name (`campus-api`), so nothing else changes.
 
 ---
 

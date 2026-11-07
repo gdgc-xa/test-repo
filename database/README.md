@@ -2,9 +2,11 @@
 
 Everything the site shows lives here as plain **JSON files**. To change what the site says (add an org, move a game, rename a tab), you edit a file in this folder. You don't need to touch any code.
 
-- Edit a file → save → reload the page. There is no build step.
+- Edit a file → save → reload the page (with `npm run dev` running in `frontend/`). There is no build step.
 - JSON is strict: use double quotes, put no comma after the last item, and don't write comments. If the page goes blank after an edit, paste the file into [jsonlint.com](https://jsonlint.com) to find the typo.
-- Each file is read by a small loader in `src/js/data/` with the same name. The loaders also hold anything that needs code: lookups, the clock, and plan merging.
+- Each file is read by a small loader in `frontend/src/js/data/` with the same name. The loaders also hold anything that needs code: lookups, the clock, and plan merging.
+- The site reads this folder at `/database/`. On your computer `npm run dev` serves it there; online, the Pages workflow (`.github/workflows/pages.yml`) copies it next to the site.
+- The Xavier Cup's **live** results don't come from here. They come from the tracker's MySQL database through the [backend](../backend/README.md). That database's schema is kept by the database lead (`campus-compass-db`), not in this repo.
 
 ## Files
 
@@ -221,7 +223,7 @@ Other settings:
 
 Real matches come from the tracker (Google Sheet → n8n → MySQL). `src/js/lib/live-data.js` reads them every `refreshSeconds`:
 
-- `api`: the Campus Compass API (see [`../../api/README.md`](../../api/README.md)).
+- `api`: the Campus Compass API (see [`backend/README.md`](../backend/README.md)).
 - `devApi`: tried first on localhost, so a local API can be tested.
 - `fallback`: the api.gs data link (same JSON). It runs on Google with usage limits, so it's used only when the API fails or takes longer than `timeoutSeconds`.
 
