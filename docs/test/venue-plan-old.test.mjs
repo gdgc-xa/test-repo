@@ -1,9 +1,9 @@
 import './old-venues-setup.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CUP_MAP, CUP_LIVE, UNPLACED_SPORTS, planActive } from '../docs/src/js/data/xavier-cup.js';
-import { venueIcons } from '../docs/src/js/components/cup-map.js';
-import { applyVenuePlan } from '../docs/src/js/lib/venue-plan.js';
+import { CUP_MAP, CUP_LIVE, UNPLACED_SPORTS, planActive } from '../src/js/data/xavier-cup.js';
+import { venueIcons } from '../src/js/components/cup-map.js';
+import { applyVenuePlan } from '../src/js/lib/venue-plan.js';
 
 test('?venues=old brings back the old map: three campus venues and nothing planned', () => {
   assert.equal(planActive, false);

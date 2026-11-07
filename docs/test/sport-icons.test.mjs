@@ -2,21 +2,21 @@ import './old-venues-setup.mjs';   // these tests describe the old map; venue-pl
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { SPORT_ICON_ASSETS, sportIconFor } from '../docs/src/js/data/sport-icons.js';
-import { GAMES, SPORTS, allSports, cupNow } from '../docs/src/js/data/xavier-cup.js';
-import { sportIcon, venueIcons, venueStats, sportMarkerHtml, cupMapHtml } from '../docs/src/js/components/cup-map.js';
-import { resolveGame } from '../docs/src/js/components/game-card.js';
-import { matchCardHtml } from '../docs/src/js/components/match-card.js';
-import { offCampusHtml } from '../docs/src/js/components/cup-off-campus.js';
-import { CUP_MAP, VENUE_BY_ID } from '../docs/src/js/data/xavier-cup.js';
+import { SPORT_ICON_ASSETS, sportIconFor } from '../src/js/data/sport-icons.js';
+import { GAMES, SPORTS, allSports, cupNow } from '../src/js/data/xavier-cup.js';
+import { sportIcon, venueIcons, venueStats, sportMarkerHtml, cupMapHtml } from '../src/js/components/cup-map.js';
+import { resolveGame } from '../src/js/components/game-card.js';
+import { matchCardHtml } from '../src/js/components/match-card.js';
+import { offCampusHtml } from '../src/js/components/cup-off-campus.js';
+import { CUP_MAP, VENUE_BY_ID } from '../src/js/data/xavier-cup.js';
 
 test('every prepared WebP asset is mapped and points at an actual WebP image', () => {
   const mapped = Object.values(SPORT_ICON_ASSETS);
-  const files = readdirSync(new URL('../docs/assets/sports/', import.meta.url)).filter(n=>n.endsWith('.webp'));
+  const files = readdirSync(new URL('../assets/sports/', import.meta.url)).filter(n=>n.endsWith('.webp'));
   assert.deepEqual(mapped.map(p=>p.split('/').at(-1)).sort(),files.sort());
   for (const [id,path] of Object.entries(SPORT_ICON_ASSETS)) {
     assert.equal(sportIconFor(id),path);
-    const data=readFileSync(new URL(`../docs/${path}`,import.meta.url));
+    const data=readFileSync(new URL(`../${path}`,import.meta.url));
     assert.equal(data.toString('ascii',0,4),'RIFF'); assert.equal(data.toString('ascii',8,12),'WEBP');
   }
 });

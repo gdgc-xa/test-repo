@@ -1,13 +1,13 @@
 import './old-venues-setup.mjs';   // these tests describe the old map; venue-plan.test.mjs covers the new one
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initialCamera, minScale, MAX_SCALE, constrainCamera, worldAt, zoomAt, pinchCamera, panBy } from '../docs/src/js/lib/cup-map-camera.js';
-import { isOffCampus, hasCampusPoint, validGps, googleMapsUrl } from '../docs/src/js/lib/cup-map-locations.js';
-import { CUP_MAP, VENUE_BY_ID, cupNow } from '../docs/src/js/data/xavier-cup.js';
-import { venueStats, venueIcons } from '../docs/src/js/components/cup-map.js';
-import { offCampusHtml } from '../docs/src/js/components/cup-off-campus.js';
-import { resolveGame } from '../docs/src/js/components/game-card.js';
-import { gameDetailHtml } from '../docs/src/js/components/game-detail.js';
+import { initialCamera, minScale, MAX_SCALE, constrainCamera, worldAt, zoomAt, pinchCamera, panBy } from '../src/js/lib/cup-map-camera.js';
+import { isOffCampus, hasCampusPoint, validGps, googleMapsUrl } from '../src/js/lib/cup-map-locations.js';
+import { CUP_MAP, VENUE_BY_ID, cupNow } from '../src/js/data/xavier-cup.js';
+import { venueStats, venueIcons } from '../src/js/components/cup-map.js';
+import { offCampusHtml } from '../src/js/components/cup-off-campus.js';
+import { resolveGame } from '../src/js/components/game-card.js';
+import { gameDetailHtml } from '../src/js/components/game-detail.js';
 const size = { width: 390, height: 560 };
 const near = (a,b) => assert.ok(Math.abs(a-b)<1e-8, `${a} != ${b}`);
 

@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CUP_MAP, CUP_LIVE, CUP_VENUE_PLAN, UNPLACED_SPORTS, planActive } from '../docs/src/js/data/xavier-cup.js';
-import { venueIcons } from '../docs/src/js/components/cup-map.js';
-import { applyVenuePlan, plannedVenueFor } from '../docs/src/js/lib/venue-plan.js';
-import { isOffCampus, hasCampusPoint } from '../docs/src/js/lib/cup-map-locations.js';
-import { project } from '../docs/src/js/lib/campus-view.js';
+import { CUP_MAP, CUP_LIVE, CUP_VENUE_PLAN, UNPLACED_SPORTS, planActive } from '../src/js/data/xavier-cup.js';
+import { venueIcons } from '../src/js/components/cup-map.js';
+import { applyVenuePlan, plannedVenueFor } from '../src/js/lib/venue-plan.js';
+import { isOffCampus, hasCampusPoint } from '../src/js/lib/cup-map-locations.js';
+import { project } from '../src/js/lib/campus-view.js';
 
 const venue = id => CUP_MAP.venues.find(v => v.id === id);
 

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { project, getCampusView, setCampusView, roadAngle, isRaised } from '../docs/src/js/lib/campus-view.js';
-import { CAMPUS_FOOTPRINTS, CAMPUS_ROAD, CAMPUS_VIEW } from '../docs/src/js/data/campus-map.js';
-import { CUP_MAP } from '../docs/src/js/data/xavier-cup.js';
+import { project, getCampusView, setCampusView, roadAngle, isRaised } from '../src/js/lib/campus-view.js';
+import { CAMPUS_FOOTPRINTS, CAMPUS_ROAD, CAMPUS_VIEW } from '../src/js/data/campus-map.js';
+import { CUP_MAP } from '../src/js/data/xavier-cup.js';
 
 test('the flat view leaves every point where it was drawn', () => {
   assert.equal(getCampusView(), CAMPUS_VIEW.default);
