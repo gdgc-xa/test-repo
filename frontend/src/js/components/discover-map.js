@@ -5,7 +5,7 @@
    Cup's venues named on it, and a venue's name in red with a
    pulsing dot while a game is on there. Redrawn only when that
    changes: when live data arrives, and once a minute.
-   Put in: docs/src/js/components/discover-map.js
+   Put in: frontend/src/js/components/discover-map.js
    Load it with one line in main.js:
      import './components/discover-map.js';
    ============================================================ */

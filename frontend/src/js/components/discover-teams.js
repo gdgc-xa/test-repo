@@ -5,7 +5,7 @@
    and jumps to Matches, where its games are at the top. Clicking
    a team you already follow still goes to Matches (it does not
    un-follow here; that is done on the Cup tab).
-   Put in: docs/src/js/components/discover-teams.js
+   Put in: frontend/src/js/components/discover-teams.js
    Load it with one line in main.js:
      import './components/discover-teams.js';
    ============================================================ */

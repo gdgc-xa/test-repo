@@ -1,7 +1,7 @@
 /* ============================================================
    data/campus-map.js — the campus drawing (buildings, paths, gates).
-   The data lives in docs/database/campus-map.json; how to edit it
-   is in docs/database/README.md.
+   The data lives in database/campus-map.json; how to edit it
+   is in database/README.md.
    ============================================================ */
 
 import map from '../../../database/campus-map.json' with { type: 'json' };

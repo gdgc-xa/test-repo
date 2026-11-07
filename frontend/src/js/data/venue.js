@@ -1,7 +1,7 @@
 /* ============================================================
    data/venue.js — the org-fair tent map: who is in which tent.
-   The data lives in docs/database/venue.json; how to edit it
-   is in docs/database/README.md.
+   The data lives in database/venue.json; how to edit it
+   is in database/README.md.
    ============================================================ */
 
 import data from '../../../database/venue.json' with { type: 'json' };

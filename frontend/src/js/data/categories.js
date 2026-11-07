@@ -1,7 +1,7 @@
 /* ============================================================
    data/categories.js — the 11 clusters every org belongs to.
-   The data lives in docs/database/clusters.json; how to edit it
-   is in docs/database/README.md.
+   The data lives in database/clusters.json; how to edit it
+   is in database/README.md.
    ============================================================ */
 
 import clusters from '../../../database/clusters.json' with { type: 'json' };

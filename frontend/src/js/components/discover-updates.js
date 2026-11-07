@@ -3,7 +3,7 @@
    on Discover. Same posts as the Xavier Cup > News tab
    (CUP_NEWS.feed, the news Worker, falling back to CUP_NEWS.posts), same
    look (.news-hero__* in cup.css), plus arrows and a counter.
-   Put in: docs/src/js/components/discover-updates.js
+   Put in: frontend/src/js/components/discover-updates.js
    Load it with one line in main.js:
      import './components/discover-updates.js';
    ============================================================ */

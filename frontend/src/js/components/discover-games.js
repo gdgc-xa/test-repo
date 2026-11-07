@@ -4,7 +4,7 @@
    out three times and the scroll position jumps by one set at
    either end). Click a chip -> the shared detail popup, with a
    "See More Matches" button that goes to Matches.
-   Put in: docs/src/js/components/discover-games.js
+   Put in: frontend/src/js/components/discover-games.js
    Load it with one line in main.js:
      import './components/discover-games.js';
    ============================================================ */

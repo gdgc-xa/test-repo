@@ -1,7 +1,7 @@
 /* ============================================================
    data/organizations.js — the Xavier Ateneo org roster (75 orgs).
-   The data lives in docs/database/organizations.json; how to edit it
-   is in docs/database/README.md.
+   The data lives in database/organizations.json; how to edit it
+   is in database/README.md.
    ============================================================ */
 
 import orgs from '../../../database/organizations.json' with { type: 'json' };

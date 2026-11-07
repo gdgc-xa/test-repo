@@ -1,7 +1,7 @@
 /* ============================================================
    data/site.js — ONE switchboard for the whole site (tabs, copy, settings).
-   The data lives in docs/database/site.json; how to edit it
-   is in docs/database/README.md.
+   The data lives in database/site.json; how to edit it
+   is in database/README.md.
    ============================================================ */
 
 import site from '../../../database/site.json' with { type: 'json' };

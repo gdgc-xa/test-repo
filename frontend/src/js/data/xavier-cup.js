@@ -1,8 +1,8 @@
 /* ============================================================
    data/xavier-cup.js — loads the Xavier Cup data and works out
    what the tab needs from it. The data itself lives in
-   docs/database/ (xavier-cup, cup-venues, cup-sports, cup-games
-   .json); how to edit it is in docs/database/README.md.
+   database/ (xavier-cup, cup-venues, cup-sports, cup-games
+   .json); how to edit it is in database/README.md.
    ============================================================ */
 
 import { parseDate } from '../lib/dates.js';

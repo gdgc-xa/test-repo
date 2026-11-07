@@ -1,7 +1,7 @@
 /* ============================================================
    data/teams.js — the eight Xavier Cup teams.
-   The data lives in docs/database/teams.json; how to edit it
-   is in docs/database/README.md.
+   The data lives in database/teams.json; how to edit it
+   is in database/README.md.
    ============================================================ */
 
 import teams from '../../../database/teams.json' with { type: 'json' };

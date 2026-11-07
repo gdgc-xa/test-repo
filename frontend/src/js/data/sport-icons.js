@@ -1,7 +1,7 @@
 /* ============================================================
    data/sport-icons.js — each sport's picture, and the other names a sport goes by.
-   The data lives in docs/database/sport-icons.json; how to edit it
-   is in docs/database/README.md.
+   The data lives in database/sport-icons.json; how to edit it
+   is in database/README.md.
    ============================================================ */
 
 import icons from '../../../database/sport-icons.json' with { type: 'json' };

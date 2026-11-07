@@ -1,0 +1,15 @@
+{
+  "name": "campus-compass-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Campus Compass website: plain HTML, CSS and JavaScript modules. No build step, no packages to install.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "node serve.js",
+    "test": "node --import ./test/database-path.js --test \"test/*.test.mjs\""
+  },
+  "license": "MIT"
+}

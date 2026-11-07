@@ -1,7 +1,7 @@
 /* ============================================================
    data/featured.js — which orgs are featured on Discover and Browse.
-   The data lives in docs/database/featured.json; how to edit it
-   is in docs/database/README.md.
+   The data lives in database/featured.json; how to edit it
+   is in database/README.md.
    ============================================================ */
 
 import data from '../../../database/featured.json' with { type: 'json' };

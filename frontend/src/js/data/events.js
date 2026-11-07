@@ -1,7 +1,7 @@
 /* ============================================================
    data/events.js — the Events tab: settings and the event list.
-   The data lives in docs/database/events.json; how to edit it
-   is in docs/database/README.md.
+   The data lives in database/events.json; how to edit it
+   is in database/README.md.
    ============================================================ */
 
 import data from '../../../database/events.json' with { type: 'json' };

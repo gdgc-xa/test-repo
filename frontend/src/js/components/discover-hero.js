@@ -1,6 +1,6 @@
 /* ============================================================
    components/discover-hero.js — numbers and the live pill for the
-   landing hero. Put in: docs/src/js/components/discover-hero.js
+   landing hero. Put in: frontend/src/js/components/discover-hero.js
    Load it with one line in main.js:
      import './components/discover-hero.js';
    ============================================================ */

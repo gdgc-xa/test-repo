@@ -12,7 +12,7 @@
    shown: GAMES starts empty and fills when the first answer lands.
 
    The snapshot's shape (one match / one event) is documented in
-   api/README.md. Every field can be null — the sheet is filled in
+   backend/README.md. Every field can be null — the sheet is filled in
    by students — so nothing here assumes a value is present.
    Students' names (team_a_care / team_b_care) are not used.
    ============================================================ */

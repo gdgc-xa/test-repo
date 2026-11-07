@@ -10,7 +10,7 @@
                spacing, gap. "Every copy" changes it on every page.
      ③ Save    writes it into src/css/tweaks.css. Refresh and it is
                there; commit and push to share it. The first Save asks
-               for the project's docs folder (Chrome or Edge); after
+               for the project's frontend folder (Chrome or Edge); after
                that it just saves.
      Undo / Redo   step through what is not saved yet.
      History   every Save, newest first. "Go back" makes an older one
@@ -330,9 +330,9 @@ function idb(mode, act) {
 const savedFolder = () => idb('readonly', s => s.get('css-folder'));
 const keepFolder = (dir) => idb('readwrite', s => s.put(dir, 'css-folder'));
 
-/** In a chosen folder, the one that holds tweaks.css (docs/src/css). */
+/** In a chosen folder, the one that holds tweaks.css (frontend/src/css). */
 async function findCss(dir) {
-  for (const path of [['src', 'css'], ['docs', 'src', 'css'], ['css'], []]) {
+  for (const path of [['src', 'css'], ['frontend', 'src', 'css'], ['docs', 'src', 'css'], ['css'], []]) {
     try {
       let d = dir;
       for (const part of path) d = await d.getDirectoryHandle(part);
@@ -361,7 +361,7 @@ async function cssFolder() {
   }
   const css = await findCss(dir);
   if (!css) {
-    message = 'That folder has no src/css/tweaks.css. Choose the project’s “docs” folder.';
+    message = 'That folder has no src/css/tweaks.css. Choose the project’s “frontend” folder.';
     return null;
   }
   await keepFolder(css);
