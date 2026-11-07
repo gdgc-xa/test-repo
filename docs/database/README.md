@@ -39,12 +39,18 @@ A list of orgs. The source is the "Link + Name and Description + Org Head" PDF r
 | `keywords` | search words a student might type ("coders", "farm"). Never shown; they only feed the Browse search, which is plain text matching |
 | `description` | the org's own one-paragraph blurb. Shown as the booth lede and the card body |
 | `emails` | contact addresses |
-| `fbUrl` / `fbHandle` | Facebook page. For a numeric `profile.php?id=…` page, leave `fbHandle` out. Never invent a `facebook.com/<name>` path, because it will 404 |
+| `fbUrl` / `fbHandle` | Facebook page. For a numeric `profile.php?id=…` page, set `fbHandle` to `null`. Never invent a `facebook.com/<name>` path, because it will 404 |
 | `logo` | `assets/orgs/<id>.webp` (320 px WebP), or `null` to show initials instead |
 | `startup` | `true` = a start-up org (AECO incubation stage). It is a status, not a cluster: the org keeps its cluster and shows a "Start-Up Org" pill |
 | `pending` | `true` = long-form copy (description, meeting time) not supplied yet. `fetchOrgFromFacebook()` in `src/js/data/organizations.js` is the slot for it |
 
 **Add an org:** copy an existing entry, give it a new `id`, and put its logo in `assets/orgs/`.
+
+Good to know:
+- **Logos:** all 75 orgs have one. They come from the roster PDF, except XU-XCEED and IIEE, whose page pictures were supplied separately. XELLO's roster artwork is a cover photo, so its WebP is a centre crop on the seal.
+- **Start-up orgs:** ATTG, Kazoku and Forerunners are marked as start-ups.
+- **Pending:** every org is currently `pending`, because the roster has no long-form copy.
+- **No vanity handle:** five pages have none. GEMS, OSAS, CMMA and Forerunners are numeric `profile.php?id=…` links, and Kazoku is a legacy `/Name-<digits>/` URL. The site prints the page's own address for these.
 
 ## clusters.json
 

@@ -116,8 +116,29 @@ the page is open. It falls back to the api.gs link if the API fails, takes
 over 5 seconds, or returns something that isn't JSON. It converts each match
 and event into the site's game format.
 
-The settings live in `CUP_LIVE` in `docs/src/js/data/xavier-cup.js`:
-addresses, refresh rate, and the **venue** and **college** mapping tables.
+The settings live in `docs/database/xavier-cup.json` → `live` (exported as
+`CUP_LIVE` by `docs/src/js/data/xavier-cup.js`): addresses, refresh rate, and
+the **venue** and **college** mapping tables.
+
+---
+
+## Files
+
+```
+src/server.js          starts the API (port 3000) and shuts down cleanly
+src/app.js             the routes: all GET, all read-only
+src/config.js          every setting, read from environment variables (.env)
+src/db.js              the MySQL connection pool + consistent read-only snapshots
+src/store.js           every query the API runs, and the JSON it returns
+src/http.js            what every request passes through: CORS, rate limit, cache, errors
+src/time.js            "now" in Manila, as the database writes it
+test/unit.test.js      tests that need no database (npm test)
+test/db.test.js        tests against a real MySQL with the real schema (npm run test:db)
+test/setup-test-db.js  starts the throwaway test MySQL in Docker
+test/test-db.js        the test database's address and passwords
+Dockerfile, docker-compose.yml   how it runs on the VPS, behind Traefik
+.env.example           every setting, with comments; copy it to .env
+```
 
 ---
 

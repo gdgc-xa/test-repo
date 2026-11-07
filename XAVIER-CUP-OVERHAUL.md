@@ -1,5 +1,7 @@
 # Xavier Cup tab — overhaul brief
 
+> **Note (restructure):** the data this log mentions in `data/*.js` (e.g. `CUP_CONFIG` in `data/xavier-cup.js`) now lives as JSON in `docs/database/` (see its README). The export names are unchanged.
+
 > **How to use this file**
 > Drop it in the repo root. In Claude Code, run **one phase per session**, e.g.
 > `Read XAVIER-CUP-OVERHAUL.md and do Phase 2 only. Stop and show me before Phase 3.`

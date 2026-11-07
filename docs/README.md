@@ -1,470 +1,67 @@
-# Campus Compass
+# Campus Compass: the website
 
-> **Xavier University – Ateneo de Cagayan** · A campus-wide directory of every student
-> organization, plus the campus events calendar and **The Xavier Cup** season.
-> Created by **GDG on Campus – Xavier Ateneo**.
->
-> The site ships in the **Xavier Cup 2026** design: navy, lime and cream tiles, merged in
-> from the TXC proposal. The original **Sands of Time** beach is still here in full and
-> can be switched to from the gear icon in the nav.
+> **Xavier University – Ateneo de Cagayan** · A campus-wide directory of every student organization, plus the campus events calendar and **The Xavier Cup** season. Created by **GDG on Campus – Xavier Ateneo**.
 
-Static HTML / CSS / vanilla JS. No frameworks, no build step, no npm dependencies.
+This folder is the whole website. GitHub Pages serves it as it is: static HTML, CSS and vanilla JavaScript, with no framework and no build step.
 
----
+It ships in the **Xavier Cup 2026** design (navy, lime and cream tiles). The original **Sands of Time** beach design is still here in full, behind the gear icon.
 
 ## The one-minute version
 
 Five screens: **Discover · Organizations · Events · The Xavier Cup · About**.
 
-Everything you are likely to want to change lives in `src/js/data/`:
+Everything you're likely to want to change is a JSON file in [`database/`](database/README.md):
 
 | I want to… | Edit |
 |---|---|
-| Add or remove an event | `data/events.js` → `EVENTS` |
-| Add a fixture, a venue, or a news post | `data/xavier-cup.js` |
-| Rename a team or swap its sprite | `data/teams.js` |
-| Add an Upcoming Events card (News & Updates) | `data/xavier-cup.js` → `CUP_EVENTS`, photo in `assets/events/` |
-| Change the season dates or turn off the preview clock | `data/xavier-cup.js` → `CUP_CONFIG.season`, `CUP_CONFIG.previewNow` |
-| Turn a whole tab off, rename it, change the contact e-mail | `data/site.js` |
-| Change which design the site opens in | `data/site.js` → `skin.defaultSkin` |
-| Feature an org on Discover/Browse | `data/featured.js` |
-| Add or correct an org | `data/organizations.js` |
-
-No file in `src/js/screens/` or `src/js/components/` contains content. If you find
-yourself editing a template to change a word, the word belongs in a data file.
-
----
+| Add or correct an org | `database/organizations.json` |
+| Feature an org on Discover/Browse | `database/featured.json` |
+| Add or remove an event | `database/events.json` |
+| Add a venue or change which sport is played where | `database/cup-venues.json` |
+| Add a news post, a banner photo or an Upcoming Events card | `database/xavier-cup.json` |
+| Change the season dates or the preview clock | `database/xavier-cup.json` → `config` |
+| Rename a team or swap its picture | `database/teams.json` |
+| Turn a tab off, rename it, change the contact email | `database/site.json` |
+| Change which design the site opens in | `database/site.json` → `skin.defaultSkin` |
 
 ## Run it
 
-### Option A — local server (recommended, works in every browser)
+The site has to be served (browsers won't load its modules and JSON from a double-clicked file). From this `docs/` folder:
 
 ```bash
-cd C:\Users\jmark\campus-compass
 python -m http.server 8765
 ```
 
-Then open **http://localhost:8765** in any browser.
+Then open **http://localhost:8765**. Any static server works, e.g. `npx serve`.
 
-### Option B — double-click `index.html`
+It needs a browser from 2024 or later (Chrome/Edge 123+, Safari 17.2+, Firefox 138+), because the data is loaded with JSON imports.
 
-Works in **Firefox** out of the box.
-**Chrome/Edge** block ES-module imports on `file://` URLs, so use Option A there.
+## Test it
 
----
-
-## Folder layout
-
-```
-campus-compass/
-├── index.html                       # single-page entry — imports everything below
-├── DESIGN.md                        # provided spec (source of truth for content)
-├── README.md                        # this file
-│
-├── src/
-│   ├── css/
-│   │   ├── tokens.css               # THE ONLY file with color values (light + dark)
-│   │   ├── base.css                 # reset, body, typography stacks, focus ring, reduced-motion
-│   │   ├── layout.css               # page-level layout: max-widths, section grid, responsive breakpoints
-│   │   ├── animations.css           # every @keyframes block (drift, wave, sand, reveal, modal…)
-│   │   │
-│   │   ├── skins.css                # Xavier Cup 2026 ⇄ Sands of Time: which scene is painted
-│   │   │
-│   │   ├── components/              # one file, one component. Never reach into a sibling.
-│   │   │   ├── nav.css              # top navigation bar
-│   │   │   ├── status.css           # Upcoming / Ongoing / Finished pill
-│   │   │   ├── detail.css           # inside of the shared event/fixture modal
-│   │   │   ├── cup-map.css          # Xavier Cup venue map, pins, venue panel
-│   │   │   ├── settings.css         # the gear panel and its segmented controls
-│   │   │   ├── bento-hero.css       # Discover tiles (Xavier Cup 2026 design)
-│   │   │   ├── team-strip.css       # the eight team tiles
-│   │   │   ├── match-card.css       # fixture card + featured match frame
-│   │   │   ├── cup-calendar.css     # season calendar
-│   │   │   ├── nav-sheet.css        # mobile hamburger sheet (<=820px)
-│   │   │   ├── venue-map.css        # org-fair map panel in the booth
-│   │   │   ├── button.css           # .btn base + --primary, --sun, --ghost, --back
-│   │   │   ├── search-shell.css     # search input + submit (hero + compact variants)
-│   │   │   ├── tag.css              # cluster pill (hero, card, booth variants)
-│   │   │   ├── chip.css             # filter chip w/ active state + intersection preview
-│   │   │   ├── card.css             # org card (accent rail) + ghost placeholder variant
-│   │   │   ├── panel.css            # generic content panel + pending variant
-│   │   │   ├── facebook-card.css    # FB page mockup (with "Preview" chip)
-│   │   │   ├── theme-block.css      # 4-color legend explainer
-│   │   │   ├── sea-scene.css        # ocean layer / foam / lines / sparkles / boats / birds bindings
-│   │   │   ├── footer.css           # sand footer + GDG credit + footprints delight
-│   │   │   ├── filter-note.css      # intersection callout
-│   │   │   └── modal.css            # booth-as-modal shell
-│   │   │
-│   │   └── screens/
-│   │       ├── landing.css          # hero stage, primitives positioning, dune divider
-│   │       ├── browse.css           # explore-head, chip row, grid layout
-│   │       ├── booth.css            # booth split (rendered inside modal panel)
-│   │       ├── events.css           # Events tab
-│   │       └── cup.css              # The Xavier Cup tab
-│   │
-│   ├── js/
-│   │   ├── main.js                  # entry: hydrate + init router + observers + delights
-│   │   ├── router.js                # SPA screen switching driven by URL query string
-│   │   ├── appearance.js            # theme + design skin + motion, persisted to localStorage
-│   │   ├── settings.js              # the gear panel
-│   │   ├── lib/dates.js             # every date the site prints + the status logic
-│   │   ├── lib/html.js              # escaping + link safety for the newer templates
-│   │   ├── lib/my-team.js           # the teams a visitor follows (saved per device)
-│   │   ├── lib/standings.js         # results → standings + knockout bracket, per sport
-│   │   ├── reveal-observer.js       # shared IntersectionObserver + watchReveals()
-│   │   │
-│   │   ├── footprints.js            # delight #1 — footprints in the sand footer
-│   │   ├── compass-orientation.js   # delight #2 — nav compass points to current screen
-│   │   ├── tag-intersection.js      # delight #4 — chip hover previews intersection
-│   │   ├── nav-sheet.js             # mobile nav sheet open/close + focus
-│   │   ├── components/venue-map.js   # the fair map, one org lit at a time
-│   │   ├── data/venue.js             # the quad, its tents, who stands where
-│   │   │
-│   │   ├── data/
-│   │   │   ├── site.js              # THE SWITCHBOARD — tabs, contact, default skin, season words
-│   │   │   ├── categories.js        # CATEGORIES[], SHORT_LABEL, FULL_LABEL, COLOR_OF, THEME_OF
-│   │   │   ├── events.js            # EVENTS[] + the Events tab's own switches
-│   │   │   ├── xavier-cup.js        # CUP_CONFIG (season, preview clock), CUP_MAP, GAMES[], CUP_NEWS
-│   │   │   ├── teams.js             # the eight Xavier Cup teams + sprites
-│   │   │   ├── cup-posts.json       # CSG Facebook posts, written by the GitHub Action
-│   │   │   └── organizations.js     # ORGS[] and fetchOrgFromFacebook(handle) STUB
-│   │   │
-│   │   ├── components/
-│   │   │   ├── card.js              # cardHtml(org, i) + ghostCardHtml()
-│   │   │   ├── chip.js              # chipHtml + renderChipRow()
-│   │   │   ├── search-shell.js      # attachSearchShell(), setSearchValue()
-│   │   │   ├── booth.js             # boothHtml(org) — big booth template
-│   │   │   ├── facebook-card.js     # fbCardHtml(org)
-│   │   │   ├── status.js            # the Upcoming / Ongoing / Finished pill
-│   │   │   ├── event-card.js        # one event as a card (+ the search matcher)
-│   │   │   ├── event-detail.js      # the event modal's contents
-│   │   │   ├── game-card.js         # one fixture as a card, sport glyphs, scoreline
-│   │   │   ├── game-detail.js       # the fixture modal's contents
-│   │   │   ├── cup-map.js           # the consolidated venue map + pins
-│   │   │   ├── match-card.js        # one match as a match card
-│   │   │   ├── sports.js            # the Sports view: sport grid, sport page, team page
-│   │   │   ├── sport-pictograms.js  # a pictogram per sport (CC0 SVGs from svgrepo.com)
-│   │   │   ├── team-strip.js        # team picker
-│   │   │   ├── featured-match.js    # which game to feature on a day
-│   │   │   ├── cup-calendar.js      # the season as a month
-│   │   │   ├── bento-hero.js        # live parts of the Discover tiles
-│   │   │   ├── detail-modal.js      # the shell events and fixtures share
-│   │   │   └── modal.js             # openModal / closeModal + focus trap + Esc
-│   │   │
-│   │   └── screens/
-│   │       ├── landing.js           # tag cloud hydration + hero search wiring
-│   │       ├── browse.js            # filter state + intersect + grid render
-│   │       ├── events.js            # date ordering, status filter, search, detail
-│   │       ├── cup.js               # header, matches (list + calendar), map, venue panel, news
-│   │       └── booth.js             # renderBooth(id) — opens booth-modal
-│   │
-│   └── html/                        # (unused — screens are hydrated by JS, no partials)
-│
-└── assets/
-    ├── brand/
-    │   └── gdg-xavier-logo.webp     # official GDG on Campus Xavier logo (About + footer)
-    ├── illustrations/               # redrawn cleaner than the mockups (per project decision)
-    │   ├── compass-rose.svg
-    │   ├── sea-scene.svg            # (also inlined in index.html so CSS binds to layers)
-    │   └── primitives/
-    │       ├── puzzle-red.svg
-    │       ├── puzzle-blue.svg
-    │       ├── puzzle-yellow.svg
-    │       ├── puzzle-green.svg
-    │       └── starfish.svg
-    │
-    └── mockups/                     # original reference SVGs (do not modify)
-        ├── org-finder-01-landing.svg
-        ├── org-finder-02-browse.svg
-        ├── org-finder-03-booth.svg
-        └── org-finder-04-mobile-landing.svg
+```bash
+node --test test/*.test.mjs
 ```
 
----
+Node 22 or newer. These tests cover the map camera, venue plan, campus view and sport icons.
 
-## Where things live
+## Files
 
-### Categories (11 clusters)
-`src/js/data/categories.js` — one edit updates everywhere: chip row, tag cloud, card tags, booth tags, legend copy.
+```
+index.html     the page: every screen's skeleton; imports everything below
+DESIGN.md      the original design spec
+database/      ALL the content, as JSON → database/README.md
+src/css/       styles: tokens, layout, one file per component and screen
+src/js/        code: router, screens, components, helpers → src/README.md
+test/          site tests (node --test)
+assets/        pictures: orgs/ teams/ sports/ cup/ events/ news/ brand/ illustrations/ mockups/
+```
 
-### Orgs (75)
-`src/js/data/organizations.js` — pure data, generated from the official roster PDF
-("Link + Name and Description + Org Head"), so names, e-mails and Facebook handles
-match the source exactly.
+How the code fits together (router, designs, the Xavier Cup views, the map, the venue plan) is in **[src/README.md](src/README.md)**.
 
-* **75 orgs across 11 clusters** (the roster adds **Religious** to the original ten).
-* **All 75 have logos**, re-encoded to 320px WebP in `assets/orgs/` — from the
-  roster PDF except XU-XCEED and IIEE, whose page pictures were supplied
-  separately. Cards still fall back to initials when `logo` is null, though
-  nothing needs that at present. XELLO's roster artwork is a cover photo with
-  the seal small and centred, so its WebP is a centre crop on the seal rather
-  than the whole picture.
-* **Three are start-up orgs.** ATTG, Kazoku and Forerunners carry
-  `startup: true`, which renders a "Start-Up Org" pill on the card and in the
-  booth. It is a *status*, not a cluster — they still carry their normal
-  cluster tag and still turn up under that chip.
-* Every entry carries `pending: true` — the long-form copy (description, meeting
-  time, officers, events) is not in the roster. `fetchOrgFromFacebook(handle)` is
-  the slot for it.
+## Put it online
 
-### The three screens
-- Landing: static HTML in `index.html` under `#screen-landing`; tag-cloud hydration in `src/js/screens/landing.js`.
-- Browse: static skeleton in `#screen-browse`; filter state + render loop in `src/js/screens/browse.js`.
-- Booth: renders as a **modal** (not a separate route). Opened by `renderBooth(id)` in `src/js/screens/booth.js`, which composes `boothHtml()` from `src/js/components/booth.js` into `#booth-modal`.
-
-### Router
-`src/js/router.js` — URL query drives the app:
-- `/` → landing
-- `?screen=browse` → browse
-- `?screen=browse&filter=<id>` or `?filters=a,b` → browse with preselected chip(s)
-- `?screen=browse&q=<text>` → browse w/ search query
-- `?…&org=<id>` → open the booth modal (independent of screen)
-- `?screen=events` → events; `&event=<id>` opens one; `&status=…&q=…` filter the list
-- `?screen=cup` → the Xavier Cup; `&game=<id>` opens a match;
-  `&tab=matches|sports|map|news` opens one of its views (Matches is the default; old
-  `tab=fixtures` and `tab=calendar` links still land on Matches);
-  on Matches, `&status=…&sport=…&venue=…&day=YYYY-MM-DD&view=calendar` filter it;
-  on Sports, `&sport=<id>&div=<division>&team=<id>` opens a sport's page or a team in it;
-  on the Map, `&venue=<id>` selects a venue
-
-A tab switched off in `data/site.js` is refused by the router — an old link to it
-lands on Discover rather than an empty screen, and its nav entry is removed from the
-DOM entirely rather than hidden.
-
-### Designs and themes
-
-Two axes, both saved per device and both switchable from the **gear icon** in the nav:
-
-**Design (`data-skin`)**
-- `txc` — **Xavier Cup 2026**, the default. No painted scene: Discover opens on a grid of
-  tiles (a navy headline tile with the org search, a lime season tile, a live-match
-  strip, the eight team sprites, the cluster tags). Archivo set expanded for display,
-  Figtree for reading, both from Google Fonts. Palette and contrast rules are at the
-  bottom of `tokens.css`; the structural rules are at the bottom of `skins.css`; the tiles
-  are `components/bento-hero.css` + `.js`.
-- `sands` — the original **Sands of Time** beach, untouched: sea, surf, hourglass,
-  palms, the closing tide scene.
-
-Both designs exist in the markup at the same time and exactly one is shown
-(`src/css/skins.css`), which is what makes the switch instant. Colour lives in
-`tokens.css`; structure lives in `skins.css`. The default is set in
-`data/site.js → skin.defaultSkin`, and `skin.allowToggle: false` locks everyone to it.
-
-The season wording (brand subtitle, hero tagline, footer line) comes from
-`data/site.js → season`, one set per design, stamped onto any `[data-season]` element.
-
-**Theme (`data-theme`)**
-- Light and dark, for either design. Dark is *night at the beach* under Sands of Time.
-
-**Motion (`data-motion`)** — a third row in Settings, so someone whose OS says one
-thing can still ask this site for the other. `prefers-reduced-motion` is still honoured
-on its own.
-
-All three are applied by a small inline script in `<head>` before first paint, so the
-page never flashes the wrong design. `src/js/appearance.js` owns them after that.
-
-### The Xavier Cup
-
-`data/xavier-cup.js` holds four independent things: `CUP_CONFIG` (which sections
-appear at all), `CUP_MAP` (the campus map — landmarks and venues in viewBox units),
-`GAMES` (the fixtures) and `CUP_NEWS` (the posts).
-
-Upcoming / Ongoing / Finished is worked out from the clock in `lib/dates.js`, and the
-tab re-checks every 60 seconds so a match goes live while the page is open. A manual
-`status` on a fixture beats the clock — that is how a postponement is expressed.
-
-**Teams.** Fixtures name their sides by id (`teams: ['ccs', 'eng']`); names, colleges and
-sprites come from `data/teams.js`. Anything that is not a team id prints as written, so
-`['All colleges']` still works for an all-in event.
-
-**Preview clock.** `CUP_CONFIG.previewNow` pins "now" to a moment in the season
-(currently Mon, Oct 12, 3:30 PM) so the tab can be reviewed with games live and finished
-before Oct 10. The banner says so while it is on. **Set it to `null` for launch.**
-
-**From the TXC proposal:** follow your team (saved per device, shared with Discover —
-`lib/my-team.js`), a featured match per day with a day pager, the season calendar, and
-match cards with the score or kickoff time boxed between the two teams
-(`components/match-card.js`).
-
-**News from Facebook.** `.github/workflows/facebook-news.yml` runs every hour, reads the
-CSG page through the Graph API, and writes `src/js/data/cup-posts.json`, which the News
-section reads. Setup: add a Page access token as the repository secret `FB_PAGE_TOKEN`.
-It reads the TXC test page by default; set the repository variable `FB_PAGE_ID` to point
-it at the real CSG page. Until the file has posts, the hand-written `CUP_NEWS.posts` show.
-
-**Layout.** A shared header (a full-screen photo slideshow from `CUP_PHOTOS`), then
-four views under a sticky tab bar: **Matches** (a win counter, the one "Follow your
-teams" picker, one Filter button whose panel holds day, status, venue and sport, a
-List / Calendar switch, then three rows you swipe or step with arrows: Live now,
-Upcoming, Finished recently, with followed teams' games first), **Sports** (a tile per sport from `SPORTS`; each sport's page
-has its news, standings and knockout bracket worked out from the scores in
-`lib/standings.js`, and its matches, per division; a team in the standings opens that
-team's games), **Map** (the venue map) and **News & Updates** (the newest post as a wide
-tile, the rest in a looping carousel with a "See all" grid, then the Upcoming Events
-cards from `CUP_EVENTS`). The open view is kept in `?tab=matches|sports|map|news`.
-
-There is a wireframe pack for this tab (`xavier-cup-wireframes.pdf`) covering the
-desktop and mobile layouts, component anatomy, states and URLs.
-
-### Events
-
-`data/events.js`. Add an object, save. The tab sorts by date on its own — ongoing
-first, then soonest upcoming, then most recent result — and pulls the host org's name,
-logo and cluster colour from `organizations.js` when the event names an `org`.
-
----
-
-### Facebook pages without a vanity handle
-
-Five pages in the roster have no vanity handle — GEMS, OSAS, CMMA and
-Forerunners are numeric `profile.php?id=…` links, and Kazoku is a legacy
-`/Name-<digits>/` URL. They carry `fbHandle: null`, and the card, booth and
-page card print the page's own address instead of a generic "Facebook page"
-label — never `facebook.com/<display name>`, which would not resolve.
-
-## Facebook API integration slot
-
-`fetchOrgFromFacebook(handle)` in `src/js/data/organizations.js` is a stub that returns `null`. When you wire it up to the real Graph API, return an object shaped like the GDG record — the booth will re-render as soon as data arrives, replacing its "pending" panels.
-
----
-
-## From `DESIGN.md`, deliberately deferred / dropped
-
-1. **Top prototype banner** and **floating screen-index chip** — dropped. Per project decision, this is treated as a shipped product, not a reviewer-facing prototype. If you want them back, add `components/banner.css` and `components/screen-index.css` (skeleton files intentionally omitted).
-2. **Mobile hamburger dropdown** — the `<button class="nav-toggle">` shows below 820px but has no attached menu; the user's decision to strip prototype affordances left the nav paths accessible via URL bar / breadcrumbs. Add a mobile nav sheet when needed.
-3. **Sign in / Add my org** buttons — visual only, no auth or form yet.
-4. **Save to my list / Join this org** CTAs in the booth — stub buttons.
-5. ~~**Events / For orgs** nav links point back to Discover~~ — Events now has its own
-   screen, and The Xavier Cup was added alongside it. "For orgs" was dropped.
-
-## Extracted illustrations
-
-Every reusable illustration group in the mockup SVGs is exported to `assets/illustrations/`:
-
-| Mockup group | File |
-|---|---|
-| `#Compass-Icon` | `compass-rose.svg` (inlined in nav for `currentColor`) |
-| `#Sea-Scene` | `sea-scene.svg` (also inlined in `index.html` so CSS animation classes bind to internal `<g>` groups) |
-| `#GDG-Credit` | replaced by the official logo, `assets/brand/gdg-xavier-logo.webp` |
-| 4 puzzle pieces + starfish | `primitives/*.svg` |
-
-Small mockup-only decorations that were not extracted separately (they exist inside `sea-scene.svg` as internal groups instead): the two sailboats, the three horizon birds, the sparkles, and the wave motion lines. If you need to swap them individually, edit `sea-scene.svg` and the inline copy in `index.html`.
-
----
+GitHub → **Settings → Pages** → Source: *Deploy from a branch* → `main` / **`/docs`**. Every push to `main` updates the site.
 
 ## Credit
 
-Designed and built by **Google Developer Group on Campus – Xavier Ateneo**, for the
-**Sands of Time** organizational trip and **The Xavier Cup** season.
-
-## Campus map integration
-
-The Map tab is 2D only. Its camera starts close enough to read on phones and
-supports drag, pinch, wheel, double tap, keyboard arrows, +/−, and recenter (Home).
-The camera survives match refreshes and tab changes. A selected venue opens an
-translucent floating panel on desktop and a collapsible sheet at widths up to 1000px.
-The Map tab fills the screen below the existing navigation/tabs; its hero banner
-is hidden only while Map is active. Other tabs keep their existing header.
-Use the panel header to collapse/expand the game list; selecting a venue opens it.
-The camera keeps selected markers clear of the panel. Background blur preserves
-legibility without reducing text opacity. Outside games remain inside this panel.
-
-### Outside locations
-
-Keep one canonical venue record in `src/js/data/xavier-cup.js` → `CUP_MAP.venues`.
-For an outside location, set `venueType: 'off-campus'`. Give it a permanent `id`
-and a confirmed `name`; optional `address`, `note`, and `gps: [longitude, latitude]`.
-It needs no campus `label`, `footprint`, or `icons` positions. Point `GAMES[].venue`
-at that ID. Do not add a copy in a second venue list or use sport names as locations.
-No confirmed outside locations were available at integration, so none are invented.
-
-`CUP_MAP.showOffCampus` controls the Outside campus panel. It lists ongoing games
-(regardless of their scheduled day) and upcoming games today using the same
-resolved matches and `cupNow()` as the rest of Campus Compass. Select a venue to
-see all its existing matches and results; select a game to open its detail view.
-Results retain the site's existing behaviour. For outside venues, valid coordinates enable an external
-Google Maps link, with coordinate order converted to latitude,longitude. Missing
-coordinates never prevent venue information from appearing. No navigation, GPS
-tracking, or internal routing is implemented.
-
-### Clock and tracker boundary
-
-The existing one-minute refresh, `CUP_CONFIG.previewNow`, `resolveGame()` and
-`computeStatus()` are retained. Explicit upcoming/ongoing/finished statuses beat
-the clock; auto status uses start/end and the existing duration fallback.
-**This repository still uses its local GAMES data. It does not yet fetch the new
-tracker.** A later tracker adapter must read Master + Events, preserve IDs and
-reported statuses, and resolve controlled venue selections into the registry.
-The preview clock is still enabled in the existing configuration; set it to null
-when the team is ready to use real time.
-
-### Sport assets and Sports tab
-
-The 23 transparent WebP sport assets are connected through
-`src/js/data/sport-icons.js`. `sportIconFor(name)` matches case, spaces, hyphens,
-and known aliases, including Basketball3x3, ESports Dota and ESports MLBB.
-Map markers, match cards, outside games, and automatic Sports entries use this
-lookup; explicit icons in SPORTS keep priority. The mini map can show the image
-for a scheduled sport even without a custom sport position at its venue.
-
-The Sports tab is restored to its original five entries: Basketball, Volleyball,
-Soccer, Frisbee, and Softball. The additional tiles were removed at the user's
-request while the final Sports implementation is undecided. All 23 WebP assets
-and the shared icon lookup remain available for map markers and outside games.
-No assets, games, venue assignments, or map layout were removed by this revert.
-Verify the final sport catalogue and tracker mappings separately.
-
-### Map views: flat and 3D
-
-The campus is stored once, flat, in `src/js/data/campus-map.js`, and every pin in
-`CUP_MAP` is stored once, flat. `src/js/lib/campus-view.js` draws it two ways, and the
-pins follow the drawing in both:
-
-- **Flat** (default): the plain plan.
-- **3D**: tilted, with each building raised by its `h`. The Map tab has a **3D** button
-  for it; a visitor's choice is remembered.
-
-`CAMPUS_VIEW` in `campus-map.js` sets `default` (`'flat'` or `'3d'`), `toggle` (`false`
-hides the button) and `slant` (code only, no button: tilts the Flat view a little).
-A pin on a raised building rides up with its roof; the building's `h` is read from its
-footprint.
-
-### Venue plan: which sport is played where
-
-`CUP_VENUE_PLAN` in `src/js/data/xavier-cup.js` holds the sports office's list of where
-each sport is played. It switches between two versions:
-
-| | `version: 'new'` (shown) | `version: 'old'` |
-|---|---|---|
-| Venues | Soccer Field, Covered Court, Gym, **Main Library** (Chess), and the outside venues **XU Uptown Sports Centre**, **Homecourt**, **Virtual Grounds** | the first three only |
-| Map icons | every planned sport's icon is on its venue, with or without games | an icon only where a fixture exists |
-| Tracker | spellings of the new venues are matched; a row with no venue goes to its sport's planned venue; overrides apply | as before |
-| Panels | "Planned here" lines, and the sports with no venue yet | none |
-
-Add `?venues=old` (or `?venues=new`) to the page address to compare the two without
-editing anything. `tests/venue-plan-old.test.mjs` keeps the old version working.
-
-The list: Athletics and Swimming at the XU Uptown Sports Centre; Badminton, Sepak
-Takraw, Table Tennis and Volleyball at the Covered Court; Basketball, Karatedo,
-Taekwondo (to be confirmed), Darts and Cheerdance at the Gym; Chess at the Library
-Annex; Football, Softball and Ultimate Frisbee at the Soccer Field (XU Field);
-Pickleball at Homecourt; Esports at Virtual Grounds (Valorant, with ML and CODM
-finals); Mega Crew on Saturday inside the Gym. **Lawn Tennis and Debate have no venue
-yet**; set their `venue` in the plan when one is confirmed.
-
-**Mega Crew is overridden in the tracker.** `CUP_VENUE_PLAN.overrides` forces every
-Mega Crew row (the sheet's "Mega Crew" or "Megacrew") to the Gym, whatever its venue
-column says, and gives it the card badge "Sat · Gym". Its date and time still come from
-the tracker. Remove the entry to hand the venue back to the sheet.
-
-The outside venues have no confirmed address or coordinates, so none are invented: add
-`address` and `gps: [longitude, latitude]` to their records (`PLAN_VENUES`) to get an
-Open in Google Maps button. Where each venue's icons sit is `CUP_VENUE_PLAN.placement`.
-
-Run the focused map tests from the repository root:
-
-```sh
-node --test tests/*.test.mjs
-```
-
-The source TXC worktree stays read-only. No framework or dependency was added.
+Designed and built by **Google Developer Group on Campus – Xavier Ateneo**, for the **Sands of Time** organizational trip and **The Xavier Cup** season.
