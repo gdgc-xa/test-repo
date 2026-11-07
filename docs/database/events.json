@@ -1,0 +1,117 @@
+{
+  "enabled": true,
+  "showFeatured": true,
+  "showPast": true,
+  "showStatusFilter": true,
+  "showSearch": true,
+  "defaultDurationMins": 180,
+  "copy": {
+    "kicker": "What’s on",
+    "title": "Campus Events",
+    "lede": "Everything happening around Xavier Ateneo, newest first. Tap any event for the full details and where it is being held.",
+    "featuredKicker": "Featured",
+    "featuredTitle": "Don’t miss these",
+    "allLabel": "All events",
+    "emptyTitle": "Nothing scheduled yet.",
+    "emptyBody": "Check back soon — events are added here as organizations confirm them."
+  },
+  "events": [
+    {
+      "id": "xavier-cup-opening",
+      "title": "The Xavier Cup — Opening Ceremony",
+      "org": "csg",
+      "host": "Central Student Government",
+      "start": {
+        "inDays": 3,
+        "at": "15:00"
+      },
+      "end": {
+        "inDays": 3,
+        "at": "18:00"
+      },
+      "location": "Xavier Ateneo Covered Court",
+      "description": "The parade of colleges, the lighting of the season torch, and the first whistle of the Xavier Cup. Every college marches; the opening exhibition match follows straight after.",
+      "link": "https://www.facebook.com/XUCSG",
+      "linkLabel": "See the programme →",
+      "featured": true,
+      "note": "Example: Season opener",
+      "cta": "Example: View event →",
+      "tags": [
+        "Open to all",
+        "Free entry"
+      ]
+    },
+    {
+      "id": "org-fair-2026",
+      "title": "Campus Org Fair",
+      "org": "gdgoc-xa",
+      "start": {
+        "inDays": 10,
+        "at": "08:00"
+      },
+      "end": {
+        "inDays": 11,
+        "at": "17:00"
+      },
+      "location": "The Quadrangle",
+      "description": "Two days, every accredited organization, one quad. Walk the tents, talk to the officers, and sign up on the spot. Campus Compass has the full map of who is standing where.",
+      "link": "?screen=browse",
+      "linkLabel": "Browse the orgs →",
+      "featured": true,
+      "note": "Example: Two-day event",
+      "tags": [
+        "All colleges"
+      ]
+    },
+    {
+      "id": "devfest-mindanao",
+      "title": "DevFest Workshop Series",
+      "org": "gdgoc-xa",
+      "start": {
+        "hoursFromNow": -1
+      },
+      "end": {
+        "hoursFromNow": 3
+      },
+      "location": "SBM Auditorium",
+      "description": "A full afternoon of hands-on sessions on modern web, cloud and AI tooling, run by the student developer community. Bring a laptop; no prior experience assumed.",
+      "link": "https://www.facebook.com/gdgcxavier",
+      "tags": [
+        "Workshop",
+        "Bring a laptop"
+      ]
+    },
+    {
+      "id": "kalinga-outreach",
+      "title": "Kalinga Community Outreach",
+      "host": "Office of Social Involvement",
+      "tag": "service-learning",
+      "start": {
+        "inDays": 18,
+        "at": "09:00"
+      },
+      "location": "Barangay Lumbia",
+      "description": "A day of community immersion and relief packing with partner barangays. Volunteers meet at the Chapel car park before the convoy leaves.",
+      "link": null,
+      "tags": [
+        "Volunteers needed"
+      ]
+    },
+    {
+      "id": "acquaintance-party",
+      "title": "Acquaintance Party",
+      "org": "csg",
+      "start": {
+        "inDays": -6,
+        "at": "18:00"
+      },
+      "end": {
+        "inDays": -6,
+        "at": "22:00"
+      },
+      "location": "Loyola Gym",
+      "description": "The first big night of the term — performances from each college, and the announcement of the Xavier Cup draw.",
+      "link": "https://www.facebook.com/XUCSG"
+    }
+  ]
+}

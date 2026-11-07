@@ -1,0 +1,214 @@
+{
+  "config": {
+    "enabled": true,
+    "name": "The Xavier Cup",
+    "kicker": "University-wide · 2026",
+    "tagline": "One campus. Every college. One trophy.",
+    "lede": "Every match of the season — where it is being played, when it starts, and how it finished. Follow your teams below and their games come first in Matches.",
+    "season": {
+      "start": "2026-10-10",
+      "end": "2026-10-20",
+      "openingNote": "Parade of colleges at the SBM steps, 2:30 PM"
+    },
+    "previewNow": null,
+    "showHero": true,
+    "showHeroPhotos": true,
+    "showTeams": true,
+    "showFeatured": true,
+    "showSchedule": true,
+    "showCalendar": true,
+    "showSports": false,
+    "showBracket": false,
+    "showMap": true,
+    "showNews": true,
+    "showEvents": false,
+    "showLegend": true,
+    "showStatusFilter": true,
+    "showLiveNow": true,
+    "showComingUp": true,
+    "showDiscoverButton": true,
+    "discoverButtonLabel": "The Xavier Cup",
+    "discoverButtonNote": "Matches, map & news",
+    "defaultDurationMins": 90,
+    "defaultStatus": "all",
+    "showScores": true,
+    "maxGamesShown": null
+  },
+  "live": {
+    "enabled": true,
+    "api": "https://campus-api.srv1804367.hstgr.cloud/v1/snapshot",
+    "devApi": "http://localhost:3000/v1/snapshot",
+    "fallback": "https://script.google.com/macros/s/AKfycbxGzJP10p0qmt-5kHtzLJ_0IL0MxXPjzlh2jx7dCV3pMFQjh_y4UU2WXhl-rrbwupUg/exec",
+    "timeoutSeconds": 5,
+    "refreshSeconds": 45,
+    "venues": {
+      "soccer-field": [
+        "Soccer Field",
+        "XU Soccer Field",
+        "Field (Pitch 1)",
+        "Field (Pitch 2)",
+        "Softball Field"
+      ],
+      "covered-court": [
+        "Covered Court",
+        "XU Covered Court"
+      ],
+      "xu-gym": [
+        "University Gym",
+        "Xavier University Gym",
+        "Gym"
+      ]
+    },
+    "colleges": {
+      "CCS": "ccs",
+      "NURSING": "nsg",
+      "NSG": "nsg",
+      "SBM": "sbm",
+      "ENG": "eng",
+      "COE": "eng",
+      "CAS": "cas",
+      "LAW": "law",
+      "SOL": "law",
+      "MED": "med",
+      "SOM": "med",
+      "PRIMUS": "agsoe",
+      "COLOSSUS": "agsoe"
+    },
+    "sports": {
+      "Soccer": {
+        "sport": "Football"
+      },
+      "Frisbee": {
+        "sport": "Ultimate Frisbee"
+      },
+      "Mega Crew": {
+        "sport": "Megacrew"
+      },
+      "Basketball 3x3": {
+        "sport": "Basketball",
+        "event": "3x3"
+      },
+      "ESports MLBB": {
+        "sport": "Esports",
+        "event": "ML"
+      },
+      "ESports COD": {
+        "sport": "Esports",
+        "event": "CODM"
+      },
+      "ESports Valorant": {
+        "sport": "Esports",
+        "event": "Valorant"
+      },
+      "ESports Dota": {
+        "sport": "Esports",
+        "event": "Dota 2"
+      }
+    }
+  },
+  "news": {
+    "enabled": true,
+    "hideReelsWithoutPhoto": true,
+    "hideAllReels": false,
+    "requirePhoto": false,
+    "title": "News & Updates",
+    "kicker": "From the TXC Compass page",
+    "pageName": "TXC Compass",
+    "pageUrl": "https://www.facebook.com/XUCSG",
+    "pageHandle": "XUCSG",
+    "followLabel": "Open the Facebook page",
+    "feed": "https://txc-compass-news.gdsc-0c0.workers.dev/posts.json",
+    "maxPosts": 15,
+    "embed": {
+      "enabled": false,
+      "height": 500,
+      "showTimeline": true
+    },
+    "posts": [
+      {
+        "id": "post-bracket",
+        "date": "2026-10-11T19:40",
+        "sport": "Basketball",
+        "tag": "Bracket",
+        "title": "Semifinal pairings are out",
+        "body": "Both basketball semifinals are set after tonight’s results. Full bracket on the page; the finals schedule follows tomorrow morning.",
+        "link": null
+      },
+      {
+        "id": "post-venue",
+        "date": "2026-10-10T12:05",
+        "tag": "Venue",
+        "title": "Badminton moved to the Engineering Court",
+        "body": "All mixed doubles fixtures move from the Loyola Gym to the Engineering Court for the rest of the week. Times are unchanged.",
+        "link": null
+      },
+      {
+        "id": "post-opening",
+        "date": "2026-10-08T08:30",
+        "tag": "Announcement",
+        "title": "Parade of colleges call time",
+        "body": "Contingents assemble at the SBM steps by 2:30 PM on opening day. Bring your college colours — marshals will be at the quad entrances.",
+        "link": null
+      }
+    ]
+  },
+  "events": {
+    "enabled": true,
+    "title": "Upcoming Events",
+    "items": [
+      {
+        "id": "wizards-most-wanted",
+        "team": "ccs",
+        "title": "Wizard’s Most Wanted",
+        "photo": null,
+        "description": "CCS organization GDGC’s Chief Technology Officer claims that the moon landing was fake."
+      },
+      {
+        "id": "pythons-vs-warriors",
+        "team": "nsg",
+        "title": "Pythons VS Warriors",
+        "photo": "assets/events/pythons.jpg",
+        "description": "NSG started the kick off and are completely on par with the undefeated ENG’G Warriors."
+      },
+      {
+        "id": "warriors-iron-wall",
+        "team": "eng",
+        "title": "Warriors Building an Iron Wall",
+        "photo": "assets/events/warriors.jpg",
+        "description": "ENG’G’s volleyball iron wall has been impenetrable so far! How will they do against the fierce Wolves.."
+      },
+      {
+        "id": "eagles-at-the-top",
+        "team": "sbm",
+        "title": "Eagles at the Top",
+        "photo": "assets/events/eagles.jpg",
+        "description": "SBM reigns victorious as the Champions of TXC 2025!"
+      }
+    ]
+  },
+  "photos": {
+    "secondsPerSlide": 6,
+    "slides": [
+      {
+        "src": "assets/cup/photos/txc26-ultimate-frisbee.webp",
+        "caption": "Ultimate Frisbee",
+        "alt": "Two Ultimate Frisbee players in team shirts holding a disc under green light; The Xavier Cup 2026, 17.10.26"
+      },
+      {
+        "src": "assets/cup/photos/txc26-volleyball.webp",
+        "caption": "Volleyball",
+        "alt": "Two volleyball players, one in a Medicine Wolves jersey, one holding a ball up high, in blue light; The Xavier Cup 2026, 17.10.26"
+      },
+      {
+        "src": "assets/cup/photos/txc26-football.webp",
+        "caption": "Football",
+        "alt": "Two football players with a ball in red light; The Xavier Cup 2026, 17.10.26"
+      },
+      {
+        "src": "assets/cup/photos/txc26-taekwondo.webp",
+        "caption": "Taekwondo",
+        "alt": "Two taekwondo athletes in white uniforms, one in a guard stance, one mid high kick; The Xavier Cup 2026, 17.10.26"
+      }
+    ]
+  }
+}

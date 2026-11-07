@@ -1,0 +1,52 @@
+{
+  "contact": {
+    "email": "gdsc@my.xu.edu.ph",
+    "label": "Contact our email",
+    "note": "Partnerships, org listings, corrections, or anything about this site.",
+    "altEmail": null,
+    "altLabel": "Project inquiries"
+  },
+  "locale": null,
+  "hour12": true,
+  "tabs": {
+    "events": {
+      "enabled": false,
+      "navLabel": "Events",
+      "sheetLabel": "Events"
+    },
+    "cup": {
+      "enabled": true,
+      "navLabel": "Xavier Cup",
+      "sheetLabel": "The Xavier Cup"
+    }
+  },
+  "skin": {
+    "defaultSkin": "txc",
+    "allowToggle": false,
+    "labels": {
+      "txc": "Xavier Cup 2026",
+      "sands": "Sands of Time"
+    }
+  },
+  "season": {
+    "txc": {
+      "brandSub": "Xavier Ateneo · The Xavier Cup 2026",
+      "heroTagline": "The Xavier Cup",
+      "heroAnchor": "Every org is a team. Every cluster a side of the draw.",
+      "footerTagline": "Built for The Xavier Cup 2026 · University-wide Season",
+      "footerSeason": "Xavier Cup 2026"
+    },
+    "sands": {
+      "brandSub": "Xavier Ateneo · Sands of Time",
+      "heroTagline": "Sands of Time",
+      "heroAnchor": "Every org is a grain in the sand. Every cluster a piece of the puzzle.",
+      "footerTagline": "Built for Sands of Time · General Assembly Organizational Trip",
+      "footerSeason": "Sands of Time"
+    }
+  },
+  "settings": {
+    "showAppearance": true,
+    "showDesign": true,
+    "showMotion": true
+  }
+}

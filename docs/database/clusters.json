@@ -1,0 +1,68 @@
+[
+  {
+    "id": "governance",
+    "full": "Governance and Policy-making",
+    "short": "Governance",
+    "color": "blue"
+  },
+  {
+    "id": "media-arts",
+    "full": "Media and Arts",
+    "short": "Media & Arts",
+    "color": "red"
+  },
+  {
+    "id": "sci-eng-tech",
+    "full": "Natural Sciences, Engineering, and Technology",
+    "short": "Sci · Eng · Tech",
+    "color": "blue"
+  },
+  {
+    "id": "business",
+    "full": "Business",
+    "short": "Business",
+    "color": "green"
+  },
+  {
+    "id": "sports",
+    "full": "Sports and Recreation",
+    "short": "Sports",
+    "color": "green"
+  },
+  {
+    "id": "environment",
+    "full": "Environment",
+    "short": "Environment",
+    "color": "green"
+  },
+  {
+    "id": "food-agri",
+    "full": "Food and Agriculture",
+    "short": "Food & Agri",
+    "color": "yellow"
+  },
+  {
+    "id": "socio-cultural",
+    "full": "Socio-Cultural",
+    "short": "Socio-Cultural",
+    "color": "yellow"
+  },
+  {
+    "id": "service-learning",
+    "full": "Service-Learning",
+    "short": "Service-Learning",
+    "color": "red"
+  },
+  {
+    "id": "program-based",
+    "full": "Program-Based",
+    "short": "Program-Based",
+    "color": "blue"
+  },
+  {
+    "id": "religious",
+    "full": "Religious",
+    "short": "Religious",
+    "color": "yellow"
+  }
+]

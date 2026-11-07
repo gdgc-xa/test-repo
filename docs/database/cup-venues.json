@@ -1,0 +1,325 @@
+{
+  "plan": {
+    "version": "new",
+    "sports": [
+      {
+        "sport": "Athletics",
+        "venue": "xu-uptown-sports-centre"
+      },
+      {
+        "sport": "Badminton",
+        "venue": "covered-court"
+      },
+      {
+        "sport": "Basketball",
+        "venue": "xu-gym"
+      },
+      {
+        "sport": "Chess",
+        "venue": "main-library"
+      },
+      {
+        "sport": "Football",
+        "venue": "soccer-field"
+      },
+      {
+        "sport": "Karatedo",
+        "venue": "xu-gym"
+      },
+      {
+        "sport": "Lawn Tennis",
+        "venue": null
+      },
+      {
+        "sport": "Sepak Takraw",
+        "venue": "covered-court"
+      },
+      {
+        "sport": "Softball",
+        "venue": "soccer-field"
+      },
+      {
+        "sport": "Swimming",
+        "venue": "xu-uptown-sports-centre"
+      },
+      {
+        "sport": "Table Tennis",
+        "venue": "covered-court"
+      },
+      {
+        "sport": "Taekwondo",
+        "venue": "xu-gym",
+        "tentative": true
+      },
+      {
+        "sport": "Darts",
+        "venue": "xu-gym"
+      },
+      {
+        "sport": "Volleyball",
+        "venue": "covered-court"
+      },
+      {
+        "sport": "Pickleball",
+        "venue": "homecourt"
+      },
+      {
+        "sport": "Cheerdance",
+        "venue": "xu-gym"
+      },
+      {
+        "sport": "Esports",
+        "venue": "virtual-grounds",
+        "note": "Valorant · ML and CODM finals"
+      },
+      {
+        "sport": "Ultimate Frisbee",
+        "venue": "soccer-field"
+      },
+      {
+        "sport": "Megacrew",
+        "venue": "xu-gym",
+        "note": "Saturday, inside the Gym"
+      },
+      {
+        "sport": "Debate",
+        "venue": null
+      }
+    ],
+    "overrides": {
+      "Megacrew": {
+        "venue": "xu-gym",
+        "place": "Gym",
+        "note": "Sat · Gym"
+      }
+    },
+    "placement": {
+      "covered-court": {
+        "label": [
+          259,
+          380
+        ],
+        "icons": {
+          "Volleyball": [
+            246,
+            330
+          ],
+          "Badminton": [
+            272,
+            330
+          ],
+          "Sepak Takraw": [
+            246,
+            356
+          ],
+          "Table Tennis": [
+            272,
+            356
+          ]
+        }
+      },
+      "xu-gym": {
+        "label": [
+          463,
+          409
+        ],
+        "icons": {
+          "Basketball": [
+            439,
+            366
+          ],
+          "Karatedo": [
+            463,
+            366
+          ],
+          "Taekwondo": [
+            487,
+            366
+          ],
+          "Darts": [
+            439,
+            391
+          ],
+          "Cheerdance": [
+            463,
+            391
+          ],
+          "Megacrew": [
+            487,
+            391
+          ]
+        }
+      }
+    },
+    "sheetNames": {
+      "soccer-field": [
+        "XU Field",
+        "Field"
+      ],
+      "covered-court": [
+        "Covered Courts",
+        "Coverd Courts",
+        "Covered Court"
+      ],
+      "xu-gym": [
+        "XU Gym",
+        "Gym"
+      ],
+      "main-library": [
+        "Main Library",
+        "XU Main Library",
+        "Library"
+      ],
+      "xu-uptown-sports-centre": [
+        "XU Uptown Sports Centre",
+        "Uptown Sports Centre",
+        "XU Uptown"
+      ],
+      "homecourt": [
+        "Homecourt",
+        "Home Court"
+      ],
+      "virtual-grounds": [
+        "Virtual Grounds",
+        "Virtual"
+      ]
+    }
+  },
+  "map": {
+    "showOffCampus": true
+  },
+  "campusVenues": [
+    {
+      "id": "soccer-field",
+      "name": "XU Soccer Field",
+      "short": "Soccer Field",
+      "label": [
+        232,
+        252
+      ],
+      "gps": [
+        124.6478329,
+        8.4761031
+      ],
+      "indoor": false,
+      "note": "Behind Loyola House and Haggerty, across the walkway from the SBM Building.",
+      "icons": {
+        "Football": {
+          "at": [
+            203,
+            205
+          ]
+        },
+        "Ultimate Frisbee": {
+          "at": [
+            232,
+            224
+          ],
+          "gps": [
+            124.64828633923103,
+            8.476343007092051
+          ]
+        },
+        "Softball": {
+          "at": [
+            262,
+            205
+          ],
+          "gps": [
+            124.64746719564286,
+            8.475821935655013
+          ]
+        }
+      }
+    },
+    {
+      "id": "covered-court",
+      "name": "XU Covered Court",
+      "short": "Covered Court",
+      "label": [
+        259,
+        368
+      ],
+      "gps": [
+        124.6478784,
+        8.4769404
+      ],
+      "indoor": true,
+      "note": "Past the SBM Building, between the Physical Plant Office and Social Science.",
+      "icons": {
+        "Volleyball": {
+          "at": [
+            259,
+            334
+          ]
+        }
+      }
+    },
+    {
+      "id": "xu-gym",
+      "name": "Xavier University Gym",
+      "short": "University Gym",
+      "label": [
+        463,
+        391
+      ],
+      "gps": [
+        124.6465004,
+        8.4775435
+      ],
+      "indoor": true,
+      "note": "Beside the SPED Lab and the Agriculture Building, on the Corrales Avenue side.",
+      "icons": {
+        "Basketball": {
+          "at": [
+            463,
+            366
+          ]
+        }
+      }
+    }
+  ],
+  "planVenues": [
+    {
+      "id": "main-library",
+      "footprint": "xu-new-library",
+      "name": "XU Main Library",
+      "short": "Main Library",
+      "label": [
+        413,
+        230
+      ],
+      "indoor": true,
+      "note": "The Main Library, beside the Library Annex near the Main Gate.",
+      "icons": {
+        "Chess": {
+          "at": [
+            413,
+            201
+          ]
+        }
+      }
+    },
+    {
+      "id": "xu-uptown-sports-centre",
+      "name": "XU Uptown Sports Centre",
+      "short": "Uptown Sports Centre",
+      "venueType": "off-campus",
+      "note": "Off campus, at the XU Uptown Sports Centre."
+    },
+    {
+      "id": "homecourt",
+      "name": "Homecourt",
+      "short": "Homecourt",
+      "venueType": "off-campus",
+      "note": "Off campus, at Homecourt."
+    },
+    {
+      "id": "virtual-grounds",
+      "name": "Virtual Grounds",
+      "short": "Virtual Grounds",
+      "venueType": "off-campus",
+      "note": "Played online. No physical venue."
+    }
+  ]
+}

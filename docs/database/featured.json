@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "showInBrowse": true,
+  "featured": [
+    {
+      "id": "gdgoc-xa",
+      "note": "Campus Compass TXC!!"
+    },
+    {
+      "id": "csg",
+      "note": "Check Out The Xavier Cup!"
+    }
+  ]
+}
